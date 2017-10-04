@@ -3,5 +3,6 @@
 *.log
 *.swp
 build/*
+docs/build/*
 estl
 unit-test

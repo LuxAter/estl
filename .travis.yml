@@ -27,7 +27,7 @@ script:
 
 after_success:
   - bash <(curl -s https://codecov.io/bash) || echo "CodeCov Error"
-  - cd docs/ && make latexpdf
+  - cd docs/ && make html
 
 deploy:
   provider: pages

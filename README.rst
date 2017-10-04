@@ -5,7 +5,7 @@ Estl
 
 |Build_Status| |Code_Coverage| |Code_Quality|
 
-.. |Version| image:: https://img.shields.io/github/tag/LuxAtrumStudio/estl/development.svg
+.. |Version| image:: https://img.shields.io/github/tag/LuxAtrumStudio/estl.svg
    :target: https://github.com/LuxAtrumStudio/estl
 .. |Downloads| image:: https://img.shields.io/github/downloads/LuxAtrumStudio/estl/latest/total.svg
    :target: https://github.com/LuxAtrumStudio/estl
