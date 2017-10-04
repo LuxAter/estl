@@ -17,8 +17,7 @@ before_install:
   - if [ "$CXX" == "g++" ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
   - sudo apt-get update -qq
 install:
-  project_apt
-  project_pip
+  - sudo pip install Sphinx
   - if [ "$CXX" == "g++" ]; then sudo apt-get install -qq g++-4.8; fi
   - if [ "$CXX" == "g++" ]; then export CXX="g++-4.8"; fi
 
@@ -27,7 +26,18 @@ script:
   - ./unit-test
 
 after_success:
-  bash <(curl -s https://codecov.io/bash) || echo "CodeCov Error"
+  - bash <(curl -s https://codecov.io/bash) || echo "CodeCov Error"
+  - cd docs/ && make latexpdf
+
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN
+  local_dir: doc/build/html
+  on:
+    branch:
+      - master
+      - development
 
 notifications:
   email: false

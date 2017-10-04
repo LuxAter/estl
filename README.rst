@@ -1,7 +1,7 @@
-Estl Documentation
-==================
+Estl
+====
 
-|Version| |Downloads|
+|Version| |Downloads| |Documentation|
 
 |Build_Status| |Code_Coverage| |Code_Quality|
 
@@ -9,6 +9,8 @@ Estl Documentation
   :target: https://github.com/LuxAtrumStudio/estl
 .. |Downloads| image:: https://img.shields.io/github/downloads/LuxAtrumStudio/estl/latest/total.svg
   :target: https://github.com/LuxAtrumStudio/estl
+.. |Documentation| image:: https://img.shields.io/badge/Documentation-gh--pages-blue.svg
+  :target: https://luxatrumstudio.github.io/estl/
 
 .. |Build_Status| image:: https://img.shields.io/travis/LuxAtrumStudio/estl/development.svg
   :target: https://travis-ci.org/LuxAtrumStudio/estl
@@ -22,7 +24,3 @@ Estl Documentation
 Extended standard template library. This library implements a set of new tools
 and extends the set of existing tools that are implemented by the C++ standard
 template library.
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
