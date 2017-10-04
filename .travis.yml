@@ -1,0 +1,33 @@
+sudo: true
+
+language:
+  - cpp
+
+compiler:
+  - g++
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - lcov
+
+before_install:
+  - if [ "$CXX" == "g++" ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
+  - sudo apt-get update -qq
+install:
+  project_apt
+  project_pip
+  - if [ "$CXX" == "g++" ]; then sudo apt-get install -qq g++-4.8; fi
+  - if [ "$CXX" == "g++" ]; then export CXX="g++-4.8"; fi
+
+script:
+  - make
+  - ./unit-test
+
+after_success:
+  bash <(curl -s https://codecov.io/bash) || echo "CodeCov Error"
+
+notifications:
+  email: false
