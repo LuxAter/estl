@@ -3,7 +3,7 @@ SHELL = /bin/bash
 export NAME= estl
 export LINK=  
 export INCLUDE=
-export TYPE= project_type
+export TYPE= lib
 
 export SOURCE_DIR= source
 export TEST_DIR= test
