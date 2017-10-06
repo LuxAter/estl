@@ -6,6 +6,7 @@
 #include <time.h>
 #include <sstream>
 #include <string>
+#include <utility>
 
 #include <iostream>
 
@@ -108,6 +109,23 @@ double estl::Time::GetTimeD() {
   return time_;
 }
 
+void estl::Time::ReadFormat(std::string fmt, std::string str) {
+  for (size_t i = 0; i < fmt.size(); i++) {
+    if (fmt[i] != '%' && fmt[i] != str[i]) {
+      break;
+    } else {
+      continue;
+    }
+    i++;
+    if (fmt[i] == '%' && str[i] != '%') {
+      break;
+    }
+    if (fmt[i] == 'h') {
+      sscanf(&str[i], "%i", &hour);
+    }
+  }
+}
+
 std::string estl::Time::Format(std::string fmt) {
   std::stringstream out;
   for (size_t i = 0; i < fmt.size(); i++) {
@@ -118,24 +136,35 @@ std::string estl::Time::Format(std::string fmt) {
     i++;
     if (fmt[i] == '%') {
       out << '%';
-    } else if (fmt[i] == 'h') {
+    } else if (fmt[i] == 'H') {
       out << hour;
-    } else if (fmt[i] == 'm') {
-      if (i + 1 != fmt.size() && fmt[i + 1] == 's') {
-        out << milli_sec;
-        i++;
-      } else {
-        out << min;
-      }
-    } else if (fmt[i] == 's') {
-      out << sec;
-    } else if (fmt[i] == 'u' && i + 1 != fmt.size() && fmt[i + 1] == 's') {
-      out << micro_sec;
-      i++;
-    } else if (fmt[i] == 'n' && i + 1 != fmt.size() && fmt[i + 1] == 's') {
-      out << nano_sec;
-      i++;
     }
   }
   return out.str();
+}
+
+std::pair<int, int> estl::Time::ReadInt(std::string str, int i) {
+  int init_i = i;
+  std::string int_str;
+  while (i < static_cast<int>(str.size()) && str[i] != ' ') {
+    if (static_cast<int>(str[i]) > 57 || static_cast<int>(str[i]) < 48) {
+      return std::make_pair(0, init_i);
+    } else {
+      int_str += str[i];
+    }
+  }
+  return std::make_pair(stoi(int_str), i);
+}
+
+std::pair<double, int> estl::Time::ReadDouble(std::string str, int i) {
+  int init_i = i;
+  std::string int_str;
+  while (i < static_cast<int>(str.size()) && str[i] != ' ') {
+    if ((str[i] >= 48 && str[i] <= 57) || str[i] == '.') {
+      int_str += str[i];
+    } else {
+      return std::make_pair(0.0, init_i);
+    }
+  }
+  return std::make_pair(stod(int_str), i);
 }

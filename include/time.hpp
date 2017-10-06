@@ -4,6 +4,7 @@
 
 #include <time.h>
 #include <string>
+#include <utility>
 
 namespace estl {
 class Time {
@@ -22,9 +23,14 @@ class Time {
   int GetTimeI();
   double GetTimeD();
 
+  void ReadFormat(std::string fmt, std::string str);
   std::string Format(std::string fmt);
 
   int sec, min, hour, milli_sec, micro_sec, nano_sec;
+
+ private:
+  std::pair<int, int> ReadInt(std::string str, int i);
+  std::pair<double, int> ReadDouble(std::string str, int i);
 };
 }  // namespace estl
 
