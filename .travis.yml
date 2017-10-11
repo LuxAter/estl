@@ -14,12 +14,12 @@ addons:
       - lcov
 
 before_install:
-  - if [ "$CXX" == "g++" ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
+  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
   - sudo apt-get update -qq
 install:
   - sudo pip install Sphinx sphinx_bootstrap_theme
-  - if [ "$CXX" == "g++" ]; then sudo apt-get install -qq g++-7; fi
-  - if [ "$CXX" == "g++" ]; then export CXX="g++-7"; fi
+  - sudo apt-get install -qq g++-6
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 90
 
 script:
   - make
