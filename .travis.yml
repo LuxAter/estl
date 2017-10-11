@@ -18,8 +18,8 @@ before_install:
   - sudo apt-get update -qq
 install:
   - sudo pip install Sphinx sphinx_bootstrap_theme
-  - if [ "$CXX" == "g++" ]; then sudo apt-get install -qq g++-4.8; fi
-  - if [ "$CXX" == "g++" ]; then export CXX="g++-4.8"; fi
+  - if [ "$CXX" == "g++" ]; then sudo apt-get install -qq g++-7; fi
+  - if [ "$CXX" == "g++" ]; then export CXX="g++-7"; fi
 
 script:
   - make
