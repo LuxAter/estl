@@ -110,20 +110,32 @@ double estl::Time::GetTimeD() {
 }
 
 void estl::Time::ReadFormat(std::string fmt, std::string str) {
+  int str_index = 0;
   for (size_t i = 0; i < fmt.size(); i++) {
-    if (fmt[i] != '%' && fmt[i] != str[i]) {
+    if (fmt[i] != '%' && fmt[i] != str[str_index]) {
       break;
-    } else {
+    } else if (fmt[i] != '%') {
       continue;
     }
     i++;
-    if (fmt[i] == '%' && str[i] != '%') {
+    std::cout << fmt[i] << "<<\n";
+    if (fmt[i] == '%' && str[str_index] != '%') {
       break;
     }
-    if (fmt[i] == 'h') {
-      sscanf(&str[i], "%i", &hour);
+    if (fmt[i] == 'H') {
+      sscanf(&str[str_index], "%i", &hour);
+    } else if (fmt[i] == 'M') {
+      sscanf(&str[str_index], "%i", &min);
+    } else if (fmt[i] == 'S') {
+      sscanf(&str[str_index], "%i", &sec);
     }
   }
+}
+
+std::istream& estl::Time::ReadFormat(std::string fmt, std::istream& in) {
+  std::cout << "??\n";
+  in >> hour;
+  return in;
 }
 
 std::string estl::Time::Format(std::string fmt) {
@@ -138,6 +150,21 @@ std::string estl::Time::Format(std::string fmt) {
       out << '%';
     } else if (fmt[i] == 'H') {
       out << hour;
+    } else if (fmt[i] == 'M') {
+      out << min;
+    } else if (fmt[i] == 'S') {
+      if (i + 1 != fmt.size() && fmt[i + 1] == 'M') {
+        out << milli_sec;
+        i++;
+      } else if (i + 1 != fmt.size() && fmt[i + 1] == 'U') {
+        out << micro_sec;
+        i++;
+      } else if (i + 1 != fmt.size() && fmt[i + 1] == 'N') {
+        out << nano_sec;
+        i++;
+      } else {
+        out << sec;
+      }
     }
   }
   return out.str();

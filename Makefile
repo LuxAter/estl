@@ -59,7 +59,7 @@ endef
 all: external source test
 
 .PHONY : clean
-clean: clean-external clean-source clean-test
+clean: clean-source clean-test
 
 .PHONY : install
 install: source root-access install-source

@@ -24,6 +24,7 @@ class Time {
   double GetTimeD();
 
   void ReadFormat(std::string fmt, std::string str);
+  std::istream& ReadFormat(std::string fmt, std::istream& in);
   std::string Format(std::string fmt);
 
   int sec, min, hour, milli_sec, micro_sec, nano_sec;
