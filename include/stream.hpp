@@ -13,7 +13,6 @@ namespace estl {
 void print(std::ostream& out, std::string __format) { out << __format; }
 template <typename T, typename... Args>
 void print(std::ostream& out, std::string __format, T first, Args... args) {
-  std::cout << "\"" << first << "\"\n";
   int i;
   for (i = 0; i < __format.size(); i++) {
     if (__format[i] != '%') {
@@ -25,10 +24,12 @@ void print(std::ostream& out, std::string __format, T first, Args... args) {
         out << '%';
         i++;
       } else {
+        i++;
         break;
       }
     }
   }
+  i++;
   bool __left = false;
   bool __show_pos = false;
   bool __zero_pad = false;
@@ -36,7 +37,6 @@ void print(std::ostream& out, std::string __format, T first, Args... args) {
   bool __width = false;
   bool __precision = false;
   bool __upper_case = false;
-  i++;
   bool __looping_flags = true;
   while (__looping_flags == true) {
     switch (__format[i]) {
@@ -54,11 +54,11 @@ void print(std::ostream& out, std::string __format, T first, Args... args) {
         break;
       default:
         __looping_flags = false;
+        i--;
         break;
     }
     i++;
   }
-  i--;
   bool __looping_width = false;
   unsigned int __print_width = 0;
   if (static_cast<int>(__format[i]) >= 48 &&
@@ -93,10 +93,10 @@ void print(std::ostream& out, std::string __format, T first, Args... args) {
     } else if (__format[i] == '*') {
     } else {
       __looping_precision = false;
+      i--;
     }
     i++;
   }
-  i--;
   if (__left == true) {
     out << std::left;
   }
@@ -113,19 +113,18 @@ void print(std::ostream& out, std::string __format, T first, Args... args) {
     }
   }
   if (__zero_pad == true) {
-    // out << std::setfill('0');
+    out << std::setfill('0');
   }
   if (__width == true) {
-    // std::cout << __print_width << "??\n";
-    // out << std::setw(__print_width);
+    out << std::setw(__print_width);
   }
   if (__precision == true) {
-    // out << std::setprecision(__print_precision);
+    out << std::setprecision(__print_precision);
   }
   if (static_cast<int>(__format[i]) >= 65 &&
       static_cast<int>(__format[i]) <= 90) {
     __format[i] = static_cast<char>(static_cast<int>(__format[i]) + 32);
-    // out << std::uppercase;
+    out << std::uppercase;
     __upper_case = true;
   }
   switch (__format[i]) {
@@ -146,21 +145,20 @@ void print(std::ostream& out, std::string __format, T first, Args... args) {
       break;
     case 'o':
       if (std::is_same<T, unsigned int>::value) {
-        out << std::hex << first << std::dec;
+        out << std::oct << first << std::dec;
       } else {
-        out << unsigned();
+        out << std::oct << unsigned() << std::dec;
       }
       break;
     case 'x':
       if (std::is_same<T, unsigned int>::value) {
-        out << std::oct << first << std::dec;
+        out << std::hex << first << std::dec;
       } else {
-        out << unsigned();
+        out << std::hex << unsigned() << std::dec;
       }
       break;
     case 'f':
       if (std::is_same<T, double>::value || std::is_same<T, float>::value) {
-        out << first;
         out << std::fixed << first << std::defaultfloat;
       } else {
         out << double();
@@ -182,7 +180,7 @@ void print(std::ostream& out, std::string __format, T first, Args... args) {
       break;
     case 'a':
       if (std::is_same<T, double>::value || std::is_same<T, float>::value) {
-        out << std::hex << first << std::dec;
+        out << std::hexfloat << first << std::defaultfloat;
       } else {
         out << double();
       }
@@ -195,7 +193,7 @@ void print(std::ostream& out, std::string __format, T first, Args... args) {
       }
       break;
     case 's':
-      if (std::is_same<T, char*>::value ||
+      if (std::is_same<T, const char*>::value ||
           std::is_same<T, std::string>::value) {
         out << first;
       } else {
@@ -209,7 +207,13 @@ void print(std::ostream& out, std::string __format, T first, Args... args) {
   }
   i++;
   __format.erase(__format.begin(), __format.begin() + i);
-  // print(out, __format, args...);
+  print(out, __format, args...);
+}
+template <typename... Args>
+std::string sprint(std::string __format, Args... args) {
+  std::stringstream out;
+  print(out, __format, args...);
+  return out.str();
 }
 }  // namespace estl
 
