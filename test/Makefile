@@ -38,7 +38,7 @@ clean:
 $(BASE_PATH)/$(BUILD_DIR)/$(DIR)/%.o: %.cpp
 	mkdir -p $(@D)
 	$(call print,Building $@,$(COMPILE_COLOR))
-	$(COMPILER) $(COMMON_INCLUDE) $(GTEST_INCLUDE) $(CXXFLAGS) $(GCOV_FLAGS) $< -o $@
+	$(COMPILER) $(COMMON_INCLUDE) $(GTEST_INCLUDE) $(CXXFLAGS) $(GCOV_FLAG) $< -o $@
 
 $(EXE): exe_start $(LIB) $(EXE_OBJ)
 	$(call print,Linking $(shell basename $(EXE)),$(LINK_COLOR))
