@@ -5,11 +5,10 @@
 #include "time.hpp"
 
 int main(int argc, char const* argv[]) {
-  int a = 7;
-  double b = 31415926535897.9323846264;
-  std::string c = "Hello World";
-  estl::print(std::cout, "%i, %f, %e, %g \n", a, b, b, b);
-  printf("%i, %f, %e, %g", a, b, b, b);
+  double a = 19011.998;
+  estl::print(std::cout, "%f\n", double(a));
+  printf("\n%f\n", a);
+  // printf("%i, %+i, %i\n", a, b, c);
   // estl::Time t;
   // t.SetTimeUI(18135);
   // std::cout << t.Format("%H:%M:%S") << "\n";

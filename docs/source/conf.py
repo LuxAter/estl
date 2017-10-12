@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 # -- General configuration ------------------------------------------------
 extensions = [
+    #  'sphinx.ext.coverage', 'sphinx.ext.imgmath', 'sphinx.ext.githubpages', 'breathe'
     'sphinx.ext.coverage', 'sphinx.ext.imgmath', 'sphinx.ext.githubpages'
 ]
+
+#  breathe_projects = { "Estl": "../doxygen/xml/" }
+#  breathe_default_project = "Estl"
 
 templates_path = ['_templates']
 
