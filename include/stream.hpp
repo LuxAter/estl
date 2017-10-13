@@ -17,6 +17,7 @@
 #include <iomanip>
 #include <iostream>
 #include <limits>
+#include <sstream>
 #include <string>
 #include <type_traits>
 
@@ -311,44 +312,123 @@ void scan(std::istream& in, std::string __format, T& first, Args&... args) {
     i++;
   }
   if (__width == true) {
-    in >> std::setw(__scan_width);
+    __scan_width += 1;
+  }
+  if (static_cast<int>(__format[i]) >= 65 &&
+      static_cast<int>(__format[i]) <= 90) {
+    __format[i] = static_cast<char>(static_cast<int>(__format[i]) + 32);
   }
   switch (__format[i]) {
     case 'i':
     case 'd':
       if (std::is_same<T, int>::value) {
-        in >> first;
+        if (__width == false) {
+          in >> first;
+        } else {
+          char str[256];
+          in.get(str, __scan_width);
+          std::istringstream iss(str);
+          iss >> first;
+        }
       }
       break;
     case 'u':
+      if (std::is_same<T, unsigned int>::value) {
+        if (__width == false) {
+          in >> first;
+        } else {
+          char str[256];
+          in.get(str, __scan_width);
+          std::istringstream iss(str);
+          iss >> first;
+        }
+      }
+      break;
     case 'o':
+      if (std::is_same<T, unsigned int>::value) {
+        if (__width == false) {
+          in >> std::oct >> first;
+        } else {
+          char str[256];
+          in.get(str, __scan_width);
+          std::istringstream iss(str);
+          iss >> std::oct >> first;
+        }
+      }
+      break;
     case 'x':
       if (std::is_same<T, unsigned int>::value) {
-        in >> first;
+        if (__width == false) {
+          in >> std::hex >> first;
+        } else {
+          char str[256];
+          in.get(str, __scan_width);
+          std::istringstream iss(str);
+          iss >> std::hex >> first;
+        }
       }
       break;
     case 'f':
     case 'e':
     case 'g':
+      if (std::is_same<T, double>::value || std::is_same<T, float>::value) {
+        if (__width == false) {
+          in >> first;
+        } else {
+          char str[256];
+          in.get(str, __scan_width);
+          std::istringstream iss(str);
+          iss >> first;
+        }
+      }
+      break;
     case 'a':
       if (std::is_same<T, double>::value || std::is_same<T, float>::value) {
-        in >> first;
+        if (__width == false) {
+          in >> std::hexfloat >> first;
+        } else {
+          char str[256];
+          in.get(str, __scan_width);
+          std::istringstream iss(str);
+          iss >> std::hexfloat >> first;
+        }
       }
       break;
     case 'c':
       if (std::is_same<T, char>::value) {
-        in >> first;
+        if (__width == false) {
+          in >> first;
+        } else {
+          char str[256];
+          in.get(str, __scan_width);
+          std::istringstream iss(str);
+          iss >> first;
+        }
       }
       break;
     case 's':
       if (std::is_same<T, const char*>::value ||
           std::is_same<T, std::string>::value) {
-        in >> first;
+        if (__width == false) {
+          in >> first;
+        } else {
+          char str[256];
+          in.get(str, __scan_width);
+          std::istringstream iss(str);
+          iss >> first;
+        }
       }
       break;
     case 'n':
     default:
-      in >> first;
+      if (__width == false) {
+        in >> first;
+      } else {
+        char str[256];
+        in.get(str, __scan_width);
+        std::istringstream iss(str);
+        iss >> first;
+      }
       break;
   }
   i++;
