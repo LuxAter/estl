@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # -- General configuration ------------------------------------------------
 extensions = [
-    #  'sphinx.ext.coverage', 'sphinx.ext.imgmath', 'sphinx.ext.githubpages', 'breathe'
-    'sphinx.ext.coverage', 'sphinx.ext.imgmath', 'sphinx.ext.githubpages'
+    'sphinx.ext.coverage', 'sphinx.ext.imgmath', 'sphinx.ext.githubpages', 'breathe'
+    #  'sphinx.ext.coverage', 'sphinx.ext.imgmath', 'sphinx.ext.githubpages'
 ]
 
-#  breathe_projects = { "Estl": "../doxygen/xml/" }
-#  breathe_default_project = "Estl"
+breathe_projects = { "Estl": "../doxygen/xml/" }
+breathe_default_project = "Estl"
 
 templates_path = ['_templates']
 
@@ -36,7 +36,7 @@ import sphinx_bootstrap_theme
 html_theme = 'bootstrap'
 html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
-html_show_sourcelink = False
+html_show_sourcelink = True
 
 html_show_sphinx = False
 

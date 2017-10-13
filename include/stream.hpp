@@ -1,3 +1,14 @@
+/**
+ * @file stream.hpp
+ * @brief iostream functions utilizing varadic templates.
+ * @author Arden Rasmussen
+ * @version 0.0
+ * @date 2017-10-12
+ *
+ * These functions improve uppon the default `printf` and `scanf` functions both
+ * in type safty, and in extensability. As these implementations can task any
+ * class or type that has an `<<` operator defined.
+ */
 // Copyright 2017 Arden
 #ifndef ESTL_STREAM_HPP_
 #define ESTL_STREAM_HPP_
@@ -10,7 +21,28 @@
 #include <type_traits>
 
 namespace estl {
+/**
+ * @brief Prints the rest of the formated string, after all variables have been
+ * used.
+ *
+ * @param out ostream to write output to.
+ * @param __format format string defining the format of the output to `out`.
+ */
 void print(std::ostream& out, std::string __format) { out << __format; }
+/**
+ * @brief Varadic template implementation of print.
+ *
+ * This function task any number of variables of any type, where the first one
+ * must be an ostream, and the seccond must be a format style string. Then every
+ * variable after that is applied according to the format string.
+ *
+ * @tparam T The type of the first additonal variable.
+ * @tparam Args Packed set of varadic template arguments.
+ * @param out ostream to write output to.
+ * @param __format Format string defining the format of the output to `out`.
+ * @param first First additional variable.
+ * @param args Packed set of additional variables.
+ */
 template <typename T, typename... Args>
 void print(std::ostream& out, std::string __format, T first, Args... args) {
   int i;
@@ -24,7 +56,6 @@ void print(std::ostream& out, std::string __format, T first, Args... args) {
         out << '%';
         i++;
       } else {
-        i++;
         break;
       }
     }
@@ -37,25 +68,29 @@ void print(std::ostream& out, std::string __format, T first, Args... args) {
   bool __width = false;
   bool __precision = false;
   bool __upper_case = false;
-  bool __looping_flags = true;
+  bool __looping_flags = false;
+  bool __is_int_base = false;
+  if (std::is_integral<T>::value == true ||
+      std::is_same<T, double>::value == true ||
+      std::is_same<T, float>::value == true) {
+    __is_int_base = true;
+  }
+  if (__format[i] == '-' || __format[i] == '+' || __format[i] == ' ' ||
+      __format[i] == '0') {
+    __looping_flags = true;
+  }
   while (__looping_flags == true) {
-    switch (__format[i]) {
-      case '-':
-        __left = true;
-        break;
-      case '+':
-        __show_pos = true;
-        break;
-      case ' ':
-        __plus_space = true;
-        break;
-      case '0':
-        __zero_pad = true;
-        break;
-      default:
-        __looping_flags = false;
-        i--;
-        break;
+    if (__format[i] == '-') {
+      __left = true;
+    } else if (__format[i] == '+') {
+      __show_pos = true;
+    } else if (__format[i] == ' ') {
+      __plus_space = true;
+    } else if (__format[i] == '0') {
+      __zero_pad = true;
+    } else {
+      __looping_flags = false;
+      i--;
     }
     i++;
   }
@@ -74,10 +109,10 @@ void print(std::ostream& out, std::string __format, T first, Args... args) {
     } else if (__format[i] == '*') {
     } else {
       __looping_width = false;
+      i--;
     }
     i++;
   }
-  i--;
   bool __looping_precision = false;
   if (__format[i] == '.') {
     __looping_precision = true;
@@ -100,19 +135,16 @@ void print(std::ostream& out, std::string __format, T first, Args... args) {
   if (__left == true) {
     out << std::left;
   }
-  if (__show_pos == true) {
-    if (std::numeric_limits<T>::is_integer == false && first > T()) {
-      out << '+';
-      if (__width == true) {
-        __print_width -= 1;
-      }
+  if (__show_pos == true && __is_int_base == true && first > T()) {
+    out << '+';
+    if (__width == true) {
+      __print_width -= 1;
     }
-  } else if (__plus_space == true) {
-    if (std::numeric_limits<T>::is_integer == false && first > T()) {
-      out << ' ';
-    }
+
+  } else if (__plus_space == true && __is_int_base == true && first > T()) {
+    out << ' ';
   }
-  if (__zero_pad == true) {
+  if (__zero_pad == true && __is_int_base == true) {
     out << std::setfill('0');
   }
   if (__width == true) {
@@ -209,6 +241,15 @@ void print(std::ostream& out, std::string __format, T first, Args... args) {
   __format.erase(__format.begin(), __format.begin() + i);
   print(out, __format, args...);
 }
+/**
+ * @brief String interface to stream formatting functions.
+ *
+ * @tparam Args Packes set of varadic template arguments.
+ * @param __format Format string defining the format of the output to `out`.
+ * @param args Packed set of additional variables.
+ *
+ * @return String containing formated information.
+ */
 template <typename... Args>
 std::string sprint(std::string __format, Args... args) {
   std::stringstream out;

@@ -27,3 +27,5 @@ template library.
    :maxdepth: 2
    :caption: Contents:
 
+   stream
+
