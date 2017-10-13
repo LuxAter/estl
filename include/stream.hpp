@@ -29,6 +29,7 @@ namespace estl {
  * @param __format format string defining the format of the output to `out`.
  */
 void print(std::ostream& out, std::string __format) { out << __format; }
+
 /**
  * @brief Varadic template implementation of print.
  *
@@ -257,6 +258,102 @@ std::string sprint(std::string __format, Args... args) {
   std::stringstream out;
   print(out, __format, args...);
   return out.str();
+}
+
+void scan(std::istream& in, std::string __format) {}
+
+template <typename T, typename... Args>
+void scan(std::istream& in, std::string __format, T& first, Args&... args) {
+  int i;
+  for (i = 0; i < __format.size(); i++) {
+    if (__format[i] != '%') {
+      char ch;
+      in.get(ch);
+      if (ch != __format[i]) {
+        return;
+      }
+    } else {
+      if (__format.size() <= i + 1) {
+        char ch;
+        in.get(ch);
+        if (ch != __format[i]) {
+          return;
+        }
+      } else if (__format[i + 1] == '%') {
+        char ch;
+        in.get(ch);
+        if (ch != __format[i]) {
+          return;
+        }
+        i++;
+      } else {
+        break;
+      }
+    }
+  }
+  i++;
+  bool __width = false;
+  unsigned int __scan_width = 0;
+  bool __looping_width = false;
+  if (static_cast<int>(__format[i]) >= 48 &&
+      static_cast<int>(__format[i]) <= 57) {
+    __looping_width = true;
+    __width = true;
+  }
+  while (__looping_width == true) {
+    if (static_cast<int>(__format[i]) >= 48 &&
+        static_cast<int>(__format[i]) <= 57) {
+      __scan_width = (10 * __scan_width) + (static_cast<int>(__format[i]) - 48);
+    } else {
+      __looping_width = false;
+      i--;
+    }
+    i++;
+  }
+  if (__width == true) {
+    in >> std::setw(__scan_width);
+  }
+  switch (__format[i]) {
+    case 'i':
+    case 'd':
+      if (std::is_same<T, int>::value) {
+        in >> first;
+      }
+      break;
+    case 'u':
+    case 'o':
+    case 'x':
+      if (std::is_same<T, unsigned int>::value) {
+        in >> first;
+      }
+      break;
+    case 'f':
+    case 'e':
+    case 'g':
+    case 'a':
+      if (std::is_same<T, double>::value || std::is_same<T, float>::value) {
+        in >> first;
+      }
+      break;
+    case 'c':
+      if (std::is_same<T, char>::value) {
+        in >> first;
+      }
+      break;
+    case 's':
+      if (std::is_same<T, const char*>::value ||
+          std::is_same<T, std::string>::value) {
+        in >> first;
+      }
+      break;
+    case 'n':
+    default:
+      in >> first;
+      break;
+  }
+  i++;
+  __format.erase(__format.begin(), __format.begin() + i);
+  scan(in, __format, args...);
 }
 }  // namespace estl
 

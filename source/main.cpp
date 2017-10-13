@@ -5,5 +5,8 @@
 #include "stream.hpp"
 
 int main(int argc, char const* argv[]) {
-  std::cout << "Hello" << estl::sprint("%i %i %i", 5, 4, 3) << "\n";
+  int i = 0, b = 0;
+  // scanf("hello %3i, %i", &i, &b);
+  estl::scan(std::cin, "hello %3i, %i", i, b);
+  std::cout << i << "," << b << "\n";
 }
