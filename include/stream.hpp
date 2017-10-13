@@ -140,12 +140,14 @@ void print(std::ostream& out, std::string __format, T first, Args... args) {
     if (__width == true) {
       __print_width -= 1;
     }
-
   } else if (__plus_space == true && __is_int_base == true && first > T()) {
     out << ' ';
   }
   if (__zero_pad == true && __is_int_base == true) {
     out << std::setfill('0');
+    if (__is_int_base && first < T()) {
+      out << std::internal;
+    }
   }
   if (__width == true) {
     out << std::setw(__print_width);
