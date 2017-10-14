@@ -7,7 +7,7 @@
  *
  * These functions improve uppon the default `printf` and `scanf` functions both
  * in type safty, and in extensability. As these implementations can task any
- * class or type that has an `<<` operator defined.
+ * class or type that has an `<<` and `>>` operator defined.
  */
 // Copyright 2017 Arden
 #ifndef ESTL_STREAM_HPP_
@@ -17,11 +17,27 @@
 #include <iomanip>
 #include <iostream>
 #include <limits>
+#include <locale>
 #include <sstream>
 #include <string>
 #include <type_traits>
 
 namespace estl {
+
+struct delim : std::ctype<char> {
+  delim() : std::ctype<char>(get_table()) {}
+  delim(char ch) : std::ctype<char>(get_table(ch)) {}
+  static mask const* get_table(char ch = char()) {
+    static mask rc[table_size];
+    if (ch == char()) {
+      rc[static_cast<int>(' ')] = std::ctype_base::space;
+    } else {
+      rc[static_cast<int>(ch)] = std::ctype_base::space;
+    }
+    return &rc[0];
+  }
+};
+
 /**
  * @brief Prints the rest of the formated string, after all variables have been
  * used.
@@ -34,7 +50,7 @@ void print(std::ostream& out, std::string __format) { out << __format; }
 /**
  * @brief Varadic template implementation of print.
  *
- * This function task any number of variables of any type, where the first one
+ * This function takes any number of variables of any type, where the first one
  * must be an ostream, and the seccond must be a format style string. Then every
  * variable after that is applied according to the format string.
  *
@@ -245,11 +261,13 @@ void print(std::ostream& out, std::string __format, T first, Args... args) {
   __format.erase(__format.begin(), __format.begin() + i);
   print(out, __format, args...);
 }
+
 /**
- * @brief String interface to stream formatting functions.
+ * @brief String interface to stream formatted print.
  *
- * @tparam Args Packes set of varadic template arguments.
- * @param __format Format string defining the format of the output to `out`.
+ * @tparam Args Packed set of varadic template arguments.
+ * @param __format Format string defining the format of the output to resulting
+ * string.
  * @param args Packed set of additional variables.
  *
  * @return String containing formated information.
@@ -261,8 +279,40 @@ std::string sprint(std::string __format, Args... args) {
   return out.str();
 }
 
+/**
+ * @brief Default IO stream interface for formmatted print.
+ *
+ * @tparam Args Packed set of varadic template arguments.
+ * @param __format Format string defining the format of the output to `cout`.
+ * @param args Packed set of additional variables.
+ */
+template <typename... Args>
+void cprint(std::string __format, Args&... args) {
+  print(std::cout, __format, args...);
+}
+
+/**
+ * @brief Ignores the rest of the __format string, and clears stream.
+ *
+ * @param in Stream to read information from.
+ * @param __format Format string defining the format of the input form `in`.
+ */
 void scan(std::istream& in, std::string __format) {}
 
+/**
+ * @brief Varadic template implementation of scan.
+ *
+ * This function takes any number of variables of any type, where the first one
+ * must of an istream, and the second must be a format style string. Then every
+ * variable after that is read according tot eh format string.
+ *
+ * @tparam T The type of the first additional variable.
+ * @tparam Args Packed set of varadic template arguments.
+ * @param in istream to read input from.
+ * @param __format Format string defining the format of the input from `in`.
+ * @param first First additional variable to save read data to.
+ * @param args Packed set of additoinal variables.
+ */
 template <typename T, typename... Args>
 void scan(std::istream& in, std::string __format, T& first, Args&... args) {
   int i;
@@ -292,6 +342,9 @@ void scan(std::istream& in, std::string __format, T& first, Args&... args) {
       }
     }
   }
+  if (i >= __format.size()) {
+    return;
+  }
   i++;
   bool __width = false;
   unsigned int __scan_width = 0;
@@ -317,6 +370,9 @@ void scan(std::istream& in, std::string __format, T& first, Args&... args) {
   if (static_cast<int>(__format[i]) >= 65 &&
       static_cast<int>(__format[i]) <= 90) {
     __format[i] = static_cast<char>(static_cast<int>(__format[i]) + 32);
+  }
+  if (i + 1 < __format.size() && __format[i + 1] != ' ') {
+    in.imbue(std::locale(in.getloc(), new delim(__format[i + 1])));
   }
   switch (__format[i]) {
     case 'i':
@@ -434,6 +490,34 @@ void scan(std::istream& in, std::string __format, T& first, Args&... args) {
   i++;
   __format.erase(__format.begin(), __format.begin() + i);
   scan(in, __format, args...);
+}
+
+/**
+ * @brief String interface to stream formmatted scan.
+ *
+ * @tparam Args Packed set of varadic tempalte arguments.
+ * @param __str String containing formated input data.
+ * @param __format Format string defining the format of the input to read from
+ * `__str`.
+ * @param args Packed set of additional variable.
+ */
+template <typename... Args>
+void sscan(std::string __str, std::string __format, Args&... args) {
+  std::istringstream in(__str);
+  scan(in, __format, args...);
+}
+
+/**
+ * @brief Default IO stream interface for formatted scan.
+ *
+ * @tparam Args Packed set of varadic template arguments.
+ * @param __format Format string defining the format of the input to read from
+ * `cin`.
+ * @param args Packed set of additional variables.
+ */
+template <typename... Args>
+void cscan(std::string __format, Args&... args) {
+  scan(std::cin, __format, args...);
 }
 }  // namespace estl
 
