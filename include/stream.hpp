@@ -1,3 +1,4 @@
+// Copyright 2017 Arden Rasmussen
 /**
  * @file stream.hpp
  * @brief iostream functions utilizing varadic templates.
@@ -9,7 +10,6 @@
  * in type safty, and in extensability. As these implementations can task any
  * class or type that has an `<<` and `>>` operator defined.
  */
-// Copyright 2017 Arden
 #ifndef ESTL_STREAM_HPP_
 #define ESTL_STREAM_HPP_
 
@@ -24,19 +24,19 @@
 
 namespace estl {
 
-struct delim : std::ctype<char> {
-  delim() : std::ctype<char>(get_table()) {}
-  delim(char ch) : std::ctype<char>(get_table(ch)) {}
-  static mask const* get_table(char ch = char()) {
-    static mask rc[table_size];
-    if (ch == char()) {
-      rc[static_cast<int>(' ')] = std::ctype_base::space;
-    } else {
-      rc[static_cast<int>(ch)] = std::ctype_base::space;
-    }
-    return &rc[0];
-  }
-};
+// struct delim : std::ctype<char> {
+// delim() : std::ctype<char>(get_table()) {}
+// explicit delim(char ch) : std::ctype<char>(get_table(ch)) {}
+// static mask const* get_table(char ch = char()) {
+// static mask rc[table_size];
+// if (ch == char()) {
+// rc[static_cast<int>(' ')] = std::ctype_base::space;
+// } else {
+// rc[static_cast<int>(ch)] = std::ctype_base::space;
+// }
+// return &rc[0];
+// }
+// };
 
 /**
  * @brief Prints the rest of the formated string, after all variables have been
@@ -258,6 +258,21 @@ void print(std::ostream& out, std::string __format, T first, Args... args) {
       break;
   }
   i++;
+  if (__left == true) {
+    out << std::right;
+  }
+  if (__zero_pad == true) {
+    out << std::setfill(' ');
+  }
+  if (__width == true) {
+    out << std::setw(0);
+  }
+  if (__precision == true) {
+    out << std::setprecision(6);
+  }
+  if (__upper_case == true) {
+    out << std::nouppercase;
+  }
   __format.erase(__format.begin(), __format.begin() + i);
   print(out, __format, args...);
 }
@@ -291,13 +306,55 @@ void cprint(std::string __format, Args&... args) {
   print(std::cout, __format, args...);
 }
 
+template <typename T>
+T scan_delim(std::istream& in, std::string __delim, bool __width = false,
+             unsigned int __scan_width = 0) {
+  T __var = T();
+  std::string __str = std::string();
+  char __ch = char();
+  if (__width == false) {
+    __scan_width = __str.max_size();
+  }
+  for (size_t s = 0; s < __scan_width; s++) {
+    __ch = in.get();
+    bool __is_in = false;
+    for (int i = 0; i < __delim.size() && __is_in == false; i++) {
+      if (__ch == __delim[i]) {
+        __is_in = true;
+      }
+    }
+    if (__is_in == false) {
+      __str += __ch;
+    } else if (__is_in == true) {
+      in.unget();
+      break;
+    }
+  }
+  std::istringstream ss(__str);
+  ss >> __var;
+  return __var;
+}
+
 /**
  * @brief Ignores the rest of the __format string, and clears stream.
  *
  * @param in Stream to read information from.
  * @param __format Format string defining the format of the input form `in`.
  */
-void scan(std::istream& in, std::string __format) {}
+void scan(std::istream& in, std::string __format) {
+  std::streambuf* buf = in.rdbuf();
+  if (buf->in_avail() < 0) {
+    return;
+  }
+  for (size_t i = 0; i < __format.size(); i++) {
+    char ch;
+    in.get(ch);
+    if (__format[i] != ch) {
+      std::cout << "\'" << __format[i] << "\' != \'" << ch << "\'\n";
+      return;
+    }
+  }
+}
 
 /**
  * @brief Varadic template implementation of scan.
@@ -371,21 +428,23 @@ void scan(std::istream& in, std::string __format, T& first, Args&... args) {
       static_cast<int>(__format[i]) <= 90) {
     __format[i] = static_cast<char>(static_cast<int>(__format[i]) + 32);
   }
+  std::string __delim = "\n ";
   if (i + 1 < __format.size() && __format[i + 1] != ' ') {
-    in.imbue(std::locale(in.getloc(), new delim(__format[i + 1])));
+    __delim += __format[i + 1];
   }
   switch (__format[i]) {
     case 'i':
     case 'd':
       if (std::is_same<T, int>::value) {
-        if (__width == false) {
-          in >> first;
-        } else {
-          char str[256];
-          in.get(str, __scan_width);
-          std::istringstream iss(str);
-          iss >> first;
-        }
+        first = estl::scan_delim<T>(in, __delim, __width, __scan_width);
+        // if (__width == false) {
+        // in >> first;
+        // } else {
+        // char str[256];
+        // in.get(str, __scan_width);
+        // std::istringstream iss(str);
+        // iss >> first;
+        // }
       }
       break;
     case 'u':
@@ -488,6 +547,7 @@ void scan(std::istream& in, std::string __format, T& first, Args&... args) {
       break;
   }
   i++;
+  // in.imbue(std::locale(in.getloc(), new delim()));
   __format.erase(__format.begin(), __format.begin() + i);
   scan(in, __format, args...);
 }
