@@ -1,19 +1,20 @@
 // Copyright 2017 Arden Rasmussen
 /**
  * @file stream.hpp
- * @brief iostream functions utilizing varadic templates.
+ * @brief iostream functions utilizing variadic templates.
  * @author Arden Rasmussen
  * @version 0.0
  * @date 2017-10-12
  *
- * These functions improve uppon the default `printf` and `scanf` functions both
- * in type safty, and in extensability. As these implementations can task any
+ * These functions improve upon the default `printf` and `scanf` functions both
+ * in type safety, and in extensibility. As these implementations can task any
  * class or type that has an `<<` and `>>` operator defined.
  */
 #ifndef ESTL_STREAM_HPP_
 #define ESTL_STREAM_HPP_
 
 #include <string.h>
+
 #include <iomanip>
 #include <iostream>
 #include <limits>
@@ -22,21 +23,15 @@
 #include <string>
 #include <type_traits>
 
+// TODO(17-10-17, Arden): Fails to scan hexadecimal floating decimals.
 namespace estl {
 
-// struct delim : std::ctype<char> {
-// delim() : std::ctype<char>(get_table()) {}
-// explicit delim(char ch) : std::ctype<char>(get_table(ch)) {}
-// static mask const* get_table(char ch = char()) {
-// static mask rc[table_size];
-// if (ch == char()) {
-// rc[static_cast<int>(' ')] = std::ctype_base::space;
-// } else {
-// rc[static_cast<int>(ch)] = std::ctype_base::space;
-// }
-// return &rc[0];
-// }
-// };
+/**
+ * @brief Enum to specify additional format information for scan.
+ *
+ * @see scan_delim
+ */
+enum Format { NONE = 0, OCT = 1, HEX = 2, FLOAT_HEX = 3 };
 
 /**
  * @brief Prints the rest of the formated string, after all variables have been
@@ -51,11 +46,11 @@ void print(std::ostream& out, std::string __format) { out << __format; }
  * @brief Varadic template implementation of print.
  *
  * This function takes any number of variables of any type, where the first one
- * must be an ostream, and the seccond must be a format style string. Then every
+ * must be an ostream, and the second must be a format style string. Then every
  * variable after that is applied according to the format string.
  *
- * @tparam T The type of the first additonal variable.
- * @tparam Args Packed set of varadic template arguments.
+ * @tparam T The type of the first additional variable.
+ * @tparam Args Packed set of variadic template arguments.
  * @param out ostream to write output to.
  * @param __format Format string defining the format of the output to `out`.
  * @param first First additional variable.
@@ -280,7 +275,7 @@ void print(std::ostream& out, std::string __format, T first, Args... args) {
 /**
  * @brief String interface to stream formatted print.
  *
- * @tparam Args Packed set of varadic template arguments.
+ * @tparam Args Packed set of variadic template arguments.
  * @param __format Format string defining the format of the output to resulting
  * string.
  * @param args Packed set of additional variables.
@@ -295,9 +290,9 @@ std::string sprint(std::string __format, Args... args) {
 }
 
 /**
- * @brief Default IO stream interface for formmatted print.
+ * @brief Default IO stream interface for formatted print.
  *
- * @tparam Args Packed set of varadic template arguments.
+ * @tparam Args Packed set of variadic template arguments.
  * @param __format Format string defining the format of the output to `cout`.
  * @param args Packed set of additional variables.
  */
@@ -306,16 +301,39 @@ void cprint(std::string __format, Args&... args) {
   print(std::cout, __format, args...);
 }
 
+/**
+ * @brief Reads from istream until stopped.
+ *
+ * Reads characters from istream until there are no more characters to read, or
+ * until on of the characters in `__delim` is read. Then reads data from set of
+ * characters using `>>` operators for type `T`.
+ *
+ * @tparam T Type to read from stream.
+ * @param in istream to read input from.
+ * @param __delim string of characters that will stop the reading.
+ * @param __width Boolean flat to set scan width to stop reading at.
+ * @param __scan_width Width to stop reading at if `__width` is true.
+ * @param num_fmt Additional format information for reading values.
+ *
+ * @return T value read from `in`.
+ */
 template <typename T>
 T scan_delim(std::istream& in, std::string __delim, bool __width = false,
-             unsigned int __scan_width = 0) {
+             unsigned int __scan_width = 0,
+             unsigned int num_fmt = estl::Format::NONE) {
   T __var = T();
   std::string __str = std::string();
   char __ch = char();
   if (__width == false) {
     __scan_width = __str.max_size();
+  } else {
+    __scan_width--;
   }
   for (size_t s = 0; s < __scan_width; s++) {
+    std::streambuf* buf = in.rdbuf();
+    if (buf->in_avail() <= 0) {
+      break;
+    }
     __ch = in.get();
     bool __is_in = false;
     for (int i = 0; i < __delim.size() && __is_in == false; i++) {
@@ -331,6 +349,13 @@ T scan_delim(std::istream& in, std::string __delim, bool __width = false,
     }
   }
   std::istringstream ss(__str);
+  if (num_fmt == estl::Format::HEX) {
+    ss >> std::hex;
+  } else if (num_fmt == estl::Format::OCT) {
+    ss >> std::oct;
+  } else if (num_fmt == estl::Format::FLOAT_HEX) {
+    ss >> std::hexfloat;
+  }
   ss >> __var;
   return __var;
 }
@@ -343,14 +368,13 @@ T scan_delim(std::istream& in, std::string __delim, bool __width = false,
  */
 void scan(std::istream& in, std::string __format) {
   std::streambuf* buf = in.rdbuf();
-  if (buf->in_avail() < 0) {
-    return;
-  }
   for (size_t i = 0; i < __format.size(); i++) {
     char ch;
     in.get(ch);
     if (__format[i] != ch) {
-      std::cout << "\'" << __format[i] << "\' != \'" << ch << "\'\n";
+      return;
+    }
+    if (buf->in_avail() <= 0) {
       return;
     }
   }
@@ -364,11 +388,11 @@ void scan(std::istream& in, std::string __format) {
  * variable after that is read according tot eh format string.
  *
  * @tparam T The type of the first additional variable.
- * @tparam Args Packed set of varadic template arguments.
+ * @tparam Args Packed set of variadic template arguments.
  * @param in istream to read input from.
  * @param __format Format string defining the format of the input from `in`.
  * @param first First additional variable to save read data to.
- * @param args Packed set of additoinal variables.
+ * @param args Packed set of additional variables.
  */
 template <typename T, typename... Args>
 void scan(std::istream& in, std::string __format, T& first, Args&... args) {
@@ -437,125 +461,63 @@ void scan(std::istream& in, std::string __format, T& first, Args&... args) {
     case 'd':
       if (std::is_same<T, int>::value) {
         first = estl::scan_delim<T>(in, __delim, __width, __scan_width);
-        // if (__width == false) {
-        // in >> first;
-        // } else {
-        // char str[256];
-        // in.get(str, __scan_width);
-        // std::istringstream iss(str);
-        // iss >> first;
-        // }
       }
       break;
     case 'u':
       if (std::is_same<T, unsigned int>::value) {
-        if (__width == false) {
-          in >> first;
-        } else {
-          char str[256];
-          in.get(str, __scan_width);
-          std::istringstream iss(str);
-          iss >> first;
-        }
+        first = estl::scan_delim<T>(in, __delim, __width, __scan_width);
       }
       break;
     case 'o':
       if (std::is_same<T, unsigned int>::value) {
-        if (__width == false) {
-          in >> std::oct >> first;
-        } else {
-          char str[256];
-          in.get(str, __scan_width);
-          std::istringstream iss(str);
-          iss >> std::oct >> first;
-        }
+        first = estl::scan_delim<T>(in, __delim, __width, __scan_width,
+                                    estl::Format::OCT);
       }
       break;
     case 'x':
       if (std::is_same<T, unsigned int>::value) {
-        if (__width == false) {
-          in >> std::hex >> first;
-        } else {
-          char str[256];
-          in.get(str, __scan_width);
-          std::istringstream iss(str);
-          iss >> std::hex >> first;
-        }
+        first = estl::scan_delim<T>(in, __delim, __width, __scan_width,
+                                    estl::Format::HEX);
       }
       break;
     case 'f':
     case 'e':
     case 'g':
       if (std::is_same<T, double>::value || std::is_same<T, float>::value) {
-        if (__width == false) {
-          in >> first;
-        } else {
-          char str[256];
-          in.get(str, __scan_width);
-          std::istringstream iss(str);
-          iss >> first;
-        }
+        first = estl::scan_delim<T>(in, __delim, __width, __scan_width);
       }
       break;
     case 'a':
       if (std::is_same<T, double>::value || std::is_same<T, float>::value) {
-        if (__width == false) {
-          in >> std::hexfloat >> first;
-        } else {
-          char str[256];
-          in.get(str, __scan_width);
-          std::istringstream iss(str);
-          iss >> std::hexfloat >> first;
-        }
+        first = estl::scan_delim<T>(in, __delim, __width, __scan_width,
+                                    estl::Format::FLOAT_HEX);
       }
       break;
     case 'c':
       if (std::is_same<T, char>::value) {
-        if (__width == false) {
-          in >> first;
-        } else {
-          char str[256];
-          in.get(str, __scan_width);
-          std::istringstream iss(str);
-          iss >> first;
-        }
+        first = estl::scan_delim<T>(in, __delim, __width, __scan_width);
       }
       break;
     case 's':
       if (std::is_same<T, const char*>::value ||
           std::is_same<T, std::string>::value) {
-        if (__width == false) {
-          in >> first;
-        } else {
-          char str[256];
-          in.get(str, __scan_width);
-          std::istringstream iss(str);
-          iss >> first;
-        }
+        first = estl::scan_delim<T>(in, __delim, __width, __scan_width);
       }
       break;
     case 'n':
     default:
-      if (__width == false) {
-        in >> first;
-      } else {
-        char str[256];
-        in.get(str, __scan_width);
-        std::istringstream iss(str);
-        iss >> first;
-      }
+      first = estl::scan_delim<T>(in, __delim, __width, __scan_width);
       break;
   }
   i++;
-  // in.imbue(std::locale(in.getloc(), new delim()));
   __format.erase(__format.begin(), __format.begin() + i);
   scan(in, __format, args...);
 }
 
 /**
- * @brief String interface to stream formmatted scan.
+ * @brief String interface to stream formatted scan.
  *
- * @tparam Args Packed set of varadic tempalte arguments.
+ * @tparam Args Packed set of variadic template arguments.
  * @param __str String containing formated input data.
  * @param __format Format string defining the format of the input to read from
  * `__str`.
@@ -570,7 +532,7 @@ void sscan(std::string __str, std::string __format, Args&... args) {
 /**
  * @brief Default IO stream interface for formatted scan.
  *
- * @tparam Args Packed set of varadic template arguments.
+ * @tparam Args Packed set of variadic template arguments.
  * @param __format Format string defining the format of the input to read from
  * `cin`.
  * @param args Packed set of additional variables.

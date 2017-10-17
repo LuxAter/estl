@@ -122,26 +122,26 @@ TEST(iostream, scan_basic) {
   EXPECT_EQ(a, 12345);
   estl::sscan("12345", "%d", a);
   EXPECT_EQ(a, 12345);
-  // estl::sscan("123456", "%u", b);
-  // EXPECT_EQ(b, 123456);
-  // estl::sscan("361100", "%o", b);
-  // EXPECT_EQ(b, 123456);
-  // estl::sscan("1e240", "%x", b);
-  // EXPECT_EQ(b, 123456);
-  // estl::sscan("123.456000", "%f", c);
+  estl::sscan("123456", "%u", b);
+  EXPECT_EQ(b, 123456);
+  estl::sscan("361100", "%o", b);
+  EXPECT_EQ(b, 123456);
+  estl::sscan("1e240", "%x", b);
+  EXPECT_EQ(b, 123456);
+  estl::sscan("123.456000", "%f", c);
+  EXPECT_EQ(c, 123.456);
+  estl::sscan("1.234560e+02", "%e", c);
+  EXPECT_EQ(c, 123.456);
+  estl::sscan("123.456", "%g", c);
+  EXPECT_EQ(c, 123.456);
+  // estl::sscan("0x1.edd2f1a9fbe77p+6", "%a", c);
   // EXPECT_EQ(c, 123.456);
-  // estl::sscan("1.234560e+02", "%e", c);
-  // EXPECT_EQ(c, 123.456);
-  // estl::sscan("123.456", "%g", c);
-  // EXPECT_EQ(c, 123.456);
-  // // estl::sscan("0x1.edd2f1a9fbe77p+6", "%a", c);
-  // // EXPECT_EQ(c, 123.456);
-  // estl::sscan("a", "%c", d);
-  // EXPECT_EQ(d, 'a');
-  // estl::sscan("stream_test", "%s", e);
-  // EXPECT_EQ(e, "stream_test");
-  // estl::sscan("abcde", "%n", e);
-  // EXPECT_EQ(e, "abcde");
+  estl::sscan("a", "%c", d);
+  EXPECT_EQ(d, 'a');
+  estl::sscan("stream_test", "%s", e);
+  EXPECT_EQ(e, "stream_test");
+  estl::sscan("abcde", "%n", e);
+  EXPECT_EQ(e, "abcde");
 }
 
 TEST(iostream, scan_uppercase) {
@@ -158,7 +158,7 @@ TEST(iostream, scan_uppercase) {
   EXPECT_EQ(b, 123456);
   estl::sscan("361100", "%O", b);
   EXPECT_EQ(b, 123456);
-  estl::sscan("1E240", "%C", b);
+  estl::sscan("1E240", "%X", b);
   EXPECT_EQ(b, 123456);
   estl::sscan("123.456000", "%F", c);
   EXPECT_EQ(c, 123.456);
