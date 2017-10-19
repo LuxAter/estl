@@ -1,9 +1,8 @@
 .. default-domain:: cpp
 .. namespace:: estl
-.. py:currentmodule:: myMod
 
-stream.hpp Reference
-====================
+Stream Reference
+================
 
 iostream functions utilizing variadic tempaltes.
 
@@ -19,6 +18,9 @@ iostream functions utilizing variadic tempaltes.
    #include <string>
    #include <type_traits>
 
+.. contents::
+   :local:
+
 ====  ========================
 enum  :cpp:enum:`estl::Format`
 void  :cpp:func:`estl::cprint`
@@ -29,8 +31,6 @@ void  :cpp:func:`estl::scan`
 void  :cpp:func:`estl::scan`
 ====  ========================
 
-.. contents:: stream.hpp
-   :local:
 
 Enumeration Type Documentation
 ------------------------------
@@ -97,6 +97,10 @@ Function Documentation
    This function takes any number of variables of any type, where the first one
    must be an `istream`, and the second must be a format stye string. Then
    every varaible after that is read from `in` according to the format string.
+
+   .. warning::
+
+      The reading of hexadecimal floating values is not yet implemented.
 
    :tparam T: The type of the first additional variable.
    :tparam Args: Packed set of variadic template arguments.

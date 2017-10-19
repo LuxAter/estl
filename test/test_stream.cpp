@@ -134,8 +134,8 @@ TEST(iostream, scan_basic) {
   EXPECT_EQ(c, 123.456);
   estl::sscan("123.456", "%g", c);
   EXPECT_EQ(c, 123.456);
-  // estl::sscan("0x1.edd2f1a9fbe77p+6", "%a", c);
-  // EXPECT_EQ(c, 123.456);
+  estl::sscan("0x1.edd2f1a9fbe77p+6", "%a", c);
+  EXPECT_EQ(c, 123.456);
   estl::sscan("a", "%c", d);
   EXPECT_EQ(d, 'a');
   estl::sscan("stream_test", "%s", e);
@@ -166,8 +166,8 @@ TEST(iostream, scan_uppercase) {
   EXPECT_EQ(c, 123.456);
   estl::sscan("123.456", "%G", c);
   EXPECT_EQ(c, 123.456);
-  // estl::sscan("0x1.EDD2F1A9FBE77P+6", "%A", c);
-  // EXPECT_EQ(c, 123.456);
+  estl::sscan("0x1.EDD2F1A9FBE77P+6", "%A", c);
+  EXPECT_EQ(c, 123.456);
   estl::sscan("a", "%C", d);
   EXPECT_EQ(d, 'a');
   estl::sscan("stream_test", "%S", e);

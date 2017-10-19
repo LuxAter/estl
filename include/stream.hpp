@@ -321,6 +321,10 @@ template <typename T>
 T scan_delim(std::istream& in, std::string __delim, bool __width = false,
              unsigned int __scan_width = 0,
              unsigned int num_fmt = estl::Format::NONE) {
+  bool __preloaded = false;
+  if (in.rdbuf()->in_avail() > 0) {
+    __preloaded = true;
+  }
   T __var = T();
   std::string __str = std::string();
   char __ch = char();
@@ -330,8 +334,7 @@ T scan_delim(std::istream& in, std::string __delim, bool __width = false,
     __scan_width--;
   }
   for (size_t s = 0; s < __scan_width; s++) {
-    std::streambuf* buf = in.rdbuf();
-    if (buf->in_avail() <= 0) {
+    if (__preloaded == true && in.rdbuf()->in_avail() <= 0) {
       break;
     }
     __ch = in.get();
@@ -344,7 +347,9 @@ T scan_delim(std::istream& in, std::string __delim, bool __width = false,
     if (__is_in == false) {
       __str += __ch;
     } else if (__is_in == true) {
-      in.unget();
+      if (__ch != '\n') {
+        in.unget();
+      }
       break;
     }
   }
@@ -354,7 +359,8 @@ T scan_delim(std::istream& in, std::string __delim, bool __width = false,
   } else if (num_fmt == estl::Format::OCT) {
     ss >> std::oct;
   } else if (num_fmt == estl::Format::FLOAT_HEX) {
-    ss >> std::hexfloat;
+    __var = std::strtod(__str.c_str(), NULL);
+    return __var;
   }
   ss >> __var;
   return __var;
