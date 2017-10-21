@@ -50,15 +50,16 @@ html_show_sphinx = False
 # Theme options are theme-specific and customize the look and feel of a
 # theme further.
 html_theme_options = {
-    'navbar_sidebarrel': True,
+    'navbar_sidebarrel': False,
     'navbar_pagenav': True,
     'navbar_pagenav_name': "Page",
-    'globaltoc_depth': 2,
+    'navbar_links': [("API", "api/api_index"), ("Examples", "examples_idex")],
+    'globaltoc_depth': -1,
     'globaltoc_includehidden': "true",
-    'navbar_class': "navbar navbar-inverse",
+    'navbar_class': "navbar",
     'navbar_fixed_top': "true",
-    'source_link_position': "nav",
-    'bootswatch_theme': "flatly",
+    'source_link_position': "footer",
+    'bootswatch_theme': "united",
     'bootstrap_version': "3",
 }
 # Add any paths that contain custom static files (such as style sheets) here,

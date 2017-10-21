@@ -18,19 +18,21 @@ iostream functions utilizing variadic tempaltes.
    #include <string>
    #include <type_traits>
 
-.. contents::
-   :local:
-
-====  ========================
-enum  :cpp:enum:`estl::Format`
-void  :cpp:func:`estl::cprint`
-void  :cpp:func:`estl::cscan`
-void  :cpp:func:`estl::print`
-void  :cpp:func:`estl::print`
-void  :cpp:func:`estl::scan`
-void  :cpp:func:`estl::scan`
-====  ========================
-
+===============  ========================
+Enumerations
+-----------------------------------------
+enum             :cpp:enum:`estl::Format`
+Functions
+-----------------------------------------
+``void``         :cpp:func:`estl::cprint`
+``void``         :cpp:func:`estl::cscan`
+``void``         :cpp:func:`estl::print`
+``void``         :cpp:func:`estl::print`
+``void``         :cpp:func:`estl::scan`
+``void``         :cpp:func:`estl::scan`
+``std::string``  :cpp:func:`estl::sprint`
+``void``         :cpp:func:`estl::sscan`
+===============  ========================
 
 Enumeration Type Documentation
 ------------------------------
@@ -98,10 +100,6 @@ Function Documentation
    must be an `istream`, and the second must be a format stye string. Then
    every varaible after that is read from `in` according to the format string.
 
-   .. warning::
-
-      The reading of hexadecimal floating values is not yet implemented.
-
    :tparam T: The type of the first additional variable.
    :tparam Args: Packed set of variadic template arguments.
    :param in: `istream` to read input from.
@@ -117,3 +115,43 @@ Function Documentation
    :param in: `istream` to read data from.
    :param __format: Format string defining the text to read from `in`.
 
+.. cpp:function:: template<typename T> \
+                  T scan_delim(std::istream& in, std::string __delim, bool__width = false, unsigned int __scan_width = 0, unsigned int num_fmt = estl::Format::NONE)
+
+   Reads from `istream` untill stopped.
+
+   Reads characterfs from istream untill ther are no more characters to read,
+   or untill one of the the characters in `__delim` is read. Then reads data
+   from set of characters using `>>` operators for type `T`.
+
+   :tparam T: Type to read from stream.
+   :param in: `istream` to read input from.
+   :param __delim: String of characters that will stop the reading.
+   :param __width: Boolean flag to enable scan width.
+   :param __scan_width: Number of characters to stop reading at if `__width` is
+                        true.
+   :param num_fmt: Additional format information for reading numeric values.
+
+   :return: ``T`` Value read from `in`.
+
+.. cpp:function:: template<typename... Args>\
+                  std::string sprint(std::string __format, Args... args)
+
+   String interface for stream formatted print.
+
+   :tparam Args: Packed set of variadic template arguments.
+   :param __format: Format stirng defining the format of the output to
+                    resulting string.
+   :param args: Packed set of additional variables.
+   :return: String containing formated values.
+
+.. cpp:function:: template<typename... Args>\
+                  void sscan(std::string __str, std::string __format, Args&... args)
+
+   String interface to stream formatted scan.
+
+   :tparam Args: Packed set of variadic template arguments.
+   :param __str: String containing formated input data.
+   :param __format: Format string defining the format of the input to read from
+                    **__str**.
+   :param args: Paked set of additional variables.

@@ -23,7 +23,6 @@
 #include <string>
 #include <type_traits>
 
-// TODO(17-10-17, Arden): Fails to scan hexadecimal floating decimals.
 namespace estl {
 
 /**
@@ -302,7 +301,7 @@ void cprint(std::string __format, Args&... args) {
 }
 
 /**
- * @brief Reads from istream until stopped.
+ * @brief Reads from *istream* until stopped.
  *
  * Reads characters from istream until there are no more characters to read, or
  * until on of the characters in `__delim` is read. Then reads data from set of
@@ -391,7 +390,7 @@ void scan(std::istream& in, std::string __format) {
  *
  * This function takes any number of variables of any type, where the first one
  * must of an istream, and the second must be a format style string. Then every
- * variable after that is read according tot eh format string.
+ * variable after that is read according to the format string.
  *
  * @tparam T The type of the first additional variable.
  * @tparam Args Packed set of variadic template arguments.
