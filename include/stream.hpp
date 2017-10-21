@@ -307,6 +307,9 @@ void cprint(std::string __format, Args&... args) {
  * until on of the characters in `__delim` is read. Then reads data from set of
  * characters using `>>` operators for type `T`.
  *
+ * @todo Currently reading `hexfloat` is done through a work around. Update to
+ * default format once std is fixed.
+ *
  * @tparam T Type to read from stream.
  * @param in istream to read input from.
  * @param __delim string of characters that will stop the reading.
