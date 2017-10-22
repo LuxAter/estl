@@ -12,6 +12,7 @@ addons:
       - ubuntu-toolchain-r-test
     packages:
       - lcov
+      - doxygen
 
 before_install:
   - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
@@ -27,13 +28,13 @@ script:
 
 after_success:
   - bash <(curl -s https://codecov.io/bash) || echo "CodeCov Error"
-  - cd docs/ && make html
+  - doxygen
 
 deploy:
   provider: pages
   skip_cleanup: true
   github_token: $GITHUB_TOKEN
-  local_dir: build/html
+  local_dir: docs/html
   on:
     branch:
       - master
