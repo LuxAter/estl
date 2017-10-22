@@ -3,6 +3,8 @@
 *.log
 *.swp
 build/*
-docs/build/*
-libestl
+docs/html/*
+docs/latex/*
+docs/xml/*
+estl
 unit-test
