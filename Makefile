@@ -1,6 +1,6 @@
 SHELL = /bin/bash
 
-export NAME= estl
+export NAME= estl.out
 export LINK=  
 export INCLUDE=
 export TYPE= lib
@@ -9,7 +9,7 @@ export SOURCE_DIR= source
 export TEST_DIR= test
 export EXTERNAL_DIR = external
 export BUILD_DIR= build
-export INCLUDE_DIR= include
+export INCLUDE_DIR= estl
 
 export BASE_PATH=$(shell pwd)
 
