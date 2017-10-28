@@ -28,11 +28,29 @@
 #ifndef ESTL_MATRIX_HPP_
 #define ESTL_MATRIX_HPP_
 
+#include <iostream>
 #include <memory>
 
 namespace estl {
+/**
+ * @brief A standard container for storing a fixed size matrix of elements.
+ *
+ * `estl::matrix` is a container that encapsulates fixed size matrices.
+ *
+ * This container is an aggregate type with the same semantics as a stuct
+ * holding
+ * a C-style array `T[N]` as its only non-static data member. Unlike a C-style
+ * array, it doesn't decay to `T*` automatically. Elements of this container can
+ * be referenced with a single index, but more commonly are referenced with
+ * multiple induces.
+ *
+ * @tparam _Tp Type of element. Required to be a complete type.
+ * @tparam _Nr Number of rows of elements.
+ * @tparam _Nc Number of columns of elements.
+ * @tparam _Al Allocator type, Not necessary in most situations.
+ */
 template <typename _Tp, std::size_t _Nr, std::size_t _Nc,
-          typename _Al = std::allocator<_Tp> >
+          typename _Al = std::allocator<_Tp>>
 class matrix {
  public:
   typedef _Al allocator_type;
@@ -41,24 +59,451 @@ class matrix {
   typedef typename _Al::const_reference const_reference;
   typedef typename _Al::difference_type difference_type;
   typedef typename _Al::size_type size_type;
+  typedef typename _Al::pointer pointer;
+  typedef typename _Al::const_pointer const_pointer;
+  typedef typename _Al::pointer iterator;
+  typedef typename _Al::const_pointer const_iterator;
+  typedef std::reverse_iterator<iterator> reverse_iterator;
+  typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
-  class iterator {
-   public:
-    typedef typename _Al::difference_type difference_type;
-    typedef typename _Al::value_type value_type;
-    typedef typename _Al::reference reference;
-    typedef typename _Al::pointer pointer;
-    typedef std::random_access_iterator_tag iterator_category;
-
-    iterator();
-    iterator(const iterator&);
-    ~iterator();
-  };
-
-  matrix();
+  matrix() {
+    _Al al;
+    __data = al.allocate(size());
+  }
   matrix(const matrix&);
-  ~matrix();
+  ~matrix() {
+    _Al al;
+    al.deallocate(__data, size());
+  }
+
+  matrix& operator=(const matrix&);
+
+  /**
+   * @brief Access specified element with bounds checking.
+   *
+   * Returns a reference to the element at specified location `__n`, with bounds
+   * checking. If `__n` is not within the range of the container, an exception
+   * of type `std::out_of_range` is thrown.
+   *
+   * @param __n Position of the element to return.
+   *
+   * @return Reference to the requested element.
+   */
+  reference at(size_type __n) {
+    if (__n >= size()) {
+      std::__throw_out_of_range_fmt(
+          __N("array::at:__n (which is %zu) >= __Nm (which is %zu)"), __n,
+          size());
+    } else {
+      return reference(__data[__n]);
+    }
+  }
+  /**
+   * @brief Access specified element with bounds checking.
+   *
+   * Returns a reference to the element at specified location `__n`, with bounds
+   * checking. If `__n` is not within the range of the container, an exception
+   * of type `std::out_of_range` is thrown.
+   *
+   * @param __n Position of the element to return.
+   *
+   * @return Reference to the requested element.
+   */
+  constexpr const_reference at(size_type __n) const {
+    if (__n >= size()) {
+      std::__throw_out_of_range_fmt(
+          __N("array::at:__n (which is %zu) >= __Nm (which is %zu)"), __n,
+          size());
+    } else {
+      return const_reference(__data[__n]);
+    }
+  }
+  /**
+   * @brief Access specified element with bounds checking.
+   *
+   * Returns a reference to the element at specified location `__nr`,`__nc`,
+   * with bounds checking. If `__nr` is not within the range of the container
+   * rows or `__nc` is not within the range of the container columns, an
+   * exception of type `std::out_of_range` is thrown.
+   *
+   * @param __nr Row position of the element to return.
+   * @param __nc Column position of the element to return.
+   *
+   * @return Reference to the requested element.
+   */
+  reference at(size_type __nr, size_type __nc) {
+    if (__nr >= rows()) {
+      std::__throw_out_of_range_fmt(
+          __N("std::at:__nr (which is %zu) >= __Nr (which is %zu)"), __nr,
+          rows());
+    } else if (__nc >= columns()) {
+      std::__throw_out_of_range_fmt(
+          __N("std::at:__nc (which is %zu) >= __Nc (which is %zu)"), __nc,
+          columns());
+    } else {
+      return reference(__data[__nr * columns() + __nc]);
+    }
+  }
+  /**
+   * @brief Access specified element with bounds checking.
+   *
+   * Returns a reference to the element at specified location `__nr`,`__nc`,
+   * with bounds checking. If `__nr` is not within the range of the container
+   * rows or `__nc` is not within the range of the container columns, an
+   * exception of type `std::out_of_range` is thrown.
+   *
+   * @param __nr Row position of the element to return.
+   * @param __nc Column position of the element to return.
+   *
+   * @return Reference to the requested element.
+   */
+  constexpr const_reference at(size_type __nr, size_type __nc) const {
+    if (__nr >= rows()) {
+      std::__throw_out_of_range_fmt(
+          __N("std::at:__nr (which is %zu) >= __Nr (which is %zu)"), __nr,
+          rows());
+    } else if (__nc >= columns()) {
+      std::__throw_out_of_range_fmt(
+          __N("std::at:__nc (which is %zu) >= __Nc (which is %zu)"), __nc,
+          columns());
+    } else {
+      return const_reference(__data[__nr * columns() + __nc]);
+    }
+  }
+  /**
+   * @brief Access specified element.
+   *
+   * Returns a reference to the element at specified location `__n`. No bounds
+   * checking is preformed.
+   *
+   * @param __n Position of the element to return.
+   *
+   * @return Reference to the requested element.
+   */
+  reference operator[](size_type __n) noexcept {
+    return reference(__data[__n]);
+  }
+  /**
+   * @brief Access specified element.
+   *
+   * Returns a reference to the element at specified location `__n`. No bounds
+   * checking is preformed.
+   *
+   * @param __n Position of the element to return.
+   *
+   * @return Reference to the requested element.
+   */
+  constexpr const_reference operator[](size_type __n) const noexcept {
+    return const_reference(__data[__n]);
+  }
+  /**
+   * @brief Access specified element.
+   *
+   * Returns a reference to the element at specified location `__nr`,``__nc. No
+   * bounds
+   * checking is preformed.
+   *
+   * @param __nr Row position of the element to return.
+   * @param __nr Column position of the element to return.
+   *
+   * @return Reference to the requested element.
+   */
+  reference operator()(size_type __nr, size_type __nc) {
+    return reference(__data[__nr * columns() + __nc]);
+  }
+  /**
+   * @brief Access specified element.
+   *
+   * Returns a reference to the element at specified location `__nr`,``__nc. No
+   * bounds
+   * checking is preformed.
+   *
+   * @param __nr Row position of the element to return.
+   * @param __nr Column position of the element to return.
+   *
+   * @return Reference to the requested element.
+   */
+  constexpr const_reference operator()(size_type __nr, size_type __nc) const {
+    return const_reference(__data[__nr * columns() + __nc]);
+  }
+  /**
+   * @brief Access the first element.
+   *
+   * Returns a reference to the first element in the container. Calling `front`
+   * on an empty container is undefined.
+   *
+   * @return Reference to the first element.
+   */
+  reference front() { return reference(__data[0]); }
+  /**
+   * @brief Access the first element.
+   *
+   * Returns a reference to the first element in the container. Calling `front`
+   * on an empty container is undefined.
+   *
+   * @return Reference to the first element.
+   */
+  constexpr const_reference front() const { return const_reference(__data[0]); }
+  /**
+   * @brief Access the last element.
+   *
+   * Returns reference to the last element in the container. Calling `back` on
+   * an empty container is undefined.
+   *
+   * @return Reference to the last element.
+   */
+  reference back() { return reference(__data[size()]); }
+  /**
+   * @brief Access the last element.
+   *
+   * Returns reference to the last element in the container. Calling `back` on
+   * an empty container is undefined.
+   *
+   * @return Reference to the last element.
+   */
+  constexpr const_reference back() const {
+    return const_reference(__data[size()]);
+  }
+  /**
+   * @brief Direct access to the underlying array.
+   *
+   * Returns pointer to the underlying array serving as element storage. The
+   * pointer is such that range `[data(); data() + size()]` is always a valid
+   * range, even if the container is empty.
+   *
+   * @return Pointer to the underlying element storage. For non-empty
+   * containers,
+   * the returned pointer compares equal to the address of the first element.
+   */
+  pointer data() { return __data; }
+  /**
+   * @brief Direct access to the underlying array.
+   *
+   * Returns pointer to the underlying array serving as element storage. The
+   * pointer is such that range `[data(); data() + size()]` is always a valid
+   * range, even if the container is empty.
+   *
+   * @return Pointer to the underlying element storage. For non-empty
+   * containers,
+   * the returned pointer compares equal to the address of the first element.
+   */
+  const_pointer data() const { return __data; }
+
+  /**
+   * @brief Returns an iterator to the beginning.
+   *
+   * Returns an iterator to the first element of the container. If the container
+   * is empty, the returned iterator will be equal to `end()`.
+   *
+   * @return Iterator to the first element.
+   */
+  iterator begin() { return iterator(__data); }
+  /**
+   * @brief Returns an iterator to the beginning.
+   *
+   * Returns an iterator to the first element of the container. If the container
+   * is empty, the returned iterator will be equal to `end()`.
+   *
+   * @return Iterator to the first element.
+   */
+  const_iterator begin() const { return const_iterator(__data[0]); }
+  /**
+   * @brief Returns an iterator to the beginning.
+   *
+   * Returns an iterator to the first element of the container. If the container
+   * is empty, the returned iterator will be equal to `end()`.
+   *
+   * @return Iterator to the first element.
+   */
+  const_iterator cbegin() const { return const_iterator(__data[0]); }
+  /**
+   * @brief Returns an iterator to the end.
+   *
+   * Returns an iterator to the element following the last element of the
+   * container. This element acts as a placeholder; attempting to access it
+   * results in undefined behavior.
+   *
+   * @return Iterator to the element following the last element.
+   */
+  iterator end() { return iterator(__data[size()]); }
+  /**
+   * @brief Returns an iterator to the end.
+   *
+   * Returns an iterator to the element following the last element of the
+   * container. This element acts as a placeholder; attempting to access it
+   * results in undefined behavior.
+   *
+   * @return Iterator to the element following the last element.
+   */
+  const_iterator end() const { return const_iterator(__data[size()]); }
+  /**
+   * @brief Returns an iterator to the end.
+   *
+   * Returns an iterator to the element following the last element of the
+   * container. This element acts as a placeholder; attempting to access it
+   * results in undefined behavior.
+   *
+   * @return Iterator to the element following the last element.
+   */
+  const_iterator cend() const { return const_iterator(__data[size()]); }
+  /**
+   * @brief Returns a revers iterator to the beginning.
+   *
+   * Returns a reverse iterator to the first element of the reversed container.
+   * It corresponds to the last element of the non-reversed container.
+   *
+   * @return Reverse iterator to the first element.
+   */
+  reverse_iterator rbegin() { return reverse_iterator(__data[0]); }
+  /**
+   * @brief Returns a revers iterator to the beginning.
+   *
+   * Returns a reverse iterator to the first element of the reversed container.
+   * It corresponds to the last element of the non-reversed container.
+   *
+   * @return Reverse iterator to the first element.
+   */
+  const_reverse_iterator rbegin() const {
+    return const_reverse_iterator(__data[0]);
+  }
+  /**
+   * @brief Returns a revers iterator to the beginning.
+   *
+   * Returns a reverse iterator to the first element of the reversed container.
+   * It corresponds to the last element of the non-reversed container.
+   *
+   * @return Reverse iterator to the first element.
+   */
+  const_reverse_iterator crbegin() const {
+    return const_reverse_iterator(__data[0]);
+  }
+  /**
+   * @brief Returns a reverse iterator to the end.
+   *
+   * Returns a reverse iterator to the element following the last element of the
+   * reversed container. it corresponds to the element preceding the first
+   * element of the non-reversed container. This element acts as a placeholder,
+   * attemplting to access it results in undefined behavior.
+   *
+   * @return Reverse iterator to the element following the last element.
+   */
+  constexpr reverse_iterator rend() { return reverse_iterator(__data[size()]); }
+  /**
+   * @brief Returns a reverse iterator to the end.
+   *
+   * Returns a reverse iterator to the element following the last element of the
+   * reversed container. it corresponds to the element preceding the first
+   * element of the non-reversed container. This element acts as a placeholder,
+   * attemplting to access it results in undefined behavior.
+   *
+   * @return Reverse iterator to the element following the last element.
+   */
+  constexpr const_reverse_iterator rend() const {
+    return const_reverse_iterator(__data[size()]);
+  }
+  /**
+   * @brief Returns a reverse iterator to the end.
+   *
+   * Returns a reverse iterator to the element following the last element of the
+   * reversed container. it corresponds to the element preceding the first
+   * element of the non-reversed container. This element acts as a placeholder,
+   * attemplting to access it results in undefined behavior.
+   *
+   * @return Reverse iterator to the element following the last element.
+   */
+  constexpr const_reverse_iterator crend() const {
+    return const_reverse_iterator(__data[size()]);
+  }
+
+  /**
+   * @brief Checks whether the container is empty.
+   *
+   * Checks if the container has no elements, i.e. whether `begin() == end()`.
+   *
+   * @return `true` is the container is empty, `false` otherwise.
+   */
+  bool empty() const noexcept { return size() == 0; }
+  /**
+   * @brief Retuns the number of elements
+   *
+   * Returns the number of elements in the container, i.e.
+   * `std::distance(begin(), end())`.
+   *
+   * @return The number of elements in the container.
+   */
+  constexpr size_type size() const noexcept { return _Nr * _Nc; }
+  /**
+   * @brief Retuns the number of rows of elemnts.
+   *
+   * Returns the number of rows of elements in the container.
+   *
+   * @return The number of rows of elements in the container.
+   */
+  constexpr size_type rows() const noexcept { return _Nr; }
+  /**
+   * @brief Returns the number of columns of elements.
+   *
+   * Returns the number of columns of elements in the container.
+   *
+   * @return The number of columns of elements in the container.
+   */
+  constexpr size_type columns() const noexcept { return _Nc; }
+  /**
+   * @brief returns the maximum possible number of elements.
+   *
+   * Returns the maximum number of elements the container is able to hold do to
+   * system or library implementation limitations, i.e. `std::distance(begin(),
+   * end())` for the largest container.
+   *
+   * @return Maximum number of elements.
+   */
+  constexpr size_type max_size() const noexcept { return _Nr * _Nc; }
+
+  /**
+   * @brief Fill the container with specified value.
+   *
+   * Assigns the given value to all elements in the container.
+   *
+   * @param __u The value to assign to the elements.
+   */
+  void fill(const value_type& __u) { std::fill_n(begin(), size(), __u); }
+  /**
+   * @brief Swaps the contents
+   *
+   * Exchanges the contents of the container with those of `__other`. Does not
+   * cause iterators and references to associate with the other container.
+   *
+   * @param __other Container to exchange the contents with.
+   */
+  void swap(matrix& __other) {
+    std::swap_ranges(begin(), end(), __other.begin());
+  }
+
+ private:
+  pointer __data;
 };
+
+template <typename _T, std::size_t _R, std::size_t _C,
+          typename _Al = std::allocator<_T>>
+std::ostream& operator<<(std::ostream& __out,
+                         const estl::matrix<_T, _R, _C>& mat) {
+  __out << '[';
+  for (std::size_t r = 0; r < _R; r++) {
+    __out << '[';
+    for (std::size_t c = 0; c < _C; c++) {
+      __out << mat.at(r, c);
+      if (c != _C - 1) {
+        __out << ", ";
+      }
+    }
+    __out << ']';
+    if (r != _R - 1) {
+      __out << ", ";
+    }
+  }
+  __out << ']';
+  return __out;
+}
 
 }  // namespace estl
 
