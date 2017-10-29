@@ -1,5 +1,10 @@
 /* The standard CSS for doxygen 1.8.13 */
 
+:root {
+  --primary-color-dark: #007ac1;
+  --primary-color: #03a9F4
+}
+
 ul li {
   font-color: red;
   font-weight: bold;
@@ -558,28 +563,29 @@ table.memberdecls {
 /* Styles for detailed member documentation */
 
 .memtitle {
-  padding: 8px;
-  /* padding: 0px; */
+  /* padding: 8px; */
+  padding: 0;
+  padding-bottom: 8px;
+  padding-top: 8px;
+  padding-left: 10px;
+  padding-right: -10px;
   border: none;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
-  /* border-top: 1px solid #A8B8D9; */
-  /* border-left: 1px solid #A8B8D9; */
-  /* border-right: 1px solid #A8B8D9; */
   border-top-right-radius: 0px;
   border-top-left-radius: 0px;
   /* margin-bottom: -1px; */
-  /* background-image: url('nav_f.image'); */
-  /* background-image: none */
-  /* background-repeat: repeat-x; */
-  /* background-color: #E2E8F2; */
-  /* background-image: none; */
   background-image: none;
-  background-color: none;
+  background-color: var(--primary-color-dark);
   line-height: 1.25;
   /* line-height: 0.0; */
-  font-weight: 300;
+  font-weight: 400;
+  font-size: 56sp;
   /* float: left; */
   float: none;
+  margin-bottom: 0px;
+  margin-right: 0px;
+  margin-left: 10%;
+  width: 80%;
 }
 
 .permalink {
@@ -610,10 +616,12 @@ table.memberdecls {
 
 .memitem {
   padding: 0;
+  /* margin: 10%; */
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
   /* margin: none; */
   margin-bottom: 10px;
-  margin-right: 5px;
+  margin-right: 0px;
+  margin-left: 10%;
   /* -webkit-transition: box-shadow 0.5s linear; */
   /* -moz-transition: box-shadow 0.5s linear; */
   /* -ms-transition: box-shadow 0.5s linear; */
@@ -621,7 +629,7 @@ table.memberdecls {
   /* transition: box-shadow 0.5s linear; */
   /* transition: none; */
   /* display: table !important; */
-  width: 100%;
+  width: 80%;
 }
 
 .memitem.glow {
@@ -645,10 +653,10 @@ dl.reflist dt {
   /* border-left: 1px solid #A8B8D9; */
   /* border-right: 1px solid #A8B8D9; */
   padding: 6px 0px 6px 0px;
-  color: #253555;
-  font-weight: bold;
+  /* color: #253555; */
+  font-weight: 400;
   text-shadow: 0px 1px 1px rgba(255, 255, 255, 0.9);
-  background-color: #DFE5F1;
+  background-color: var(--primary-color);
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
   /* opera specific markup */
   /* box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.15); */
@@ -659,6 +667,8 @@ dl.reflist dt {
   /* webkit specific markup */
   /* -webkit-box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.15); */
   -webkit-border-top-right-radius: 0px;
+  /* align-items: center; */
+  /* justify-content: stretch; */
 }
 
 .overload {
@@ -668,6 +678,9 @@ dl.reflist dt {
 
 .memdoc,
 dl.reflist dd {
+  font-size: 16px;
+  font-weight: 400;
+  background: #fff;
   box-shadow: none;
   border: none;
   /* border-bottom: 1px solid #A8B8D9; */
@@ -675,12 +688,12 @@ dl.reflist dd {
   /* border-right: 1px solid #A8B8D9; */
   /* padding: 6px 10px 2px 10px; */
   padding: 6px;
-  background-color: #FBFCFD;
+  /* background-color: #FBFCFD; */
   border-top-width: 0;
   /* background-image: url('nav_g.image'); */
   /* background-repeat: repeat-x; */
-  background-image: none;
-  background-color: #FFFFFF;
+  /* background-image: none; */
+  /* background-color: #FFFFFF; */
   /* opera specific markup */
   border-bottom-left-radius: 0px;
   border-bottom-right-radius: 0px;
@@ -773,11 +786,12 @@ span.mlabels {
 }
 
 span.mlabel {
-  background-color: #728DC1;
-  border-top: 1px solid #5373B4;
-  border-left: 1px solid #5373B4;
-  border-right: 1px solid #C4CFE5;
-  border-bottom: 1px solid #C4CFE5;
+  background-color: #fff;
+  /* background-color: #728DC1; */
+  /* border-top: 1px solid #5373B4; */
+  /* border-left: 1px solid #5373B4; */
+  /* border-right: 1px solid #C4CFE5; */
+  /* border-bottom: 1px solid #C4CFE5; */
   text-shadow: none;
   color: white;
   margin-right: 4px;

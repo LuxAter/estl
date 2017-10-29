@@ -1178,7 +1178,8 @@ HTML_STYLESHEET        =
 # list). For an example see the documentation.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_STYLESHEET = docs/_static/DoxygenStyleSheet.css
+HTML_EXTRA_STYLESHEET = docs/_static/Doxygen.css
+# HTML_EXTRA_STYLESHEET = docs/_static/DoxygenStyleSheet.css
 # HTML_EXTRA_STYLESHEET  = docs/_static/customdoxygen.css
 # HTML_EXTRA_STYLESHEET  =
 

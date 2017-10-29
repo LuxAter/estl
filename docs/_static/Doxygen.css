@@ -1,0 +1,154 @@
+/* Material Doxygen CSS File 0.0 */
+
+/* Basic Variables including colors, and sizes */
+
+:root {
+  --primary-color: #ECEFF1;
+  --primary-color-dark: #BABDBE;
+  --primary-color-light: #FFFFFF;
+  --primary-text-color: #000000;
+  --secondary-color: #29B6F6;
+  --secondary-color-dark: #0086C3;
+  --secondary-color-light: #73E8FF;
+  --secondary-text-color: #000000;
+}
+
+/* Member Details {{{*/
+
+.memtitle {
+  padding: 8px;
+  border: 0px;
+  border-bottom: 2px;
+  border-color: var(--primary-color-dark);
+  border-style: solid;
+  border-top-right-radius: 2px;
+  border-top-left-radius: 2px;
+  background-image: none;
+  background-color: var(--primary-color);
+  line-height: 24px;
+  font-weight: 400;
+  font-size: 16px;
+  margin: 0px;
+  float: none;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+}
+
+.memitem {
+  padding: 0px;
+  border: none;
+  border-bottom-right-radius: 2px;
+  border-bottom-left-radius: 2px;
+  margin: 0px;
+  margin-bottom: 20px;
+  box-shadow: none;
+}
+
+.memproto,
+dl.reflist dt {
+  border: none;
+  border-top-right-radius: 0px;
+  padding: 6px;
+  font-weight: 400;
+  text-shadow: none;
+  background-color: var(--primary-color);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+}
+
+.memdoc,
+dl.reflist dd {
+  font-size: 14px;
+  font-weight: 400;
+  background: var(--primary-color-light);
+  border: none;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+}
+
+.permalink {
+  font-size: 65%;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.overload {
+  font-size: 65%;
+  vertical-align: middle;
+  font-family: Roboto, sans-serif;
+}
+
+.memtemplate {
+  font-size: 80%;
+  color: var(--secondary-color);
+  font-weight: 13px;
+  margin-left: 10px;
+}
+
+.memitem.glow {
+  box-shadow: none;
+}
+
+.memname {
+  font-weight: 400;
+  margin-left: 0px;
+}
+
+.memname td {
+  vertical-align: bottom
+}
+
+table.mlabels {
+  border-spacing: 0px;
+
+}
+
+td.mlabels-left {
+  width: 100%;
+  padding: 0px;
+}
+
+td.mlabels-right {
+  vertical-align: bottom;
+  padding: 0px;
+  white-space: nowrap;
+}
+
+span.mlabels {
+  margin-left: 8px;
+}
+
+span.mlabel {
+  background-color: var(--secondary-color);
+  text-shadow: none;
+  color: var(--secondary-text-color);
+  margin-right: 4px;
+  padding: 2px;
+  border: none;
+  border-radius: 2px;
+  font-size: 7pt;
+  white-space: nowrap;
+  vertical-align: middle;
+  font-size: 12px;
+}
+
+/* }}} */
+
+/* Parameter Settings {{{ */
+
+.paramname {
+  color: var(--secondary-color-dark);
+  padding: 5px;
+}
+
+/* }}} */
+
+/* Navbar Details {{{ */
+
+div.doc li {
+  background: none;
+}
+
+.navpath li.navlem a:hover {
+  background-image: none;
+  color: #F00;
+}
+
+/* }}} */

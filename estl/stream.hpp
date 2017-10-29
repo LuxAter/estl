@@ -318,6 +318,30 @@ void cprint(std::string __format, Args&... args) {
 }
 
 /**
+ * @brief Error stream interface for formatted print.
+ *
+ * @tparam Args Packed set of variadic template arguments.
+ * @param __format Format string defining the format of the output to `cerr`.
+ * @param args Packed set of additional variables.
+ */
+template <typename... Args>
+void eprint(std::string __format, Args&... args) {
+  print(std::cerr, __format, args...);
+}
+
+/**
+ * @brief Log stream interface for formatted print.
+ *
+ * @tparam Args Packed set of variadic template arguments.
+ * @param __format Format string defining the format of the output to `clog`.
+ * @param args Packed set of additional varaibles.
+ */
+template <typename... Args>
+void lprint(std::string __format, Args&... args) {
+  print(std::clog, __format, args...);
+}
+
+/**
  * @brief Reads from *istream* until stopped.
  *
  * Reads characters from istream until there are no more characters to read, or
