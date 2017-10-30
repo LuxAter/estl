@@ -47,7 +47,12 @@ namespace estl {
  *
  * @see scan_delim
  */
-enum Format { NONE = 0, OCT = 1, HEX = 2, FLOAT_HEX = 3 };
+enum Format {
+  NONE = 0,      ///< No additional formating.
+  OCT = 1,       ///< Octal based integers.
+  HEX = 2,       ///< Hexadecimal based integers.
+  FLOAT_HEX = 3  ///< Floating hexadecimal based floating integers.
+};
 
 /**
  * @brief Prints the rest of the formated string, after all variables have been

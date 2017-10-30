@@ -3,28 +3,157 @@
 /* Basic Variables including colors, and sizes */
 
 :root {
-  --primary-color: #ECEFF1;
-  --primary-color-dark: #BABDBE;
-  --primary-color-light: #FFFFFF;
-  --primary-text-color: #000000;
-  --secondary-color: #29B6F6;
-  --secondary-color-dark: #0086C3;
-  --secondary-color-light: #73E8FF;
-  --secondary-text-color: #000000;
+  --cyan-1: #1ABC9C;
+  --cyan-2: #16A085;
+  --green-1: #2ECC71;
+  --green-2: #27AE60;
+  --blue-1: #3498DB;
+  --blue-2: #2980B9;
+  --magenta-1: #9B59B6;
+  --magenta-2: #8E44AD;
+  --black-1: #34495E;
+  --black-2: #2C3E50;
+  --yellow-1: #F1C40F;
+  --yellow-2: #F39C12;
+  --orange-1: #E67E22;
+  --orange-2: #D35400;
+  --red-1: #E74C3c;
+  --red-2: #C0392B;
+  --red-3: #fceae8;
+  --white-1: #ECF0F1;
+  --white-2: #BDC3C7;
+  --white-3: #d3dcde;
+  --grey-1: #95A5A6;
+  --grey-2: #7F8C8D;
 }
 
-/* Member Details {{{*/
+:root {
+  --mem-title-color: var(--grey-2);
+  --mem-title-text: var(--white-1);
+  --mem-proto-color: var(--grey-1);
+  --mem-proto-text: var(--white-1);
+  --mem-doc-color: var(--white-1);
+  --mem-doc-text: var(--black-2);
+
+  --template-color: var(--white-2);
+
+  --param-text: var(--blue-2);
+  --param-color: none;
+  --tparam-text: var(--blue-2);
+  --tparam-color: none;
+
+  --label-color: var(--magenta-1);
+  --label-text: var(--white-1);
+
+  --link-text: var(--cyan-2);
+
+  --background: var(--black-2);
+  --foreground: var(--white-1);
+}
+
+code {
+  /* padding: 2px, 4px; */
+  font-style: italic;
+  /* background-color: var(--red-3); */
+  color: var(--red-2);
+  /* font-size: 80%; */
+}
+
+/* Page Details {{{ */
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+div.contents {
+  margin-top: 10px;
+  margin-left: 10%;
+  margin-right: 10%;
+}
+
+.contents a:visited {
+  color: var(--link-text);
+}
+
+a.el {
+  font-weight: bold;
+  color: var(--link-text);
+}
+
+div.summary a {
+  padding: 2px;
+  color: var(--foreground);
+  border-radius: 2px;
+  background-color: var(--blue-1);
+}
+
+/* }}} */
+
+/* Header Details {{{ */
+
+div.header {
+  background-color: var(--background)
+}
+
+h2.groupheader {
+  color: var(--white-1);
+  border-color: var(--white-2);
+}
+
+/* }}} */
+
+/* TOC Details {{{ */
+
+.directory tr.even {
+  background-color: var(--black-1);
+}
+
+tr.heading h2 {
+  color: var(--white-1);
+  border-color: var(--white-2);
+}
+
+td.memSeparator {
+  background-color: var(--grey-2);
+  border-color: var(--grey-2);
+}
+
+
+.mdescLeft,
+.mdescRight {
+  color: var(--white-2);
+}
+
+.memTemplParams {
+  color: var(--template-color);
+}
+
+.mdescLeft,
+.mdescRight,
+.memItemLeft,
+.memItemRight,
+.memTemplItemLeft,
+.memTemplItemRight,
+.memTemplParams {
+  background-color: var(--black-1);
+  border: none;
+  margin: 4px;
+  padding: 1px 0 0 8px;
+}
+
+/* }}} */
+
+/* Member Details {{{ */
 
 .memtitle {
   padding: 8px;
-  border: 0px;
-  border-bottom: 2px;
-  border-color: var(--primary-color-dark);
-  border-style: solid;
+  border: none;
   border-top-right-radius: 2px;
   border-top-left-radius: 2px;
   background-image: none;
-  background-color: var(--primary-color);
+  background-color: var(--mem-title-color);
+  color: var(--mem-title-text);
   line-height: 24px;
   font-weight: 400;
   font-size: 16px;
@@ -47,18 +176,21 @@
 dl.reflist dt {
   border: none;
   border-top-right-radius: 0px;
-  padding: 6px;
+  padding: 8px;
   font-weight: 400;
   text-shadow: none;
-  background-color: var(--primary-color);
+  background-color: var(--mem-proto-color);
+  color: var(--mem-proto-text);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
 }
 
 .memdoc,
 dl.reflist dd {
+  padding: 8px;
   font-size: 14px;
   font-weight: 400;
-  background: var(--primary-color-light);
+  background: var(--mem-doc-color);
+  color: var(--mem-doc-text);
   border: none;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
 }
@@ -77,7 +209,7 @@ dl.reflist dd {
 
 .memtemplate {
   font-size: 80%;
-  color: var(--secondary-color);
+  color: var(--template-color);
   font-weight: 13px;
   margin-left: 10px;
 }
@@ -101,6 +233,7 @@ table.mlabels {
 }
 
 td.mlabels-left {
+  vertical-align: middle;
   width: 100%;
   padding: 0px;
 }
@@ -108,6 +241,7 @@ td.mlabels-left {
 td.mlabels-right {
   vertical-align: bottom;
   padding: 0px;
+  padding-bottom: 5px;
   white-space: nowrap;
 }
 
@@ -116,11 +250,11 @@ span.mlabels {
 }
 
 span.mlabel {
-  background-color: var(--secondary-color);
+  background-color: var(--label-color);
   text-shadow: none;
-  color: var(--secondary-text-color);
+  color: var(--label-text);
   margin-right: 4px;
-  padding: 2px;
+  padding: 4px;
   border: none;
   border-radius: 2px;
   font-size: 7pt;
@@ -129,13 +263,48 @@ span.mlabel {
   font-size: 12px;
 }
 
+
 /* }}} */
 
 /* Parameter Settings {{{ */
 
+.paramkey {
+  text-align: right;
+}
+
+.paramtype {
+  white-space: nowrap;
+}
+
 .paramname {
-  color: var(--secondary-color-dark);
-  padding: 5px;
+  color: var(--param-text);
+  background-color: var(--param-color);
+  padding: 0px;
+  white-space: nowrap;
+}
+
+.paramname em {
+  font-style: normal;
+}
+
+.paramname code {
+  line-height: 14px;
+}
+
+/* }}} */
+
+/* Admonitions Details {{{ */
+
+dl.todo {
+  border: none;
+  border-radius: 4px;
+  background-color: var(--cyan-1);
+  margin: 0px;
+  padding: 3px;
+}
+
+dl.todo a.el {
+  color: var(--white-1);
 }
 
 /* }}} */
@@ -149,6 +318,68 @@ div.doc li {
 .navpath li.navlem a:hover {
   background-image: none;
   color: #F00;
+}
+
+/* }}} */
+
+/* Table Details {{{ */
+
+table.fieldtable {
+  background-color: var(--white-2);
+  border-radius: 2px;
+  border: none;
+  box-shadow: none;
+  margin: auto;
+  width: 100%;
+}
+
+.fieldtable th {
+  background-image: none;
+  border-radius: 0px;
+  border-top-left-radius: 2px;
+  border-top-right-radius: 2px;
+  border-width: 2px;
+  background-color: var(--grey-1);
+  color: var(--white-1);
+  border-color: var(--grey-2);
+}
+
+.fieldtable td.fieldname {
+  border-color: var(--grey-1);
+}
+
+.fieldtable td.fielddoc {
+  border-color: var(--grey-1);
+}
+
+/* }}} */
+
+/* Index Details {{{ */
+
+div.qindex {
+  background-color: var(--black-1);
+  border: none;
+  color: var(--foreground);
+}
+
+div.ah,
+span.ah {
+  background-color: var(--green-1);
+  color: var(--foreground);
+  font-weight: bold;
+  margin-bottom: 3px;
+  margin-top: 3px;
+  box-shadow: none;
+  /* box-shadow: rgb(153, 153, 153) 2px 2px 3px; */
+  background-image: none;
+  /* background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(238, 238, 238)), color-stop(0.3, rgb(68, 68, 68)), to(rgb(0, 0, 0))); */
+  padding: 0.2em;
+  border: none;
+  /* border-width: thin; */
+  /* border-style: solid; */
+  /* border-color: rgb(51, 51, 51); */
+  /* border-image: initial; */
+  /* border-radius: 0.5em; */
 }
 
 /* }}} */
