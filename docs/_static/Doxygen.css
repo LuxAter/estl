@@ -59,6 +59,12 @@ code {
   /* font-size: 80%; */
 }
 
+.fragment * {
+  background-color: var(--black-1);
+  color: var(--white-1);
+}
+
+
 /* Page Details {{{ */
 
 body {
@@ -140,6 +146,11 @@ td.memSeparator {
   border: none;
   margin: 4px;
   padding: 1px 0 0 8px;
+}
+
+span.icon {
+  font-weight: bold;
+  background-color: var(--blue-1);
 }
 
 /* }}} */
@@ -295,12 +306,32 @@ span.mlabel {
 
 /* Admonitions Details {{{ */
 
-dl.todo {
+dl.todo,
+dl.note,
+dl.warning {
   border: none;
   border-radius: 4px;
-  background-color: var(--cyan-1);
   margin: 0px;
   padding: 3px;
+}
+
+dl.todo {
+  background-color: var(--cyan-1);
+}
+
+dl.note {
+  background-color: var(--blue-1);
+}
+
+dl.warning {
+  background-color: var(--orange-1);
+}
+
+
+dl.todo dt,
+dl.note dt,
+dl.warning dt {
+  color: var(--white-1);
 }
 
 dl.todo a.el {

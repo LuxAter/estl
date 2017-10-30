@@ -337,6 +337,8 @@ void eprint(std::string __format, Args&... args) {
 /**
  * @brief Log stream interface for formatted print.
  *
+ * @note This function is `lprint` with a lower case *L*.
+ *
  * @tparam Args Packed set of variadic template arguments.
  * @param __format Format string defining the format of the output to `clog`.
  * @param args Packed set of additional varaibles.

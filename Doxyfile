@@ -1192,7 +1192,7 @@ HTML_EXTRA_STYLESHEET = docs/_static/Doxygen.css
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
 # HTML_EXTRA_FILES       = docs/_static/doxy-boot.js docs/_static/jquery.smartmenus.js docs/_static/jquery.smartmenus.bootstrap.js docs/_static/jquery.smartmenus.bootstrap.css
-HTML_EXTRA_FILES       = 
+HTML_EXTRA_FILES       = docs/_static/highlight.pack.js docs/_static/styles/monokai.css
 
 # The HTML_COLORSTYLE_HUE tag controls the color of the HTML output. Doxygen
 # will adjust the colors in the style sheet and background images according to

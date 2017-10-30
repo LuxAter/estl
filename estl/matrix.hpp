@@ -28,6 +28,8 @@
 #ifndef ESTL_MATRIX_HPP_
 #define ESTL_MATRIX_HPP_
 
+#include <algorithm>
+#include <initializer_list>
 #include <iostream>
 #include <memory>
 
@@ -70,13 +72,31 @@ class matrix {
     _Al al;
     __data = al.allocate(size());
   }
-  matrix(const matrix&);
+  matrix(const std::initializer_list<_Tp>& mat) {
+    _Al al;
+    __data = al.allocate(size());
+    std::copy(mat.begin(), mat.end(), __data);
+  }
+  matrix(const std::initializer_list<std::initializer_list<_Tp>>& mat) {
+    _Al al;
+    __data = al.allocate(size());
+    std::copy(mat.begin()->begin(), mat.begin()->begin() + size(), __data);
+  }
+  matrix(const matrix& mat) {
+    _Al al;
+    __data = al.allocate(size());
+    std::copy(mat.begin(), mat.end(), __data);
+  }
   ~matrix() {
     _Al al;
     al.deallocate(__data, size());
   }
 
-  matrix& operator=(const matrix&);
+  matrix& operator=(const matrix& mat) {
+    _Al al;
+    __data = al.allocate(size());
+    std::copy(mat.begin(), mat.end(), __data);
+  }
 
   /**
    * @brief Access specified element with bounds checking.
@@ -151,6 +171,9 @@ class matrix {
    * with bounds checking. If `__nr` is not within the range of the container
    * rows or `__nc` is not within the range of the container columns, an
    * exception of type `std::out_of_range` is thrown.
+   *
+   * @throws std::out_of_range When either `__nr` or `__nc` is not within the
+   * declared range of the container.
    *
    * @param __nr Row position of the element to return.
    * @param __nc Column position of the element to return.
@@ -306,7 +329,7 @@ class matrix {
    *
    * @return Iterator to the first element.
    */
-  const_iterator begin() const { return const_iterator(__data[0]); }
+  const_iterator begin() const { return const_iterator(__data); }
   /**
    * @brief Returns an iterator to the beginning.
    *
@@ -315,7 +338,7 @@ class matrix {
    *
    * @return Iterator to the first element.
    */
-  const_iterator cbegin() const { return const_iterator(__data[0]); }
+  const_iterator cbegin() const { return const_iterator(__data); }
   /**
    * @brief Returns an iterator to the end.
    *
@@ -325,7 +348,7 @@ class matrix {
    *
    * @return Iterator to the element following the last element.
    */
-  iterator end() { return iterator(__data[size()]); }
+  iterator end() { return iterator(__data + size()); }
   /**
    * @brief Returns an iterator to the end.
    *
@@ -335,7 +358,7 @@ class matrix {
    *
    * @return Iterator to the element following the last element.
    */
-  const_iterator end() const { return const_iterator(__data[size()]); }
+  const_iterator end() const { return const_iterator(__data + size()); }
   /**
    * @brief Returns an iterator to the end.
    *
@@ -345,7 +368,7 @@ class matrix {
    *
    * @return Iterator to the element following the last element.
    */
-  const_iterator cend() const { return const_iterator(__data[size()]); }
+  const_iterator cend() const { return const_iterator(__data + size()); }
   /**
    * @brief Returns a revers iterator to the beginning.
    *
@@ -354,7 +377,7 @@ class matrix {
    *
    * @return Reverse iterator to the first element.
    */
-  reverse_iterator rbegin() { return reverse_iterator(__data[0]); }
+  reverse_iterator rbegin() { return reverse_iterator(__data); }
   /**
    * @brief Returns a revers iterator to the beginning.
    *
@@ -364,7 +387,7 @@ class matrix {
    * @return Reverse iterator to the first element.
    */
   const_reverse_iterator rbegin() const {
-    return const_reverse_iterator(__data[0]);
+    return const_reverse_iterator(__data);
   }
   /**
    * @brief Returns a revers iterator to the beginning.
@@ -375,7 +398,7 @@ class matrix {
    * @return Reverse iterator to the first element.
    */
   const_reverse_iterator crbegin() const {
-    return const_reverse_iterator(__data[0]);
+    return const_reverse_iterator(__data);
   }
   /**
    * @brief Returns a reverse iterator to the end.
@@ -387,7 +410,9 @@ class matrix {
    *
    * @return Reverse iterator to the element following the last element.
    */
-  constexpr reverse_iterator rend() { return reverse_iterator(__data[size()]); }
+  constexpr reverse_iterator rend() {
+    return reverse_iterator(__data + size());
+  }
   /**
    * @brief Returns a reverse iterator to the end.
    *
@@ -399,7 +424,7 @@ class matrix {
    * @return Reverse iterator to the element following the last element.
    */
   constexpr const_reverse_iterator rend() const {
-    return const_reverse_iterator(__data[size()]);
+    return const_reverse_iterator(__data + size());
   }
   /**
    * @brief Returns a reverse iterator to the end.
@@ -412,7 +437,7 @@ class matrix {
    * @return Reverse iterator to the element following the last element.
    */
   constexpr const_reverse_iterator crend() const {
-    return const_reverse_iterator(__data[size()]);
+    return const_reverse_iterator(__data + size());
   }
 
   /**
@@ -431,7 +456,7 @@ class matrix {
    *
    * @return The number of elements in the container.
    */
-  constexpr size_type size() const noexcept { return _Nr * _Nc; }
+  constexpr inline size_type size() const noexcept { return _Nr * _Nc; }
   /**
    * @brief Retuns the number of rows of elemnts.
    *
@@ -439,7 +464,7 @@ class matrix {
    *
    * @return The number of rows of elements in the container.
    */
-  constexpr size_type rows() const noexcept { return _Nr; }
+  constexpr inline size_type rows() const noexcept { return _Nr; }
   /**
    * @brief Returns the number of columns of elements.
    *
@@ -447,7 +472,7 @@ class matrix {
    *
    * @return The number of columns of elements in the container.
    */
-  constexpr size_type columns() const noexcept { return _Nc; }
+  constexpr inline size_type columns() const noexcept { return _Nc; }
   /**
    * @brief returns the maximum possible number of elements.
    *
@@ -479,32 +504,110 @@ class matrix {
     std::swap_ranges(begin(), end(), __other.begin());
   }
 
- private:
-  pointer __data;
-};
-
-template <typename _T, std::size_t _R, std::size_t _C,
-          typename _Al = std::allocator<_T>>
-std::ostream& operator<<(std::ostream& __out,
-                         const estl::matrix<_T, _R, _C>& mat) {
-  __out << '[';
-  for (std::size_t r = 0; r < _R; r++) {
+  friend std::ostream& operator<<(std::ostream& __out,
+                                  const estl::matrix<_Tp, _Nr, _Nc>& mat) {
     __out << '[';
-    for (std::size_t c = 0; c < _C; c++) {
-      __out << mat.at(r, c);
-      if (c != _C - 1) {
+    for (std::size_t r = 0; r < _Nr; r++) {
+      __out << '[';
+      for (std::size_t c = 0; c < _Nc; c++) {
+        __out << mat.at(r, c);
+        if (c != _Nc - 1) {
+          __out << ", ";
+        }
+      }
+      __out << ']';
+      if (r != _Nr - 1) {
         __out << ", ";
       }
     }
     __out << ']';
-    if (r != _R - 1) {
-      __out << ", ";
-    }
+    return __out;
   }
-  __out << ']';
-  return __out;
+
+  friend inline bool operator==(const estl::matrix<_Tp, _Nr, _Nc>& lhs,
+                                const estl::matrix<_Tp, _Nr, _Nc>& rhs) {
+    return std::equal(lhs.begin(), lhs.end(), rhs.begin());
+  }
+  friend inline bool operator!=(const estl::matrix<_Tp, _Nr, _Nc>& lhs,
+                                const estl::matrix<_Tp, _Nr, _Nc>& rhs) {
+    return !(lhs == rhs);
+  }
+
+  friend inline bool operator<(const estl::matrix<_Tp, _Nr, _Nc>& lhs,
+                               const estl::matrix<_Tp, _Nr, _Nc>& rhs) {
+    return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(),
+                                        rhs.end());
+  }
+  friend inline bool operator>(const estl::matrix<_Tp, _Nr, _Nc>& lhs,
+                               const estl::matrix<_Tp, _Nr, _Nc>& rhs) {
+    return rhs < lhs;
+  }
+
+  friend inline bool operator<=(const estl::matrix<_Tp, _Nr, _Nc>& lhs,
+                                const estl::matrix<_Tp, _Nr, _Nc>& rhs) {
+    return !(lhs > rhs);
+  }
+
+  friend inline bool operator>=(const estl::matrix<_Tp, _Nr, _Nc>& lhs,
+                                const estl::matrix<_Tp, _Nr, _Nc>& rhs) {
+    return !(lhs < rhs);
+  }
+
+ private:
+  pointer __data = nullptr;
+};
+
+template <typename _A, std::size_t _R, std::size_t _C, typename _B>
+inline estl::matrix<_A, _R, _C> operator+(const estl::matrix<_A, _R, _C>& lhs,
+                                          const _B& rhs) {
+  estl::matrix<_A, _R, _C> mat;
+  typename estl::matrix<_A, _R, _C>::iterator it;
+  typename estl::matrix<_A, _R, _C>::const_iterator lhs_it;
+  for (it = mat.begin(), lhs_it = lhs.begin();
+       it != mat.end() && lhs_it != lhs.end(); ++it, ++lhs_it) {
+    *it = *lhs_it + rhs;
+  }
+  return mat;
 }
 
+template <typename _A, std::size_t _R, std::size_t _C, typename _B>
+inline estl::matrix<_A, _R, _C> operator-(const estl::matrix<_A, _R, _C>& lhs,
+                                          const _B& rhs) {
+  estl::matrix<_A, _R, _C> mat;
+  typename estl::matrix<_A, _R, _C>::iterator it;
+  typename estl::matrix<_A, _R, _C>::const_iterator lhs_it;
+  for (it = mat.begin(), lhs_it = lhs.begin();
+       it != mat.end() && lhs_it != lhs.end(); ++it, ++lhs_it) {
+    *it = *lhs_it - rhs;
+  }
+  return mat;
+}
+
+template <typename _A, std::size_t _R, std::size_t _C, typename _B>
+inline estl::matrix<_A, _R, _C> operator*(const estl::matrix<_A, _R, _C>& lhs,
+                                          const _B& rhs) {
+  estl::matrix<_A, _R, _C> mat;
+  typename estl::matrix<_A, _R, _C>::iterator it;
+  typename estl::matrix<_A, _R, _C>::const_iterator lhs_it;
+  for (it = mat.begin(), lhs_it = lhs.begin();
+       it != mat.end() && lhs_it != lhs.end(); ++it, ++lhs_it) {
+    *it = *lhs_it * rhs;
+  }
+  return mat;
+}
+
+template <typename _A, std::size_t _R, std::size_t _C, typename _B>
+inline estl::matrix<_A, _R, _C> operator/(const estl::matrix<_A, _R, _C>& lhs,
+                                          const _B& rhs) {
+  estl::matrix<_A, _R, _C> mat;
+  typename estl::matrix<_A, _R, _C>::iterator it;
+  typename estl::matrix<_A, _R, _C>::const_iterator lhs_it;
+  for (it = mat.begin(), lhs_it = lhs.begin();
+       it != mat.end() && lhs_it != lhs.end(); ++it, ++lhs_it) {
+    *it = *lhs_it / rhs;
+  }
+  return mat;
+}
 }  // namespace estl
 
 #endif  // ESTL_MATRIX_HPP_
