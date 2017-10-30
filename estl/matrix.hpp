@@ -32,6 +32,7 @@
 #include <initializer_list>
 #include <iostream>
 #include <memory>
+#include <utility>
 
 namespace estl {
 /**
@@ -96,6 +97,19 @@ class matrix {
     _Al al;
     __data = al.allocate(size());
     std::copy(mat.begin(), mat.end(), __data);
+  }
+
+  matrix& operator=(const std::initializer_list<_Tp>& mat) {
+    _Al al;
+    __data = al.allocate(size());
+    std::copy(mat.begin(), mat.end(), __data);
+  }
+
+  matrix& operator=(
+      const std::initializer_list<std::initializer_list<_Tp>>& mat) {
+    _Al al;
+    __data = al.allocate(size());
+    std::copy(mat.begin()->begin(), mat.end()->begin() + size(), __data);
   }
 
   /**
@@ -608,6 +622,14 @@ inline estl::matrix<_A, _R, _C> operator/(const estl::matrix<_A, _R, _C>& lhs,
   }
   return mat;
 }
+
+template <typename _A, std::size_t _R, std::size_t _C, typename _B>
+inline estl::matrix<_A, _R, _C>& operator+=(estl::matrix<_A, _R, _C>& lhs,
+                                            const _B& rhs) {
+  lhs = lhs + rhs;
+  return lhs;
+}
+
 }  // namespace estl
 
 #endif  // ESTL_MATRIX_HPP_

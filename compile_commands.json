@@ -1,0 +1,41 @@
+[
+    {
+        "arguments": [
+            "c++", 
+            "-c", 
+            "-I/home/arden/Programming/cpp/estl/estl", 
+            "-std=c++14", 
+            "-w", 
+            "-fprofile-arcs", 
+            "-ftest-coverage", 
+            "-fno-inline", 
+            "-fno-inline-small-functions", 
+            "-fno-default-inline", 
+            "-o", 
+            "/home/arden/Programming/cpp/estl/build/source/./main.o", 
+            "main.cpp"
+        ], 
+        "directory": "/home/arden/Programming/cpp/estl/source", 
+        "file": "main.cpp"
+    }, 
+    {
+        "arguments": [
+            "c++", 
+            "-c", 
+            "-I/home/arden/Programming/cpp/estl/estl", 
+            "-I/home/arden/Programming/cpp/estl/external/googletest/googletest/include", 
+            "-std=c++14", 
+            "-w", 
+            "-fprofile-arcs", 
+            "-ftest-coverage", 
+            "-fno-inline", 
+            "-fno-inline-small-functions", 
+            "-fno-default-inline", 
+            "-o", 
+            "/home/arden/Programming/cpp/estl/build/test/./test_stream.o", 
+            "test_stream.cpp"
+        ], 
+        "directory": "/home/arden/Programming/cpp/estl/test", 
+        "file": "test_stream.cpp"
+    }
+]

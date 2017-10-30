@@ -22,48 +22,122 @@
   --red-3: #fceae8;
   --white-1: #ECF0F1;
   --white-2: #BDC3C7;
-  --white-3: #d3dcde;
+  --white-3: #FFFFFF;
   --grey-1: #95A5A6;
   --grey-2: #7F8C8D;
 }
 
 :root {
-  --mem-title-color: var(--grey-2);
+  --mem-title-color: var(--blue-2);
   --mem-title-text: var(--white-1);
-  --mem-proto-color: var(--grey-1);
+  --mem-proto-color: var(--blue-1);
   --mem-proto-text: var(--white-1);
-  --mem-doc-color: var(--white-1);
-  --mem-doc-text: var(--black-2);
+  --mem-doc-color: var(--background-2);
+  --mem-doc-text: var(--foreground);
 
-  --template-color: var(--white-2);
+  --template-color: var(--grey-2);
+  --mem-temp-color: var(--white-2);
 
-  --param-text: var(--blue-2);
+  --param-text: var(--yellow-2);
   --param-color: none;
-  --tparam-text: var(--blue-2);
+  --tparam-text: var(--yellow-2);
   --tparam-color: none;
 
   --label-color: var(--magenta-1);
   --label-text: var(--white-1);
 
-  --link-text: var(--cyan-2);
+  --link-text: var(--green-1);
 
-  --background: var(--black-2);
-  --foreground: var(--white-1);
+  --background: var(--white-3);
+  --background-2: var(--white-1);
+  --foreground: var(--black-1);
+  --foreground-2: var(--black-2);
+  --foreground-3: var(--grey-2);
+
+  --summary-color: var(--blue-1);
+  --summary-text: var(--white-1);
+
+  --todo: var(--green-1);
+  --note: var(--blue-1);
+  --warning: var(--red-1);
 }
 
 code {
-  /* padding: 2px, 4px; */
   font-style: italic;
   /* background-color: var(--red-3); */
   color: var(--red-2);
-  /* font-size: 80%; */
 }
 
-.fragment * {
-  background-color: var(--black-1);
-  color: var(--white-1);
+
+/* Typography Details {{{ */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
+  font-family: inherit;
+  font-weight: 700;
+  line-height: 1.1;
+  color: inherit;
 }
 
+h1,
+h2,
+h3 {
+  margin-top: 31px;
+  margin-bottom: 15px;
+}
+
+h4,
+h5,
+h6 {
+  margin-top: 16px;
+  margin-bottom: 15px;
+}
+
+h6 {
+  font-weight: normal;
+}
+
+h1,
+.h1 {
+  font-size: 62px;
+}
+
+h2,
+.h2 {
+  font-size: 52px;
+}
+
+h3,
+.h3 {
+  font-size: 40px;
+}
+
+h4,
+.h4 {
+  font-size: 29px;
+}
+
+h5,
+.h5 {
+  font-size: 28px;
+}
+
+h6,
+.h6 {
+  font-size: 24px;
+}
+
+/* }}} */
 
 /* Page Details {{{ */
 
@@ -89,9 +163,9 @@ a.el {
 
 div.summary a {
   padding: 2px;
-  color: var(--foreground);
+  color: var(--summary-text);
   border-radius: 2px;
-  background-color: var(--blue-1);
+  background-color: var(--summary-color);
 }
 
 /* }}} */
@@ -103,8 +177,8 @@ div.header {
 }
 
 h2.groupheader {
-  color: var(--white-1);
-  border-color: var(--white-2);
+  color: var(--foreground);
+  border-color: var(--background-2);
 }
 
 /* }}} */
@@ -112,23 +186,23 @@ h2.groupheader {
 /* TOC Details {{{ */
 
 .directory tr.even {
-  background-color: var(--black-1);
+  background-color: var(--background-2);
 }
 
 tr.heading h2 {
-  color: var(--white-1);
-  border-color: var(--white-2);
+  color: var(--foreground);
+  border-color: var(--foreground-2);
 }
 
 td.memSeparator {
-  background-color: var(--grey-2);
-  border-color: var(--grey-2);
+  background-color: var(--foreground-3);
+  border-color: var(--foreground-3);
 }
 
 
 .mdescLeft,
 .mdescRight {
-  color: var(--white-2);
+  color: var(--foreground-2);
 }
 
 .memTemplParams {
@@ -142,7 +216,7 @@ td.memSeparator {
 .memTemplItemLeft,
 .memTemplItemRight,
 .memTemplParams {
-  background-color: var(--black-1);
+  background-color: var(--background-2);
   border: none;
   margin: 4px;
   padding: 1px 0 0 8px;
@@ -171,6 +245,10 @@ span.icon {
   margin: 0px;
   float: none;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+}
+
+.memproto .memtemplate {
+  color: var(--mem-temp-text);
 }
 
 .memitem {
@@ -316,26 +394,26 @@ dl.warning {
 }
 
 dl.todo {
-  background-color: var(--cyan-1);
+  background-color: var(--todo);
 }
 
 dl.note {
-  background-color: var(--blue-1);
+  background-color: var(--note);
 }
 
 dl.warning {
-  background-color: var(--orange-1);
+  background-color: var(--warning);
 }
 
 
 dl.todo dt,
 dl.note dt,
 dl.warning dt {
-  color: var(--white-1);
+  color: var(--foreground-2);
 }
 
 dl.todo a.el {
-  color: var(--white-1);
+  color: var(--foreground-2);
 }
 
 /* }}} */
@@ -356,7 +434,7 @@ div.doc li {
 /* Table Details {{{ */
 
 table.fieldtable {
-  background-color: var(--white-2);
+  background-color: var(--background-2);
   border-radius: 2px;
   border: none;
   box-shadow: none;
@@ -370,17 +448,17 @@ table.fieldtable {
   border-top-left-radius: 2px;
   border-top-right-radius: 2px;
   border-width: 2px;
-  background-color: var(--grey-1);
-  color: var(--white-1);
-  border-color: var(--grey-2);
+  background-color: var(--background-3);
+  color: var(--foreground-2);
+  border-color: var(--foreground-3);
 }
 
 .fieldtable td.fieldname {
-  border-color: var(--grey-1);
+  border-color: var(--foreground-3);
 }
 
 .fieldtable td.fielddoc {
-  border-color: var(--grey-1);
+  border-color: var(--foreground-3);
 }
 
 /* }}} */
@@ -388,7 +466,7 @@ table.fieldtable {
 /* Index Details {{{ */
 
 div.qindex {
-  background-color: var(--black-1);
+  background-color: var(--background-2);
   border: none;
   color: var(--foreground);
 }
@@ -401,16 +479,9 @@ span.ah {
   margin-bottom: 3px;
   margin-top: 3px;
   box-shadow: none;
-  /* box-shadow: rgb(153, 153, 153) 2px 2px 3px; */
   background-image: none;
-  /* background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(238, 238, 238)), color-stop(0.3, rgb(68, 68, 68)), to(rgb(0, 0, 0))); */
   padding: 0.2em;
   border: none;
-  /* border-width: thin; */
-  /* border-style: solid; */
-  /* border-color: rgb(51, 51, 51); */
-  /* border-image: initial; */
-  /* border-radius: 0.5em; */
 }
 
 /* }}} */
