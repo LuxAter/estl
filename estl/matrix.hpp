@@ -58,28 +58,71 @@ template <typename _Tp, std::size_t _Nr, std::size_t _Nc,
           typename _Al = std::allocator<_Tp>>
 class matrix {
  public:
+  /**
+   * @brief _Al
+   */
   typedef _Al allocator_type;
+  /**
+   * @brief _Tp
+   */
   typedef typename _Al::value_type value_type;
+  /**
+   * @brief value_type&
+   */
   typedef typename _Al::reference reference;
+  /**
+   * @brief const value_type&
+   */
   typedef typename _Al::const_reference const_reference;
+  /**
+   * @brief std::ptrdiff_t
+   */
   typedef typename _Al::difference_type difference_type;
+  /**
+   * @brief std::size_t
+   */
   typedef typename _Al::size_type size_type;
+  /**
+   * @brief value_type*
+   */
   typedef typename _Al::pointer pointer;
+  /**
+   * @brief const value_type*
+   */
   typedef typename _Al::const_pointer const_pointer;
+  /**
+   * @brief Random access iterator
+   */
   typedef typename _Al::pointer iterator;
+  /**
+   * @brief Constant random access iterator
+   */
   typedef typename _Al::const_pointer const_iterator;
+  /**
+   * @brief std::reverse_iterator<iterator>
+   */
   typedef std::reverse_iterator<iterator> reverse_iterator;
+  /**
+   * @brief std::reverse_iterator<const_iterator>
+   */
   typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+
+  // TODO(2017-10-31, Arden): Add iterator constructor.
+  /**
+   * @name Constructor
+   * @{ */
 
   matrix() {
     _Al al;
     __data = al.allocate(size());
   }
+  // TODO(2017-10-31, Arden): Add flag for initializer_list being too large.
   matrix(const std::initializer_list<_Tp>& mat) {
     _Al al;
     __data = al.allocate(size());
     std::copy(mat.begin(), mat.end(), __data);
   }
+  // TODO(2017-10-31, Arden): Add flag for initializer_list being too large.
   matrix(const std::initializer_list<std::initializer_list<_Tp>>& mat) {
     _Al al;
     __data = al.allocate(size());
@@ -90,11 +133,20 @@ class matrix {
     __data = al.allocate(size());
     std::copy(mat.begin(), mat.end(), __data);
   }
+  /**  @} */
+
+  /**
+   * @name Destructor
+   * @{ */
   ~matrix() {
     _Al al;
     al.deallocate(__data, size());
   }
+  /** @} */
 
+  /**
+   * @name Operator=
+   * @{ */
   matrix& operator=(const matrix& mat) {
     _Al al;
     __data = al.allocate(size());
@@ -111,6 +163,11 @@ class matrix {
     __data = al.allocate(size());
     std::copy(mat.begin()->begin(), mat.end()->begin() + size(), __data);
   }
+  /** @} */
+
+  /**
+   * @name Element Access
+   * @{ */
 
   /**
    * @brief Access specified element with bounds checking.
@@ -326,6 +383,12 @@ class matrix {
    */
   const_pointer data() const { return __data; }
 
+  /** @} */
+
+  /**
+   * @name Iterators
+   * @{ */
+
   /**
    * @brief Returns an iterator to the beginning.
    *
@@ -454,6 +517,12 @@ class matrix {
     return const_reverse_iterator(__data + size());
   }
 
+  /** @} */
+
+  /**
+   * @name Capacity
+   * @{ */
+
   /**
    * @brief Checks whether the container is empty.
    *
@@ -498,6 +567,12 @@ class matrix {
    */
   constexpr size_type max_size() const noexcept { return _Nr * _Nc; }
 
+  /** @} */
+
+  /**
+   * @name Operations
+   * @{ */
+
   /**
    * @brief Fill the container with specified value.
    *
@@ -517,6 +592,14 @@ class matrix {
   void swap(matrix& __other) {
     std::swap_ranges(begin(), end(), __other.begin());
   }
+  inline void operator()(_Tp (*func)(_Tp)) {
+    for (typename estl::matrix<_Tp, _Nr, _Nc>::iterator it = begin();
+         it != end(); ++it) {
+      *it = func(*it);
+    }
+  }
+
+  /** @} */
 
   template <typename _T>
   inline estl::matrix<_Tp, _Nr, _Nc>& operator+=(const _T& rhs) {
@@ -538,17 +621,31 @@ class matrix {
     *this = *this * rhs;
     return *this;
   }
-  inline void operator()(_Tp (*func)(_Tp)) {
-    for (typename estl::matrix<_Tp, _Nr, _Nc>::iterator it = begin();
-         it != end(); ++it) {
-      *it = func(*it);
-    }
-  }
 
  private:
   pointer __data = nullptr;
 };
 
+/**
+ * @relates estl::matrix
+ * @name Operators
+ * @{
+ */
+
+/**
+ * @brief Stream output operator for estl::matrix.
+ *
+ * Prints the matrix to the supplied stream. In the format of
+ * `[[...],[...],...]`.
+ *
+ * @tparam _Tp Value type of the container.
+ * @tparam _Nr Number of rows in the container.
+ * @tparam _Nc Number of columns in the container.
+ * @param __out Output stream to print to.
+ * @param mat Matrix to print.
+ *
+ * @return Output stream containing representation of the matrix.
+ */
 template <typename _Tp, std::size_t _Nr, std::size_t _Nc>
 std::ostream& operator<<(std::ostream& __out,
                          const estl::matrix<_Tp, _Nr, _Nc>& mat) {
@@ -570,6 +667,22 @@ std::ostream& operator<<(std::ostream& __out,
   return __out;
 }
 
+/**
+ * @brief Lexicographically compares the values in the array.
+ *
+ * Compares the contents of the two containers.
+ *
+ * Checks if the contents of the `lhs` and `rhs` are
+ *
+ * @tparam _TpA
+ * @tparam _TpB
+ * @tparam _Nr
+ * @tparam _Nc
+ * @param lhs
+ * @param rhs
+ *
+ * @return
+ */
 template <typename _TpA, typename _TpB, std::size_t _Nr, std::size_t _Nc>
 inline bool operator==(const estl::matrix<_TpA, _Nr, _Nc>& lhs,
                        const estl::matrix<_TpB, _Nr, _Nc>& rhs) {
@@ -587,6 +700,7 @@ inline bool operator<(const estl::matrix<_TpA, _Nr, _Nc>& lhs,
   return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(),
                                       rhs.end());
 }
+
 template <typename _TpA, typename _TpB, std::size_t _Nr, std::size_t _Nc>
 inline bool operator>(const estl::matrix<_TpA, _Nr, _Nc>& lhs,
                       const estl::matrix<_TpB, _Nr, _Nc>& rhs) {
@@ -598,7 +712,6 @@ inline bool operator<=(const estl::matrix<_TpA, _Nr, _Nc>& lhs,
                        const estl::matrix<_TpB, _Nr, _Nc>& rhs) {
   return !(lhs > rhs);
 }
-
 template <typename _TpA, typename _TpB, std::size_t _Nr, std::size_t _Nc>
 inline bool operator>=(const estl::matrix<_TpA, _Nr, _Nc>& lhs,
                        const estl::matrix<_TpB, _Nr, _Nc>& rhs) {
@@ -717,6 +830,55 @@ inline estl::matrix<_TpA, _Nr, _Nc> operator/(
   return mat;
 }
 
+/** @} */
+
+/**
+ * @relates estl::matrix
+ * @name Functions
+ * @{ */
+template <typename _Tp, std::size_t _Nr, std::size_t _Nc>
+inline _Tp determinate(const estl::matrix<_Tp, _Nr, _Nc>& lhs) {
+  _Tp det;
+  if (_Nr != _Nc) {
+    std::__throw_invalid_argument(
+        "Matrix must be square to take to determinate");
+  }
+  if (_Nr == 2 && _Nc == 2) {
+    det = (lhs(0, 0) * lhs(1, 1)) - (lhs(0, 1) * lhs(1, 0));
+  } else {
+    // std::cout << "oHELLO>>" << lhs.columns() << std::endl;
+    // std::size_t columns_index = 0;
+    // for (typename estl::matrix<_Tp, _Nr, _Nc>::const_iterator it =
+    // lhs.begin();
+    // it != lhs.begin() + lhs.columns(); ++it) {
+    // std::cout << *it << "[";
+    // estl::matrix<_Tp, _Nr - 1, _Nc - 1> mat;
+    // std::size_t index = 0;
+    // typename estl::matrix<_Tp, _Nr, _Nc>::iterator res_it = mat.begin();
+    // for (typename estl::matrix<_Tp, _Nr, _Nc>::const_iterator i =
+    // lhs.begin() + lhs.columns();
+    // i != lhs.end(); ++i) {
+    // if ((index % lhs.columns()) == columns_index) {
+    // ++i;
+    // index += 1;
+    // }
+    // *res_it = *i;
+    // index += 1;
+    // ++res_it;
+    // if (i == lhs.end()) {
+    // break;
+    // }
+    // std::cout << *i << ",";
+    // }
+    // std::cout << "]->" << mat << "\n";
+    // det += *it * determinate(mat);
+    // columns_index += 1;
+    // }
+  }
+  std::cout << "\n";
+  return det;
+}
+/**  @} */
 }  // namespace estl
 
 #endif  // ESTL_MATRIX_HPP_

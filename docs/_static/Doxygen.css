@@ -207,6 +207,10 @@ div#titlearea {
 
 /* TOC Details {{{ */
 
+table.memberdecls {
+  width: 100%;
+}
+
 .directory tr.even {
   background-color: var(--background-2);
 }
