@@ -173,12 +173,34 @@ div.summary a {
 /* Header Details {{{ */
 
 div.header {
-  background-color: var(--background)
+  background-color: var(--background);
+  background-image: none;
 }
 
 h2.groupheader {
   color: var(--foreground);
   border-color: var(--background-2);
+}
+
+/* }}} */
+
+/* NavPath Details {{{ */
+
+div#titlearea {
+  border-bottom: 2px solid;
+  border-color: var(--foreground-2);
+}
+
+/* .sm.sm-dox { */
+
+/* background-image: none; */
+
+/* background-color: var(--black-2); */
+
+/* } */
+
+.navpath {
+  display: none;
 }
 
 /* }}} */

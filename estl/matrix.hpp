@@ -13,16 +13,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- *
+ */
+
+/**
  * @file matrix.hpp
- * @brief matrix template class for 2D matrices.
+ * @brief Matrix template class for 2D matrices.
  * @author Arden Rasmussen
  * @version 0.0
- * @date 2017-10-23
+ * @date 2017-10-30
+ * @copyright GNUGeneral Public License
  *
- * This class represents a two dimensional matrix. And provides iterator access
- * to the elements of the matrix through access operators. It also provides
- * basic matrix operations, as described below.
+ * This provides a two dimensional matrix container class, along with basic
+ * matrix operations.
  */
 
 #ifndef ESTL_MATRIX_HPP_
@@ -98,13 +100,11 @@ class matrix {
     __data = al.allocate(size());
     std::copy(mat.begin(), mat.end(), __data);
   }
-
   matrix& operator=(const std::initializer_list<_Tp>& mat) {
     _Al al;
     __data = al.allocate(size());
     std::copy(mat.begin(), mat.end(), __data);
   }
-
   matrix& operator=(
       const std::initializer_list<std::initializer_list<_Tp>>& mat) {
     _Al al;
@@ -518,58 +518,92 @@ class matrix {
     std::swap_ranges(begin(), end(), __other.begin());
   }
 
-  friend std::ostream& operator<<(std::ostream& __out,
-                                  const estl::matrix<_Tp, _Nr, _Nc>& mat) {
-    __out << '[';
-    for (std::size_t r = 0; r < _Nr; r++) {
-      __out << '[';
-      for (std::size_t c = 0; c < _Nc; c++) {
-        __out << mat.at(r, c);
-        if (c != _Nc - 1) {
-          __out << ", ";
-        }
-      }
-      __out << ']';
-      if (r != _Nr - 1) {
-        __out << ", ";
-      }
+  template <typename _T>
+  inline estl::matrix<_Tp, _Nr, _Nc>& operator+=(const _T& rhs) {
+    *this = *this + rhs;
+    return *this;
+  }
+  template <typename _T>
+  inline estl::matrix<_Tp, _Nr, _Nc>& operator-=(const _T& rhs) {
+    *this = *this - rhs;
+    return *this;
+  }
+  template <typename _T>
+  inline estl::matrix<_Tp, _Nr, _Nc>& operator*=(const _T& rhs) {
+    *this = *this / rhs;
+    return *this;
+  }
+  template <typename _T>
+  inline estl::matrix<_Tp, _Nr, _Nc>& operator/=(const _T& rhs) {
+    *this = *this * rhs;
+    return *this;
+  }
+  inline void operator()(_Tp (*func)(_Tp)) {
+    for (typename estl::matrix<_Tp, _Nr, _Nc>::iterator it = begin();
+         it != end(); ++it) {
+      *it = func(*it);
     }
-    __out << ']';
-    return __out;
-  }
-
-  friend inline bool operator==(const estl::matrix<_Tp, _Nr, _Nc>& lhs,
-                                const estl::matrix<_Tp, _Nr, _Nc>& rhs) {
-    return std::equal(lhs.begin(), lhs.end(), rhs.begin());
-  }
-  friend inline bool operator!=(const estl::matrix<_Tp, _Nr, _Nc>& lhs,
-                                const estl::matrix<_Tp, _Nr, _Nc>& rhs) {
-    return !(lhs == rhs);
-  }
-
-  friend inline bool operator<(const estl::matrix<_Tp, _Nr, _Nc>& lhs,
-                               const estl::matrix<_Tp, _Nr, _Nc>& rhs) {
-    return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(),
-                                        rhs.end());
-  }
-  friend inline bool operator>(const estl::matrix<_Tp, _Nr, _Nc>& lhs,
-                               const estl::matrix<_Tp, _Nr, _Nc>& rhs) {
-    return rhs < lhs;
-  }
-
-  friend inline bool operator<=(const estl::matrix<_Tp, _Nr, _Nc>& lhs,
-                                const estl::matrix<_Tp, _Nr, _Nc>& rhs) {
-    return !(lhs > rhs);
-  }
-
-  friend inline bool operator>=(const estl::matrix<_Tp, _Nr, _Nc>& lhs,
-                                const estl::matrix<_Tp, _Nr, _Nc>& rhs) {
-    return !(lhs < rhs);
   }
 
  private:
   pointer __data = nullptr;
 };
+
+template <typename _Tp, std::size_t _Nr, std::size_t _Nc>
+std::ostream& operator<<(std::ostream& __out,
+                         const estl::matrix<_Tp, _Nr, _Nc>& mat) {
+  __out << '[';
+  for (std::size_t r = 0; r < _Nr; r++) {
+    __out << '[';
+    for (std::size_t c = 0; c < _Nc; c++) {
+      __out << mat.at(r, c);
+      if (c != _Nc - 1) {
+        __out << ", ";
+      }
+    }
+    __out << ']';
+    if (r != _Nr - 1) {
+      __out << ", ";
+    }
+  }
+  __out << ']';
+  return __out;
+}
+
+template <typename _TpA, typename _TpB, std::size_t _Nr, std::size_t _Nc>
+inline bool operator==(const estl::matrix<_TpA, _Nr, _Nc>& lhs,
+                       const estl::matrix<_TpB, _Nr, _Nc>& rhs) {
+  return std::equal(lhs.begin(), lhs.end(), rhs.begin());
+}
+template <typename _TpA, typename _TpB, std::size_t _Nr, std::size_t _Nc>
+inline bool operator!=(const estl::matrix<_TpA, _Nr, _Nc>& lhs,
+                       const estl::matrix<_TpB, _Nr, _Nc>& rhs) {
+  return !(lhs == rhs);
+}
+
+template <typename _TpA, typename _TpB, std::size_t _Nr, std::size_t _Nc>
+inline bool operator<(const estl::matrix<_TpA, _Nr, _Nc>& lhs,
+                      const estl::matrix<_TpB, _Nr, _Nc>& rhs) {
+  return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(),
+                                      rhs.end());
+}
+template <typename _TpA, typename _TpB, std::size_t _Nr, std::size_t _Nc>
+inline bool operator>(const estl::matrix<_TpA, _Nr, _Nc>& lhs,
+                      const estl::matrix<_TpB, _Nr, _Nc>& rhs) {
+  return rhs < lhs;
+}
+
+template <typename _TpA, typename _TpB, std::size_t _Nr, std::size_t _Nc>
+inline bool operator<=(const estl::matrix<_TpA, _Nr, _Nc>& lhs,
+                       const estl::matrix<_TpB, _Nr, _Nc>& rhs) {
+  return !(lhs > rhs);
+}
+
+template <typename _TpA, typename _TpB, std::size_t _Nr, std::size_t _Nc>
+inline bool operator>=(const estl::matrix<_TpA, _Nr, _Nc>& lhs,
+                       const estl::matrix<_TpB, _Nr, _Nc>& rhs) {
+  return !(lhs < rhs);
+}
 
 template <typename _A, std::size_t _R, std::size_t _C, typename _B>
 inline estl::matrix<_A, _R, _C> operator+(const estl::matrix<_A, _R, _C>& lhs,
@@ -580,6 +614,21 @@ inline estl::matrix<_A, _R, _C> operator+(const estl::matrix<_A, _R, _C>& lhs,
   for (it = mat.begin(), lhs_it = lhs.begin();
        it != mat.end() && lhs_it != lhs.end(); ++it, ++lhs_it) {
     *it = *lhs_it + rhs;
+  }
+  return mat;
+}
+template <typename _TpA, typename _TpB, std::size_t _Nr, std::size_t _Nc>
+inline estl::matrix<_TpA, _Nr, _Nc> operator+(
+    const estl::matrix<_TpA, _Nr, _Nc>& lhs,
+    const estl::matrix<_TpB, _Nr, _Nc>& rhs) {
+  estl::matrix<_TpA, _Nr, _Nc> mat;
+  typename estl::matrix<_TpA, _Nr, _Nc>::iterator it;
+  typename estl::matrix<_TpA, _Nr, _Nc>::const_iterator lhs_it;
+  typename estl::matrix<_TpB, _Nr, _Nc>::const_iterator rhs_it;
+  for (it = mat.begin(), lhs_it = lhs.begin(), rhs_it = rhs.begin();
+       it != mat.end() && lhs_it != lhs.end() && rhs_it != rhs.end();
+       ++it, ++lhs_it, ++rhs_it) {
+    *it = *lhs_it + *rhs_it;
   }
   return mat;
 }
@@ -596,6 +645,21 @@ inline estl::matrix<_A, _R, _C> operator-(const estl::matrix<_A, _R, _C>& lhs,
   }
   return mat;
 }
+template <typename _TpA, typename _TpB, std::size_t _Nr, std::size_t _Nc>
+inline estl::matrix<_TpA, _Nr, _Nc> operator-(
+    const estl::matrix<_TpA, _Nr, _Nc>& lhs,
+    const estl::matrix<_TpB, _Nr, _Nc>& rhs) {
+  estl::matrix<_TpA, _Nr, _Nc> mat;
+  typename estl::matrix<_TpA, _Nr, _Nc>::iterator it;
+  typename estl::matrix<_TpA, _Nr, _Nc>::const_iterator lhs_it;
+  typename estl::matrix<_TpB, _Nr, _Nc>::const_iterator rhs_it;
+  for (it = mat.begin(), lhs_it = lhs.begin(), rhs_it = rhs.begin();
+       it != mat.end() && lhs_it != lhs.end() && rhs_it != rhs.end();
+       ++it, ++lhs_it, ++rhs_it) {
+    *it = *lhs_it - *rhs_it;
+  }
+  return mat;
+}
 
 template <typename _A, std::size_t _R, std::size_t _C, typename _B>
 inline estl::matrix<_A, _R, _C> operator*(const estl::matrix<_A, _R, _C>& lhs,
@@ -606,6 +670,21 @@ inline estl::matrix<_A, _R, _C> operator*(const estl::matrix<_A, _R, _C>& lhs,
   for (it = mat.begin(), lhs_it = lhs.begin();
        it != mat.end() && lhs_it != lhs.end(); ++it, ++lhs_it) {
     *it = *lhs_it * rhs;
+  }
+  return mat;
+}
+template <typename _TpA, typename _TpB, std::size_t _Nr, std::size_t _Nc>
+inline estl::matrix<_TpA, _Nr, _Nc> operator*(
+    const estl::matrix<_TpA, _Nr, _Nc>& lhs,
+    const estl::matrix<_TpB, _Nr, _Nc>& rhs) {
+  estl::matrix<_TpA, _Nr, _Nc> mat;
+  typename estl::matrix<_TpA, _Nr, _Nc>::iterator it;
+  typename estl::matrix<_TpA, _Nr, _Nc>::const_iterator lhs_it;
+  typename estl::matrix<_TpB, _Nr, _Nc>::const_iterator rhs_it;
+  for (it = mat.begin(), lhs_it = lhs.begin(), rhs_it = rhs.begin();
+       it != mat.end() && lhs_it != lhs.end() && rhs_it != rhs.end();
+       ++it, ++lhs_it, ++rhs_it) {
+    *it = *lhs_it * *rhs_it;
   }
   return mat;
 }
@@ -622,12 +701,20 @@ inline estl::matrix<_A, _R, _C> operator/(const estl::matrix<_A, _R, _C>& lhs,
   }
   return mat;
 }
-
-template <typename _A, std::size_t _R, std::size_t _C, typename _B>
-inline estl::matrix<_A, _R, _C>& operator+=(estl::matrix<_A, _R, _C>& lhs,
-                                            const _B& rhs) {
-  lhs = lhs + rhs;
-  return lhs;
+template <typename _TpA, typename _TpB, std::size_t _Nr, std::size_t _Nc>
+inline estl::matrix<_TpA, _Nr, _Nc> operator/(
+    const estl::matrix<_TpA, _Nr, _Nc>& lhs,
+    const estl::matrix<_TpB, _Nr, _Nc>& rhs) {
+  estl::matrix<_TpA, _Nr, _Nc> mat;
+  typename estl::matrix<_TpA, _Nr, _Nc>::iterator it;
+  typename estl::matrix<_TpA, _Nr, _Nc>::const_iterator lhs_it;
+  typename estl::matrix<_TpB, _Nr, _Nc>::const_iterator rhs_it;
+  for (it = mat.begin(), lhs_it = lhs.begin(), rhs_it = rhs.begin();
+       it != mat.end() && lhs_it != lhs.end() && rhs_it != rhs.end();
+       ++it, ++lhs_it, ++rhs_it) {
+    *it = *lhs_it / *rhs_it;
+  }
+  return mat;
 }
 
 }  // namespace estl
