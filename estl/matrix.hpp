@@ -35,6 +35,9 @@
 #include <iostream>
 #include <memory>
 #include <utility>
+#include <vector>
+
+#include <iomanip>
 
 namespace estl {
 /**
@@ -123,10 +126,17 @@ class matrix {
     std::copy(mat.begin(), mat.end(), __data);
   }
   // TODO(2017-10-31, Arden): Add flag for initializer_list being too large.
+  // TODO(2017-10-31, Arden): Fix double initializer zero bug.
   matrix(const std::initializer_list<std::initializer_list<_Tp>>& mat) {
     _Al al;
     __data = al.allocate(size());
     std::copy(mat.begin()->begin(), mat.begin()->begin() + size(), __data);
+  }
+  template <class InputIt>
+  matrix(InputIt first, InputIt last) {
+    _Al al;
+    __data = al.allocate(size());
+    std::copy(first, last, __data);
   }
   matrix(const matrix& mat) {
     _Al al;
@@ -383,6 +393,16 @@ class matrix {
    */
   const_pointer data() const { return __data; }
 
+  std::array<_Tp, _Nr * _Nc> data_array() const {
+    return std::array<_Tp, _Nr * _Nc>(__data);
+  }
+  std::array<std::array<_Tp, _Nc>, _Nr> data_2darray() const {
+    return std::array<std::array<_Tp, _Nc>, _Nr>();
+  }
+  std::vector<_Tp> data_vector() const {
+    return std::vector<_Tp>(begin(), end());
+  }
+
   /** @} */
 
   /**
@@ -447,7 +467,7 @@ class matrix {
    */
   const_iterator cend() const { return const_iterator(__data + size()); }
   /**
-   * @brief Returns a revers iterator to the beginning.
+   * @brief Returns a reverse iterator to the beginning.
    *
    * Returns a reverse iterator to the first element of the reversed container.
    * It corresponds to the last element of the non-reversed container.
@@ -507,7 +527,7 @@ class matrix {
    * @brief Returns a reverse iterator to the end.
    *
    * Returns a reverse iterator to the element following the last element of the
-   * reversed container. it corresponds to the element preceding the first
+   * reversed container. It corresponds to the element preceding the first
    * element of the non-reversed container. This element acts as a placeholder,
    * attemplting to access it results in undefined behavior.
    *
@@ -515,6 +535,51 @@ class matrix {
    */
   constexpr const_reverse_iterator crend() const {
     return const_reverse_iterator(__data + size());
+  }
+
+  /**
+   * @brief Returns an iterator to specified element.
+   *
+   * Retuns an iterator to the element that is located at `[__r][__c]` in the
+   * container.
+   *
+   * @param __r Row of the specified element.
+   * @param __c Column of the specified element.
+   *
+   * @return Iterator to the specified element.
+   */
+  constexpr iterator element(size_type __r, size_type __c) {
+    return iterator(__data + (__r * columns()) + __c);
+  }
+
+  /**
+   * @brief Returns an iterator to specified element.
+   *
+   * Retuns an iterator to the element that is located at `[__r][__c]` in the
+   * container.
+   *
+   * @param __r Row of the specified element.
+   * @param __c Column of the specified element.
+   *
+   * @return Iterator to the specified element.
+   */
+  constexpr const_iterator element(size_type __r, size_type __c) const {
+    return const_iterator(__data + (__r * columns()) + __c);
+  }
+
+  /**
+   * @brief Returns an iterator to specified element.
+   *
+   * Retuns an iterator to the element that is located at `[__r][__c]` in the
+   * container.
+   *
+   * @param __r Row of the specified element.
+   * @param __c Column of the specified element.
+   *
+   * @return Iterator to the specified element.
+   */
+  constexpr const_iterator celement(size_type __r, size_type __c) const {
+    return const_iterator(__data + (__r * columns()) + __c);
   }
 
   /** @} */
@@ -582,6 +647,19 @@ class matrix {
    */
   void fill(const value_type& __u) { std::fill_n(begin(), size(), __u); }
   /**
+   * @brief Fills the diagonal of the matrix with specified value.
+   *
+   * Assigns the given value to all elements along the diagonal of the matrix.
+   *
+   * @param __u The value to assign to the elements.
+   */
+  void fill_diagonal(const value_type& __u) {
+    for (typename estl::matrix<_Tp, _Nr, _Nc>::size_type it = 0;
+         it < columns() && it < rows(); it++) {
+      at(it, it) = __u;
+    }
+  }
+  /**
    * @brief Swaps the contents
    *
    * Exchanges the contents of the container with those of `__other`. Does not
@@ -600,6 +678,28 @@ class matrix {
   }
 
   /** @} */
+
+  /**
+   * @name Row/Column Operations
+   * @{ */
+  inline void swap_row(size_type __a, size_type __b) {
+    for (typename estl::matrix<_Tp, _Nr, _Nc>::iterator it_a = element(__a, 0),
+                                                        it_b = element(__b, 0);
+         it_a != element(__a, columns()) && it_b != element(__b, columns());
+         ++it_a, ++it_b) {
+      std::iter_swap(it_a, it_b);
+    }
+  }
+  inline void swap_column(size_type __a, size_type __b) {
+    for (typename estl::matrix<_Tp, _Nr, _Nc>::iterator it_a = element(0, __a),
+                                                        it_b = element(0, __b);
+         it_a != element(rows(), __a) && it_b != element(rows(), __b);
+         it_a += columns(), it_b += columns()) {
+      std::iter_swap(it_a, it_b);
+    }
+  }
+
+  /**  @} */
 
   template <typename _T>
   inline estl::matrix<_Tp, _Nr, _Nc>& operator+=(const _T& rhs) {
@@ -836,48 +936,77 @@ inline estl::matrix<_TpA, _Nr, _Nc> operator/(
  * @relates estl::matrix
  * @name Functions
  * @{ */
+
 template <typename _Tp, std::size_t _Nr, std::size_t _Nc>
-inline _Tp determinate(const estl::matrix<_Tp, _Nr, _Nc>& lhs) {
-  _Tp det;
-  if (_Nr != _Nc) {
-    std::__throw_invalid_argument(
-        "Matrix must be square to take to determinate");
+_Tp trace(const estl::matrix<_Tp, _Nr, _Nc>& lhs) {
+  _Tp sum;
+  for (typename estl::matrix<_Tp, _Nr, _Nc>::size_type it = 0;
+       it != lhs.rows() && it != lhs.columns(); it++) {
+    sum += lhs.at(it, it);
   }
-  if (_Nr == 2 && _Nc == 2) {
-    det = (lhs(0, 0) * lhs(1, 1)) - (lhs(0, 1) * lhs(1, 0));
-  } else {
-    // std::cout << "oHELLO>>" << lhs.columns() << std::endl;
-    // std::size_t columns_index = 0;
-    // for (typename estl::matrix<_Tp, _Nr, _Nc>::const_iterator it =
-    // lhs.begin();
-    // it != lhs.begin() + lhs.columns(); ++it) {
-    // std::cout << *it << "[";
-    // estl::matrix<_Tp, _Nr - 1, _Nc - 1> mat;
-    // std::size_t index = 0;
-    // typename estl::matrix<_Tp, _Nr, _Nc>::iterator res_it = mat.begin();
-    // for (typename estl::matrix<_Tp, _Nr, _Nc>::const_iterator i =
-    // lhs.begin() + lhs.columns();
-    // i != lhs.end(); ++i) {
-    // if ((index % lhs.columns()) == columns_index) {
-    // ++i;
-    // index += 1;
-    // }
-    // *res_it = *i;
-    // index += 1;
-    // ++res_it;
-    // if (i == lhs.end()) {
-    // break;
-    // }
-    // std::cout << *i << ",";
-    // }
-    // std::cout << "]->" << mat << "\n";
-    // det += *it * determinate(mat);
-    // columns_index += 1;
-    // }
-  }
-  std::cout << "\n";
-  return det;
+  return sum;
 }
+
+template <typename _Tp, std::size_t _Nr, std::size_t _Nc>
+_Tp det(const estl::matrix<_Tp, _Nr, _Nc>& lhs) {
+  estl::matrix<_Tp, _Nr, _Nc> mat(lhs);
+  _Tp sign = _Tp(1);
+  for (typename estl::matrix<_Tp, _Nr, _Nc>::size_type it = 0;
+       it != mat.rows() && it != mat.columns(); it++) {
+    typename estl::matrix<_Tp, _Nr, _Nc>::size_type sw;
+    for (sw = it; sw != mat.rows(); sw++) {
+      if (mat.at(sw, it) != _Tp()) {
+        break;
+      }
+    }
+    if (sw != it) {
+      mat.swap_row(sw, it);
+      sign *= _Tp(-1);
+    }
+    for (typename estl::matrix<_Tp, _Nr, _Nc>::size_type row = it + 1;
+         row != mat.rows(); row++) {
+      _Tp mult = mat.at(row, it) / mat.at(it, it);
+      for (typename estl::matrix<_Tp, _Nr, _Nc>::size_type column = it;
+           column != mat.columns(); column++) {
+        mat.at(row, column) -= mult * mat.at(it, column);
+      }
+    }
+  }
+  _Tp sum = _Tp(1);
+  for (typename estl::matrix<_Tp, _Nr, _Nc>::size_type it = 0;
+       it != mat.rows() && it != mat.columns(); it++) {
+    sum *= mat.at(it, it);
+  }
+  sum *= sign;
+  return sum;
+}
+
+template <typename _Tp, std::size_t _Nr, std::size_t _Nc>
+estl::matrix<_Tp, _Nr, _Nc> inverse(const estl::matrix<_Tp, _Nr, _Nc>& lhs) {
+  estl::matrix<_Tp, _Nr, _Nc> mat(lhs);
+  estl::matrix<_Tp, _Nr, _Nc> inv;
+  inv.fill_diagonal(_Tp(1));
+  for (typename estl::matrix<_Tp, _Nr, _Nc>::size_type it = 0;
+       it != mat.rows() && it != mat.columns(); it++) {
+    _Tp pivot = mat.at(it, it);
+    for (typename estl::matrix<_Tp, _Nr, _Nc>::size_type column = 0;
+         column != mat.columns(); column++) {
+      mat.at(it, column) /= pivot;
+      inv.at(it, column) /= pivot;
+    }
+    for (typename estl::matrix<_Tp, _Nr, _Nc>::size_type row = 0;
+         row != mat.rows(); row++) {
+      _Tp mult = mat.at(row, it);
+      for (typename estl::matrix<_Tp, _Nr, _Nc>::size_type column = 0;
+           column != mat.columns() && row != it; column++) {
+        mat.at(row, column) -= mult * mat.at(it, column);
+        inv.at(row, column) -= mult * inv.at(it, column);
+      }
+    }
+  }
+  return inv;
+}
+
 /**  @} */
 }  // namespace estl
 

@@ -5,13 +5,12 @@
 #include "matrix.hpp"
 #include "stream.hpp"
 
-bool hello(bool tmp) { return !tmp; }
-
 int main(int argc, char const* argv[]) {
-  estl::matrix<int, 3, 3> a = {{2, 1, 0}, {4, 5, 3}, {8, 7, 6}};
-  estl::matrix<int, 2, 2> b = {0, 1, 2, 3};
+  estl::matrix<double, 3, 3> a = {2, 2, 3, 4, 5, 6, 7, 8, 9};
   std::cout << std::boolalpha;
   std::cout << a << std::endl;
-  std::cout << "det(a) = " << estl::determinate(b) << std::endl;
+  std::cout << "trace(a)=" << estl::trace(a) << std::endl;
+  std::cout << "det(a) = " << estl::det(a) << std::endl;
+  std::cout << "Inv(a) = " << estl::inverse(a) << std::endl;
   return 0;
 }
