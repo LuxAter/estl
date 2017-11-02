@@ -131,3 +131,7 @@ test:
 clean-test:
 	$(call print_section,Unit Tests)
 	if [ -d "$(TEST_DIR)" ]; then cd "$(TEST_DIR)" && $(MAKE) clean; fi
+
+.PHONY: docs
+docs:
+	doxygen

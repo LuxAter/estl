@@ -13,12 +13,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- *
+ */
+
+/**
  * @file stream.hpp
  * @brief iostream functions utilizing variadic templates.
  * @author Arden Rasmussen
  * @version 1.0
  * @date 2017-10-12
+ * @copyright GNUGeneral Public License
  *
  * These functions improve upon the default `printf` and `scanf` functions both
  * in type safety, and in extensibility. As these implementations can task any

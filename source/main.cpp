@@ -9,6 +9,9 @@ int main(int argc, char const* argv[]) {
   estl::matrix<double, 3, 3> a = {2, 2, 3, 4, 5, 6, 7, 8, 9};
   std::cout << std::boolalpha;
   std::cout << a << std::endl;
+  std::array<double, 9> data = a.data_array();
+  data[0] = 3.1415;
+  std::cout << a << std::endl;
   std::cout << "trace(a)=" << estl::trace(a) << std::endl;
   std::cout << "det(a) = " << estl::det(a) << std::endl;
   std::cout << "Inv(a) = " << estl::inverse(a) << std::endl;

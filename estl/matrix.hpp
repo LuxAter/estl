@@ -39,6 +39,9 @@
 
 #include <iomanip>
 
+/**
+ * @brief Base ESTL namespace for all estl objects
+ */
 namespace estl {
 /**
  * @brief A standard container for storing a fixed size matrix of elements.
@@ -110,7 +113,6 @@ class matrix {
    */
   typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
-  // TODO(2017-10-31, Arden): Add iterator constructor.
   /**
    * @name Constructor
    * @{ */
@@ -388,17 +390,53 @@ class matrix {
    * range, even if the container is empty.
    *
    * @return Pointer to the underlying element storage. For non-empty
-   * containers,
-   * the returned pointer compares equal to the address of the first element.
+   * containers, the returned pointer compares equal to the address of the first
+   * element.
    */
   const_pointer data() const { return __data; }
 
+  /**
+   * @brief Direct access to the underlying array.
+   *
+   * Returns a `std::array` containing a copy of the underlying array serving as
+   * element storage.
+   *
+   * @note This is a copy, so changing the values of the returned `std::array`
+   * will not effect the values in the matrix.
+   *
+   * @return `std::array` containing a copy of the underlying element storage.
+   */
   std::array<_Tp, _Nr * _Nc> data_array() const {
-    return std::array<_Tp, _Nr * _Nc>(__data);
+    std::array<_Tp, _Nr * _Nc> mat;
+    std::copy(begin(), end(), mat.begin());
+    return mat;
   }
+  /**
+   * @brief Direct access to the underlying array.
+   *
+   * Returns a `std::array<std::array>` containing a copy of the underlying
+   * array serving as element storage.
+   *
+   * @note This is a copy, so changing the values of the returned
+   * `std::array<std::array>` will not effect the values in the matrix.
+   *
+   * @return `std::array<std::array>` containing a copy of the underlying
+   * element storage.
+   */
   std::array<std::array<_Tp, _Nc>, _Nr> data_2darray() const {
     return std::array<std::array<_Tp, _Nc>, _Nr>();
   }
+  /**
+   * @brief Direct access to the underlying array.
+   *
+   * Returns a `std::vector` containing a copy of the underlying array serving
+   * as element storage.
+   *
+   * @note This is a copy, so changing the values of the returned
+   * `std::array<std::array>` will not effect the values in the matrix.
+   *
+   * @return `std::vector` containing a copy of the underlying element storage.
+   */
   std::vector<_Tp> data_vector() const {
     return std::vector<_Tp>(begin(), end());
   }
@@ -670,6 +708,14 @@ class matrix {
   void swap(matrix& __other) {
     std::swap_ranges(begin(), end(), __other.begin());
   }
+  /**
+   * @brief Preform supplied function on elements.
+   *
+   * For every element in the matrix, executes `func` with that element as the
+   * argument.
+   *
+   * @param func Function that takes one parameter of type `_Tp`.
+   */
   inline void operator()(_Tp (*func)(_Tp)) {
     for (typename estl::matrix<_Tp, _Nr, _Nc>::iterator it = begin();
          it != end(); ++it) {
@@ -682,6 +728,16 @@ class matrix {
   /**
    * @name Row/Column Operations
    * @{ */
+
+  /**
+   * @brief Swaps the contents to two rows of the container.
+   *
+   * Exchanges the contents of two rows of the container, with the other row.
+   * Does not cause iterators and references to associate with the other row.
+   *
+   * @param __a First row to swap.
+   * @param __b Seconed row to swap.
+   */
   inline void swap_row(size_type __a, size_type __b) {
     for (typename estl::matrix<_Tp, _Nr, _Nc>::iterator it_a = element(__a, 0),
                                                         it_b = element(__b, 0);
@@ -690,6 +746,16 @@ class matrix {
       std::iter_swap(it_a, it_b);
     }
   }
+  /**
+   * @brief Swaps the contents to two columns of the container.
+   *
+   * Exchanges the contents of two columns of the container, with the other
+   * column. Does not cause iterators and references to associate with the other
+   * column.
+   *
+   * @param __a First column to swap.
+   * @param __b Seconed column to swap.
+   */
   inline void swap_column(size_type __a, size_type __b) {
     for (typename estl::matrix<_Tp, _Nr, _Nc>::iterator it_a = element(0, __a),
                                                         it_b = element(0, __b);
@@ -701,21 +767,61 @@ class matrix {
 
   /**  @} */
 
+  /**
+   * @brief Compound assignment of two matricies, or a matrix and a sclar.
+   *
+   * Implements the compound addition operator for matrix arithmetic.
+   *
+   * @tparam _T Type to add to the matrix.
+   * @param rhs Value to add to the matrix.
+   *
+   * @return `reference` of `*this` after arithmetic operation.
+   */
   template <typename _T>
   inline estl::matrix<_Tp, _Nr, _Nc>& operator+=(const _T& rhs) {
     *this = *this + rhs;
     return *this;
   }
+  /**
+   * @brief Compound assignment of two matricies, or a matrix and a sclar.
+   *
+   * Implements the compound subtraction operator for matrix arithmetic.
+   *
+   * @tparam _T Type to subtract from the matrix.
+   * @param rhs Value to subtract from the matrix.
+   *
+   * @return `reference` of `*this` after arithmetic operation.
+   */
   template <typename _T>
   inline estl::matrix<_Tp, _Nr, _Nc>& operator-=(const _T& rhs) {
     *this = *this - rhs;
     return *this;
   }
+  /**
+   * @brief Compound assignment of two matricies, or a matrix and a sclar.
+   *
+   * Implements the compound multiplication operator for matrix arithmetic.
+   *
+   * @tparam _T Type to multiply to the matrix.
+   * @param rhs Value to multiply to the matrix.
+   *
+   * @return `reference` of `*this` after arithmetic operation.
+   */
   template <typename _T>
   inline estl::matrix<_Tp, _Nr, _Nc>& operator*=(const _T& rhs) {
     *this = *this / rhs;
     return *this;
   }
+  /**
+   * @brief Compound assignment of two matricies, or a matrix and a sclar.
+   *
+   * Implements the compound division operator for matrix arithmetic.
+   *
+   * @tparam _T Type to divide the matrix by.
+   * @param rhs Value to divide the matrix by.
+   *
+   * @return `reference` of `*this` after arithmetic operation.
+   */
   template <typename _T>
   inline estl::matrix<_Tp, _Nr, _Nc>& operator/=(const _T& rhs) {
     *this = *this * rhs;
@@ -768,32 +874,68 @@ std::ostream& operator<<(std::ostream& __out,
 }
 
 /**
- * @brief Lexicographically compares the values in the array.
+ * @brief Lexicographically compares the values in the matrix.
  *
  * Compares the contents of the two containers.
  *
- * Checks if the contents of the `lhs` and `rhs` are
+ * Checks if the contents of `lhs` and `rhs` are equal, that is, whether
+ * each element in `lhs` compares equal with the element in `rhs` at the same
+ * position.
  *
- * @tparam _TpA
- * @tparam _TpB
- * @tparam _Nr
- * @tparam _Nc
- * @param lhs
- * @param rhs
+ * @tparam _TpA Value type of the first containere.
+ * @tparam _TpB Value type of the second container.
+ * @tparam _Nr Number of rows in the containers.
+ * @tparam _Nc Number of columns in the containers.
+ * @param lhs First matrix to compare.
+ * @param rhs Second matrix to compare.
  *
- * @return
+ * @return `true` if the contents of the containers are equal, `false`
+ * otherwise.
  */
 template <typename _TpA, typename _TpB, std::size_t _Nr, std::size_t _Nc>
 inline bool operator==(const estl::matrix<_TpA, _Nr, _Nc>& lhs,
                        const estl::matrix<_TpB, _Nr, _Nc>& rhs) {
   return std::equal(lhs.begin(), lhs.end(), rhs.begin());
 }
+/**
+ * @brief Lexicographically compares the values in the matrix.
+ *
+ * Checks if the contents of `lhs` and `rhs` are equal, that is, whether each
+ * element in `lhs` compares equal with the element in `rhs` at the same
+ * position.
+ *
+ * @tparam _TpA Value type of the first container.
+ * @tparam _TpB Value type of the second container.
+ * @tparam _Nr Number of rows in the containers.
+ * @tparam _Nc Number of columns in the containes.
+ * @param lhs First matrix to compare.
+ * @param rhs Second matrix to compare.
+ *
+ * @return `true` if the contents of the containers are not equal, `false`
+ * otherwise.
+ */
 template <typename _TpA, typename _TpB, std::size_t _Nr, std::size_t _Nc>
 inline bool operator!=(const estl::matrix<_TpA, _Nr, _Nc>& lhs,
                        const estl::matrix<_TpB, _Nr, _Nc>& rhs) {
   return !(lhs == rhs);
 }
 
+/**
+ * @brief Lexicographically compares the values in the matrix.
+ *
+ * Compares the contents of `lhs` and `rhs` lexicographically. The comparison is
+ * preformed by a function equivalent to `std::lexicographical_compare`.
+ *
+ * @tparam _TpA Value type of the first container.
+ * @tparam _TpB Value type of the second container.
+ * @tparam _Nr Number of rows in the containers.
+ * @tparam _Nc Number of Columns in the containers.
+ * @param lhs First matrix to compare.
+ * @param rhs Second matrix to compare.
+ *
+ * @return `true` if the contents of the `lhs` are lexicographically *less* than
+ * the contents of `rhs`, `false` otherwise.
+ */
 template <typename _TpA, typename _TpB, std::size_t _Nr, std::size_t _Nc>
 inline bool operator<(const estl::matrix<_TpA, _Nr, _Nc>& lhs,
                       const estl::matrix<_TpB, _Nr, _Nc>& rhs) {
@@ -801,23 +943,86 @@ inline bool operator<(const estl::matrix<_TpA, _Nr, _Nc>& lhs,
                                       rhs.end());
 }
 
+/**
+ * @brief Lexicographically compares the values in the matrix.
+ *
+ * Compares the contents of `lhs` and `rhs` lexicographically. The comparison is
+ * preformed by a function equivalent to `std::lexicographical_compare`.
+ *
+ * @tparam _TpA Value type of the first container.
+ * @tparam _TpB Value type of the second container.
+ * @tparam _Nr Number of rows in the containers.
+ * @tparam _Nc Number of Columns in the containers.
+ * @param lhs First matrix to compare.
+ * @param rhs Second matrix to compare.
+ *
+ * @return `true` if the contents of the `lhs` are lexicographically *greater*
+ * than the contents of `rhs`, `false` otherwise.
+ */
 template <typename _TpA, typename _TpB, std::size_t _Nr, std::size_t _Nc>
 inline bool operator>(const estl::matrix<_TpA, _Nr, _Nc>& lhs,
                       const estl::matrix<_TpB, _Nr, _Nc>& rhs) {
   return rhs < lhs;
 }
 
+/**
+ * @brief Lexicographically compares the values in the matrix.
+ *
+ * Compares the contents of `lhs` and `rhs` lexicographically. The comparison is
+ * preformed by a function equivalent to `std::lexicographical_compare`.
+ *
+ * @tparam _TpA Value type of the first container.
+ * @tparam _TpB Value type of the second container.
+ * @tparam _Nr Number of rows in the containers.
+ * @tparam _Nc Number of Columns in the containers.
+ * @param lhs First matrix to compare.
+ * @param rhs Second matrix to compare.
+ *
+ * @return `true` if the contents of the `lhs` are lexicographically *less* than
+ * or *equal* the contents of `rhs`, `false` otherwise.
+ */
 template <typename _TpA, typename _TpB, std::size_t _Nr, std::size_t _Nc>
 inline bool operator<=(const estl::matrix<_TpA, _Nr, _Nc>& lhs,
                        const estl::matrix<_TpB, _Nr, _Nc>& rhs) {
   return !(lhs > rhs);
 }
+/**
+ * @brief Lexicographically compares the values in the matrix.
+ *
+ * Compares the contents of `lhs` and `rhs` lexicographically. The comparison is
+ * preformed by a function equivalent to `std::lexicographical_compare`.
+ *
+ * @tparam _TpA Value type of the first container.
+ * @tparam _TpB Value type of the second container.
+ * @tparam _Nr Number of rows in the containers.
+ * @tparam _Nc Number of Columns in the containers.
+ * @param lhs First matrix to compare.
+ * @param rhs Second matrix to compare.
+ *
+ * @return `true` if the contents of the `lhs` are lexicographically *greater*
+ * than or *equal* the contents of `rhs`, `false` otherwise.
+ */
 template <typename _TpA, typename _TpB, std::size_t _Nr, std::size_t _Nc>
 inline bool operator>=(const estl::matrix<_TpA, _Nr, _Nc>& lhs,
                        const estl::matrix<_TpB, _Nr, _Nc>& rhs) {
   return !(lhs < rhs);
 }
 
+/**
+ * @brief Preforms matrix arithmetics on a matrix and a scalar.
+ *
+ * Implements the binary operators for matrix arithmetic. Adds the scalar to
+ * every element of the matrix.
+ *
+ * @tparam _A Value type of the matrix.
+ * @tparam _R Number of rows in the matrix.
+ * @tparam _C Number of columns in the matrix.
+ * @tparam _B Value type of the scalar.
+ * @param lhs The matrix.
+ * @param rhs The scalar.
+ *
+ * @return The matrix after the arithmetic operation.
+ */
 template <typename _A, std::size_t _R, std::size_t _C, typename _B>
 inline estl::matrix<_A, _R, _C> operator+(const estl::matrix<_A, _R, _C>& lhs,
                                           const _B& rhs) {
@@ -830,6 +1035,21 @@ inline estl::matrix<_A, _R, _C> operator+(const estl::matrix<_A, _R, _C>& lhs,
   }
   return mat;
 }
+/**
+ * @brief Preforms matrix arithmetic on a matrix and another matrix.
+ *
+ * Implements the binary operators for matrix arithmetic. Lexicographically adds
+ * every element of `lhs` with the element from `rhs` with the same position.
+ *
+ * @tparam _TpA Value type of `lhs`.
+ * @tparam _TpB Value type of `rhs`.
+ * @tparam _Nr Number of rows in the matrix.
+ * @tparam _Nc Number of columns in the matrix.
+ * @param lhs The first matrix.
+ * @param rhs The second matrix.
+ *
+ * @return The matrix after the arithmetic operation.
+ */
 template <typename _TpA, typename _TpB, std::size_t _Nr, std::size_t _Nc>
 inline estl::matrix<_TpA, _Nr, _Nc> operator+(
     const estl::matrix<_TpA, _Nr, _Nc>& lhs,
@@ -846,6 +1066,21 @@ inline estl::matrix<_TpA, _Nr, _Nc> operator+(
   return mat;
 }
 
+/**
+ * @brief Preforms matrix arithmetics on a matrix and a scalar.
+ *
+ * Implements the binary operators for matrix arithmetic. Subtracts the scalar
+ * from every element in the matrix.
+ *
+ * @tparam _A Value type of the matrix.
+ * @tparam _R Number of rows in the matrix.
+ * @tparam _C Number of columns in the matrix.
+ * @tparam _B Value type of the scalar.
+ * @param lhs The matrix.
+ * @param rhs The scalar.
+ *
+ * @return The matrix after the arithmetic operation.
+ */
 template <typename _A, std::size_t _R, std::size_t _C, typename _B>
 inline estl::matrix<_A, _R, _C> operator-(const estl::matrix<_A, _R, _C>& lhs,
                                           const _B& rhs) {
@@ -858,6 +1093,22 @@ inline estl::matrix<_A, _R, _C> operator-(const estl::matrix<_A, _R, _C>& lhs,
   }
   return mat;
 }
+/**
+ * @brief Preforms matrix arithmetic on a matrix and another matrix.
+ *
+ * Implements the binary operators for matrix arithmetic. Lexicographically
+ * subtracts every element of `lhs` with the element from `rhs` with the same
+ * position.
+ *
+ * @tparam _TpA Value type of `lhs`.
+ * @tparam _TpB Value type of `rhs`.
+ * @tparam _Nr Number of rows in the matrix.
+ * @tparam _Nc Number of columns in the matrix.
+ * @param lhs The first matrix.
+ * @param rhs The second matrix.
+ *
+ * @return The matrix after the arithmetic operation.
+ */
 template <typename _TpA, typename _TpB, std::size_t _Nr, std::size_t _Nc>
 inline estl::matrix<_TpA, _Nr, _Nc> operator-(
     const estl::matrix<_TpA, _Nr, _Nc>& lhs,
@@ -874,6 +1125,21 @@ inline estl::matrix<_TpA, _Nr, _Nc> operator-(
   return mat;
 }
 
+/**
+ * @brief Preforms matrix arithmetics on a matrix and a scalar.
+ *
+ * Implements the binary operators for matrix arithmetic. Multiplies the scalar
+ * to every element of the matrix.
+ *
+ * @tparam _A Value type of the matrix.
+ * @tparam _R Number of rows in the matrix.
+ * @tparam _C Number of columns in the matrix.
+ * @tparam _B Value type of the scalar.
+ * @param lhs The matrix.
+ * @param rhs The scalar.
+ *
+ * @return The matrix after the arithmetic operation.
+ */
 template <typename _A, std::size_t _R, std::size_t _C, typename _B>
 inline estl::matrix<_A, _R, _C> operator*(const estl::matrix<_A, _R, _C>& lhs,
                                           const _B& rhs) {
@@ -886,6 +1152,22 @@ inline estl::matrix<_A, _R, _C> operator*(const estl::matrix<_A, _R, _C>& lhs,
   }
   return mat;
 }
+/**
+ * @brief Preforms matrix arithmetic on a matrix and another matrix.
+ *
+ * Implements the binary operators for matrix arithmetic. Lexicographically
+ * multiplies every element of `lhs` with the element from `rhs` with the same
+ * position.
+ *
+ * @tparam _TpA Value type of `lhs`.
+ * @tparam _TpB Value type of `rhs`.
+ * @tparam _Nr Number of rows in the matrix.
+ * @tparam _Nc Number of columns in the matrix.
+ * @param lhs The first matrix.
+ * @param rhs The second matrix.
+ *
+ * @return The matrix after the arithmetic operation.
+ */
 template <typename _TpA, typename _TpB, std::size_t _Nr, std::size_t _Nc>
 inline estl::matrix<_TpA, _Nr, _Nc> operator*(
     const estl::matrix<_TpA, _Nr, _Nc>& lhs,
@@ -902,6 +1184,21 @@ inline estl::matrix<_TpA, _Nr, _Nc> operator*(
   return mat;
 }
 
+/**
+ * @brief Preforms matrix arithmetics on a matrix and a scalar.
+ *
+ * Implements the binary operators for matrix arithmetic. Divides every element
+ * of the matrix by the scalar.
+ *
+ * @tparam _A Value type of the matrix.
+ * @tparam _R Number of rows in the matrix.
+ * @tparam _C Number of columns in the matrix.
+ * @tparam _B Value type of the scalar.
+ * @param lhs The matrix.
+ * @param rhs The scalar.
+ *
+ * @return The matrix after the arithmetic operation.
+ */
 template <typename _A, std::size_t _R, std::size_t _C, typename _B>
 inline estl::matrix<_A, _R, _C> operator/(const estl::matrix<_A, _R, _C>& lhs,
                                           const _B& rhs) {
@@ -914,6 +1211,22 @@ inline estl::matrix<_A, _R, _C> operator/(const estl::matrix<_A, _R, _C>& lhs,
   }
   return mat;
 }
+/**
+ * @brief Preforms matrix arithmetic on a matrix and another matrix.
+ *
+ * Implements the binary operators for matrix arithmetic. Lexicographically
+ * divides every element of `lhs` with the element from `rhs` with the same
+ * position.
+ *
+ * @tparam _TpA Value type of `lhs`.
+ * @tparam _TpB Value type of `rhs`.
+ * @tparam _Nr Number of rows in the matrix.
+ * @tparam _Nc Number of columns in the matrix.
+ * @param lhs The first matrix.
+ * @param rhs The second matrix.
+ *
+ * @return The matrix after the arithmetic operation.
+ */
 template <typename _TpA, typename _TpB, std::size_t _Nr, std::size_t _Nc>
 inline estl::matrix<_TpA, _Nr, _Nc> operator/(
     const estl::matrix<_TpA, _Nr, _Nc>& lhs,
@@ -937,6 +1250,19 @@ inline estl::matrix<_TpA, _Nr, _Nc> operator/(
  * @name Functions
  * @{ */
 
+/**
+ * @brief Finds the trace of the matrix.
+ *
+ * Returns the trace of the matrix, which is computed by taking the sum of the
+ * diagonal terms of the matrix. \f$\sum_{i}^{Nr} A_{(i,i)}\f$.
+ *
+ * @tparam _Tp Value type of the container.
+ * @tparam _Nr Number of rows in the container.
+ * @tparam _Nc Number of column in the container.
+ * @param lhs Matrix to find the trace of.
+ *
+ * @return The trace of the matrix.
+ */
 template <typename _Tp, std::size_t _Nr, std::size_t _Nc>
 _Tp trace(const estl::matrix<_Tp, _Nr, _Nc>& lhs) {
   _Tp sum;
@@ -947,6 +1273,24 @@ _Tp trace(const estl::matrix<_Tp, _Nr, _Nc>& lhs) {
   return sum;
 }
 
+/**
+ * @brief Finds the determinant of the given matrix.
+ *
+ * Returns the deterinant of the provided matrix.
+ *
+ * @warning This can only be as accurate as `_Tp`, because the determinant is
+ * found in terms of `_Tp`. This means that the value only has the abbility to
+ * be represented by a `_Tp` value. This means that if `_Tp` is `int`, then the
+ * determinant will not be accurate, as it requires devision, and decimial
+ * integers, instead use `_Tp` as a `double` or `float`.
+ *
+ * @tparam _Tp Value type of the container.
+ * @tparam _Nr Number of rows in the container.
+ * @tparam _Nc Number of columns in container.
+ * @param lhs Matrix to find the determinat of.
+ *
+ * @return The determinant of the matrix.
+ */
 template <typename _Tp, std::size_t _Nr, std::size_t _Nc>
 _Tp det(const estl::matrix<_Tp, _Nr, _Nc>& lhs) {
   estl::matrix<_Tp, _Nr, _Nc> mat(lhs);
@@ -981,6 +1325,18 @@ _Tp det(const estl::matrix<_Tp, _Nr, _Nc>& lhs) {
   return sum;
 }
 
+/**
+ * @brief Computes the inverse matrix of the specified matrix.
+ *
+ * Computes the inverse matrix throught the use of gausian elimination.
+ *
+ * @tparam _Tp Value type of the container.
+ * @tparam _Nr Number of rows in the container.
+ * @tparam _Nc Number of columns in the container.
+ * @param lhs Matrix to find the inverse of.
+ *
+ * @return Inverse matrix to the givin matrix.
+ */
 template <typename _Tp, std::size_t _Nr, std::size_t _Nc>
 estl::matrix<_Tp, _Nr, _Nc> inverse(const estl::matrix<_Tp, _Nr, _Nc>& lhs) {
   estl::matrix<_Tp, _Nr, _Nc> mat(lhs);
