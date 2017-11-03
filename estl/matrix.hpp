@@ -1292,7 +1292,7 @@ _Tp trace(const estl::matrix<_Tp, _Nr, _Nc>& lhs) {
  * @return The determinant of the matrix.
  */
 template <typename _Tp, std::size_t _Nr, std::size_t _Nc>
-_Tp det(const estl::matrix<_Tp, _Nr, _Nc>& lhs) {
+_Tp determinant(const estl::matrix<_Tp, _Nr, _Nc>& lhs) {
   estl::matrix<_Tp, _Nr, _Nc> mat(lhs);
   _Tp sign = _Tp(1);
   for (typename estl::matrix<_Tp, _Nr, _Nc>::size_type it = 0;
@@ -1361,6 +1361,47 @@ estl::matrix<_Tp, _Nr, _Nc> inverse(const estl::matrix<_Tp, _Nr, _Nc>& lhs) {
     }
   }
   return inv;
+}
+
+template <typename _Tp, std::size_t _Nr, std::size_t _Nc>
+estl::matrix<_Tp, _Nr, _Nc> echelon_form(
+    const estl::matrix<_Tp, _Nr, _Nc>& lhs) {
+  estl::matrix<_Tp, _Nr, _Nc> mat(lhs);
+  for (typename estl::matrix<_Tp, _Nr, _Nc>::size_type it = 0;
+       it != mat.rows() && it != mat.columns(); it++) {
+    _Tp pivot = mat.at(it, it);
+    for (typename estl::matrix<_Tp, _Nr, _Nc>::size_type col = 0;
+         col != mat.columns(); col++) {
+      mat.at(it, col) /= pivot;
+    }
+    for (typename estl::matrix<_Tp, _Nr, _Nc>::size_type row = 0;
+         row != mat.rows(); row++) {
+      _Tp mult = mat.at(row, it);
+      for (typename estl::matrix<_Tp, _Nr, _Nc>::size_type col = it;
+           col != mat.columns() && row != it; col++) {
+        mat.at(row, col) -= mult * mat.at(it, col);
+      }
+    }
+  }
+  return mat;
+}
+
+template <typename _Tp, std::size_t _Nr, std::size_t _N, std::size_t _Nc>
+estl::matrix<_Tp, _Nr, _Nc> multiplication(
+    const estl::matrix<_Tp, _Nr, _N>& lhs,
+    const estl::matrix<_Tp, _N, _Nc>& rhs) {
+  estl::matrix<_Tp, _Nr, _Nc> mat;
+  for (typename estl::matrix<_Tp, _Nr, _Nc>::size_type row = 0;
+       row != mat.rows(); row++) {
+    for (typename estl::matrix<_Tp, _Nr, _Nc>::size_type column = 0;
+         column != mat.columns(); column++) {
+      for (typename estl::matrix<_Tp, _Nr, _Nc>::size_type k = 0;
+           k < lhs.columns() && k < rhs.rows(); k++) {
+        mat.at(row, column) += (lhs.at(row, k) * rhs.at(k, column));
+      }
+    }
+  }
+  return mat;
 }
 
 /**  @} */

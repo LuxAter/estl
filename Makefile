@@ -134,4 +134,11 @@ clean-test:
 
 .PHONY: docs
 docs:
+	$(call print_section,Documentation)
+	$(call print,Running doxygen...,$(COMPILE_COLOR))
 	doxygen
+
+.PHONY: clean-docs
+clean-docs:
+	$(call print_section,Documentation)
+	$(call print,Cleaned Documentation,$(CLEAN_COLOR))
