@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Matrix &#8212; ESTL 0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Stream" href="stream.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html">
+          ESTL</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">API Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="stream.html">Stream</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Matrix</a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">Matrix</a><ul>
+<li><a class="reference internal" href="#class-documentation">Class Documentation</a><ul>
+<li><a class="reference internal" href="#constructors">Constructors</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+  <li>
+    <a href="stream.html" title="Previous Chapter: Stream"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; Stream</span>
+    </a>
+  </li>
+              
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="../_sources/api/matrix.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <div class="section" id="matrix">
+<h1>Matrix<a class="headerlink" href="#matrix" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;estl/matrix.hpp&gt;</span><span class="cp"></span>
+</pre></div>
+</div>
+<p>This file provides a two dimensional matrix container class, along with basic
+matrix operations.</p>
+<div class="section" id="class-documentation">
+<h2>Class Documentation<a class="headerlink" href="#class-documentation" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv2I0_NSt6size_tE_NSt6size_tE0E6matrix">
+template&lt;typename <code class="descname">_Tp</code>, std::size_t <code class="descclassname"></code><code class="descname">_Nr</code>, std::size_t <code class="descclassname"></code><code class="descname">_Nc</code>, typename <code class="descname">_Al</code> = std::allocator&lt;_Tp&gt;&gt;<br /><em class="property">class </em><code class="descclassname"></code><code class="descname">matrix</code><a class="headerlink" href="#_CPPv2I0_NSt6size_tE_NSt6size_tE0E6matrix" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>A standard container for storing a fixed size matrix of elements.</p>
+<p><code class="docutils literal"><span class="pre">estl::matrix</span></code> is a container that encapsulates fixed size matrices. This
+container is an aggregated type with the same semantics as a struct holding
+a C-style array <code class="docutils literal"><span class="pre">T[N]</span></code> as its only non-static data member. Unlike a
+C-style array, it dosen’t decay to <code class="docutils literal"><span class="pre">T*</span></code> automatically. Elements of this
+container can be referenced with a single index, but more commonly are
+referenced with multiple indecies.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Template Parameters:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<li><strong>_Tp</strong> – Type of element. Required to be a complete type.</li>
+<li><strong>_Nr</strong> – Number of rows of elements.</li>
+<li><strong>_Nc</strong> – Number of columns of elements.</li>
+<li><strong>_Al</strong> – Allocator type, not necessary in most situations.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="type">
+<dt id="_CPPv2N6matrix14allocator_typeE">
+<span id="matrix::allocator_type"></span><em class="property">typedef </em>_Al <code class="descclassname"></code><code class="descname">allocator_type</code><a class="headerlink" href="#_CPPv2N6matrix14allocator_typeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="type">
+<dt id="_CPPv2N6matrix10value_typeE">
+<span id="matrix::value_type"></span><em class="property">typedef </em><em class="property">typename</em> _Al::valuetype <code class="descclassname"></code><code class="descname">value_type</code><a class="headerlink" href="#_CPPv2N6matrix10value_typeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="type">
+<dt id="_CPPv2N6matrix9referenceE">
+<span id="matrix::reference"></span><em class="property">typedef </em><em class="property">typename</em> _Al::reference <code class="descclassname"></code><code class="descname">reference</code><a class="headerlink" href="#_CPPv2N6matrix9referenceE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="type">
+<dt id="_CPPv2N6matrix15const_referenceE">
+<span id="matrix::const_reference"></span><em class="property">typedef </em><em class="property">typename</em> _Al::const_referene <code class="descclassname"></code><code class="descname">const_reference</code><a class="headerlink" href="#_CPPv2N6matrix15const_referenceE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="type">
+<dt id="_CPPv2N6matrix15difference_typeE">
+<span id="matrix::difference_type"></span><em class="property">typedef </em><em class="property">typename</em> _Al::difference_type <code class="descclassname"></code><code class="descname">difference_type</code><a class="headerlink" href="#_CPPv2N6matrix15difference_typeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="type">
+<dt id="_CPPv2N6matrix9size_typeE">
+<span id="matrix::size_type"></span><em class="property">typedef </em><em class="property">typename</em> _Al::size_type <code class="descclassname"></code><code class="descname">size_type</code><a class="headerlink" href="#_CPPv2N6matrix9size_typeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="type">
+<dt id="_CPPv2N6matrix7pointerE">
+<span id="matrix::pointer"></span><em class="property">typedef </em><em class="property">typename</em> _Al::pointer <code class="descclassname"></code><code class="descname">pointer</code><a class="headerlink" href="#_CPPv2N6matrix7pointerE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="type">
+<dt id="_CPPv2N6matrix13const_pointerE">
+<span id="matrix::const_pointer"></span><em class="property">typedef </em><em class="property">typename</em> _Al::const_pointer <code class="descclassname"></code><code class="descname">const_pointer</code><a class="headerlink" href="#_CPPv2N6matrix13const_pointerE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="type">
+<dt id="_CPPv2N6matrix8iteratorE">
+<span id="matrix::iterator"></span><em class="property">typedef </em><em class="property">typename</em> _Al::pointer <code class="descclassname"></code><code class="descname">iterator</code><a class="headerlink" href="#_CPPv2N6matrix8iteratorE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="type">
+<dt id="_CPPv2N6matrix14const_iteratorE">
+<span id="matrix::const_iterator"></span><em class="property">typedef </em><em class="property">typename</em> _Al::const_pointer <code class="descclassname"></code><code class="descname">const_iterator</code><a class="headerlink" href="#_CPPv2N6matrix14const_iteratorE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="type">
+<dt id="_CPPv2N6matrix16reverse_iteratorE">
+<span id="matrix::reverse_iterator"></span><em class="property">typedef </em>std::reverse_iterator&lt;<a class="reference internal" href="#_CPPv2N6matrix8iteratorE" title="matrix::iterator">iterator</a>&gt; <code class="descclassname"></code><code class="descname">reverse_iterator</code><a class="headerlink" href="#_CPPv2N6matrix16reverse_iteratorE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="type">
+<dt id="_CPPv2N6matrix22const_reverse_iteratorE">
+<span id="matrix::const_reverse_iterator"></span><em class="property">typedef </em>std::reverse_iterator&lt;<a class="reference internal" href="#_CPPv2N6matrix14const_iteratorE" title="matrix::const_iterator">const_iterator</a>&gt; <code class="descclassname"></code><code class="descname">const_reverse_iterator</code><a class="headerlink" href="#_CPPv2N6matrix22const_reverse_iteratorE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<div class="section" id="constructors">
+<h3>Constructors<a class="headerlink" href="#constructors" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N6matrix6matrixEv">
+<span id="matrix::matrix"></span><code class="descclassname">matrix::</code><code class="descname">matrix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N6matrix6matrixEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This is the default constructor.</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2017, Arden Rasmussen.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.4.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

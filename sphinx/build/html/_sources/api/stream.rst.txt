@@ -1,0 +1,316 @@
+.. default-domain:: cpp
+.. namespace:: estl
+
+Stream
+======
+
+.. code-block:: cpp
+
+   #include <estl/stream.hpp>
+
+This header files supplies template implementations of ``printf`` and ``scanf``
+function, with the use of C++ streams.
+
+These functions improve upon the default ``printf`` and ``scanf`` functions both in
+type safety, and in extensibility. As these implementations can take any class
+or type that has a defined ``<<`` and ``>>`` operator.
+
+.. contents::
+
+Enumeration Type Documentation
+------------------------------
+
+.. enum:: Format
+
+   Enum to specify additional format information for ``scan``.
+
+   .. enumerator:: NONE = 0
+
+      No additional formating.
+
+   .. enumerator:: OCT = 1
+
+      Octal based integers.
+
+   .. enumerator:: HEX = 2
+
+      Hexadecimal based integers.
+
+   .. enumerator:: FLOAT_HEX = 3
+
+      Floating hexadecimal based floating integers.
+
+Function Documentation
+----------------------
+
+Print
+^^^^^
+
+These functions are all used to implement formatted print with streams. The
+main function is ``print``, this is where the majority of the print
+funcionality is found.
+
+.. function:: void print(std::ostream& out, std::string __format)
+
+   Prints the rest of the formated string, after all variables have been used.
+
+   :param out: Stream to write output to.
+   :param __format: Format string defining the format of the output to ``out``.
+
+.. function:: template <typename T, typename... Args> \
+              void print(std::ostream& out,\
+              std::string __format,\
+              T first,\
+              Args... args)
+
+   Varadic template implementation of print. This function takes any number of
+   variables of any type, where the first one must be an ``ostream``, and the
+   second must be a format style string. Then every varible after that is
+   printed according to the format string.
+
+   :tparam T: The type fo the first additional variable.
+   :tparam Args: Packed set of varadic template arguments.
+   :param out: Stream to write output to.
+   :param __format: Format strign defining the format of the output to ``out``.
+   :param first: First additional varaible.
+   :param args: Packed set of additoinal variables.
+
+.. function:: template <typename... Args> \
+              std::string sprint(std::string __format, Args... args)
+
+   String interface to stream formatted print. Uses formated print from
+   ``print``, and returns the output as a string.
+
+   :tparam Args: Packed set of variadic template arguments.
+   :param __format: Format string defining the format of the output to
+                    resulting string.
+   :param args: Packed set of additional variables.
+
+   :returns: String containing formated information.
+
+.. function:: template <typename... Args> \
+              void cprint(std::string __format, Args... args)
+
+   Default IO stream interface for formattted print.
+
+   :tparam Args: Packed set of variadic template arguments.
+   :parm __format: Format string defining the format of the output to ``cout``.
+   :param args: Packed set of additional variables.
+
+.. function:: template <typename... Args> \
+              void eprint(std::string __format, Args... args)
+
+   Error stream interface for formatted print.
+
+   :tparam Args: Packed set of variadic template arguments.
+   :param __format: Format string defining the format of the output to
+                    ``cerr``.
+   :param args: Packed set of additional variables.
+
+.. function:: template <typename... Args> \
+              void lprint(std::string __format, Args... args)
+
+   Log stream interface for formatted print.
+
+   .. note:: This function is ``lprint`` with a lower case *L*.
+
+   :tparam Args: Packed set of variadic template arguments.
+   :param __format: Format string defining the format of the output to
+                    ``clog``.
+   :param args: Packed set of additional variables.
+
+Scan
+^^^^
+
+These functions are all used to implement formatted scan with streams. The main
+function is ``scan`` and ``scan_delim``, these are where the majority of the
+scan functionality is found.
+
+.. function:: template <typename T> \
+              T scan_delim(std::istream& in,\
+              std::string __delim,\
+              bool __width=false,\
+              unsigned int __scan_width=0,\
+              unsigned int num_fmt=estl::Format::NONE)
+
+   Reads characters from istream untill ther are no more characters to read, or
+   untill one of the characters in ``__delim`` is read. Then reads data from
+   set of characters using ``>>`` operators for type ``T``.
+
+   .. todo:: Currently reading ``hexfloat`` is done through a work around.
+             Update do default format once ``libstdc++`` is fixed.
+
+   :tparam T: Type to read from stream.
+   :param in: Stream to read input from.
+   :param __delim: String of characters that will stop the reading.
+   :param __width: Boolean flag to set scan width to stop reading at.
+   :param __scan_width: Number of characters to stop reading at if ``__width``
+                        is ``true``.
+   :param num_fmt: Additional format information for reading values.
+
+   :returns: ``T`` value read from ``in``.
+
+.. function:: void scan(std::istream& in, std::string __format)
+
+   Ignores the rest of the ``__format`` string, and clears the ``__format``
+   string from the stream.
+
+   :param in: Stream to read information from.
+   :param __format: Format string defining the format to the input from ``in``.
+
+.. function:: template<typename T, typename... Args> \
+              void scan(std::istream& in,\
+              std::string __format,\
+              T& first,\
+              Args&... args)
+
+   This function taks any number of variables of any type, where the first one
+   must be an ``istream`` and the second must be a format style string. Then
+   every variable after that is read according to the format string.
+
+   :tparam T: The type of the first additional variable.
+   :tparam Args: Packed set of variadit template arguments.
+   :param in: Stream to read input from.
+   :param __format: Format string defining the format of the input from ``in``.
+   :param first: First additional variable to save read data to.
+   :param args: Packed sete of additional variables.
+
+.. function:: template<typename... Args> \
+              void sscan(std::string __str,\
+              std::string __format,\
+              Args&... args)
+
+   String interface to stream formatted scan.
+
+   :tparam Args: Packed set of variadic template arguments.
+   :param __str: String containing formated input data.
+   :param __format: Format string defining the format of the input to read from
+                    ``__str``.
+   :param args: Packed set of additional variables.
+
+Format Documentation
+--------------------
+
+Format strings are important part of the ``stream`` functions, as everything
+requires a format style string. The string consists of normal characters and
+format specifiers. The normal characters are writen/read from the stream as
+that specific character, while the format specifiers indicate the use of a
+variable. The format specifier is in the format of:
+
+.. code-block:: sh
+
+   %[flags][width][.precison]specifier
+
+The *specifier* character is the most significant component, since it defines
+the type and the interpretation of its corresponding argument:
+
++----------------+-------------------------------------------+--------------+
+| specifier      | Output                                    | Example      |
++================+===========================================+==============+
+| ``d`` or ``i`` | Signed decimal integer                    | 392          |
++----------------+-------------------------------------------+--------------+
+| ``u``          | Unsigned decimal integer                  | 7235         |
++----------------+-------------------------------------------+--------------+
+| ``o``          | Unsigned octal                            | 610          |
++----------------+-------------------------------------------+--------------+
+| ``x``          | Unsigned hexadecimal integer              | 7fa          |
++----------------+-------------------------------------------+--------------+
+| ``X``          | Unsigned hexadecimal integer (uppercase)  | 7FA          |
++----------------+-------------------------------------------+--------------+
+| ``f``          | Decimal floating point                    | 392.65       |
++----------------+-------------------------------------------+--------------+
+| ``F``          | Decimal floating point (uppercase)        | 392.65       |
++----------------+-------------------------------------------+--------------+
+| ``e``          | Scientific notation                       | 3.9265e+2    |
++----------------+-------------------------------------------+--------------+
+| ``E``          | Scientific notation (uppercase)           | 3.9265E+2    |
++----------------+-------------------------------------------+--------------+
+| ``g``          | Use the shortest representation: ``e`` or | 392.65       |
+|                | ``f``                                     |              |
++----------------+-------------------------------------------+--------------+
+| ``G``          | Use the shortest representation: ``E`` or | 392.65       |
+|                | ``F``                                     |              |
++----------------+-------------------------------------------+--------------+
+| ``a``          | Hexadecimal floating point                | -0xc.90fep-2 |
++----------------+-------------------------------------------+--------------+
+| ``A``          | Hexadecimal floating point (uppercase)    | -0XC.90FEP-2 |
++----------------+-------------------------------------------+--------------+
+| ``c``          | Character                                 | a            |
++----------------+-------------------------------------------+--------------+
+| ``s``          | String of characters                      | sample       |
++----------------+-------------------------------------------+--------------+
+| ``p``          | Pointer address                           | b8000000     |
++----------------+-------------------------------------------+--------------+
+| ``n``          | Any supplied class using default ``<<``   |              |
+|                | or ``>>`` operators                       |              |
++----------------+-------------------------------------------+--------------+
+| ``%``          | A ``%`` followed by another ``%`` will    | ``%``        |
+|                | write a single ``%`` to the stream        |              |
++----------------+-------------------------------------------+--------------+
+
+The *format* specifier can also contain sub-specifiers: *flag*, *width*,
+and *.precision* (in that order), which are optional and follow these
+specifictations:
+
++-------------+----------------------------------------------------------------+
+| flags       | Description                                                    |
++=============+================================================================+
+| ``-``       | Left-justify within the given field width; Right justification |
+|             | is default.                                                    |
++-------------+----------------------------------------------------------------+
+| ``+``       | Forces to preceed the result with a plus or minus sign         |
+|             | (``+`` or ``-``) even for positive numbers. By default, only   |
+|             | negative numbers are preceded with a ``-`` sign.               |
++-------------+----------------------------------------------------------------+
+| ``(space)`` | If no sign is going to be written, a blank space is inserted   |
+|             | before the value.                                              |
++-------------+----------------------------------------------------------------+
+| ``#``       | Used with ``o``, ``x``, or ``X`` specifiers the value is       |
+|             | preceded with ``0``, ``0x`` or ``0X`` respectively for values  |
+|             | different than zero.                                           |
++-------------+----------------------------------------------------------------+
+| ``0``       | Left-pads the number with zeroes (``0``) instead of spaces     |
+|             | when padding is specified.                                     |
++-------------+----------------------------------------------------------------+
+
++--------------+---------------------------------------------------------------+
+| width        | Description                                                   |
++==============+===============================================================+
+| ``(number)`` | Minimum umber of chracters to be printed. If the vallue to be |
+|              | printed is shorter than this number,the result is padded with |
+|              | blank spaces. The value is not truncated even if the result   |
+|              | is larger.                                                    |
++--------------+---------------------------------------------------------------+
+| ``*``        | The *width* is not specified in the *format* string, but as   |
+|              | an additional integer value argument preceding the argument   |
+|              | that has to be formatted.                                     |
++--------------+---------------------------------------------------------------+
+
++-------------+----------------------------------------------------------------+
+| .precision  | Description                                                    |
++=============+================================================================+
+| ``.number`` | For integer specifiers (``d``, ``i``, ``o``, ``u``, ``x``      |
+|             | ``X``): *precision* specifies the minumum number of digets to  |
+|             | be written. If the value to be written is shorter than this    |
+|             | number, the result is padded with leading zeros. THe value is  |
+|             | not truncated even if the result is longer. A *precision* of   |
+|             | ``0`` means that no character is written for the value ``0``.  |
+|             |                                                                |
+|             | For ``a``, ``A``, ``e``, ``E``, ``f`` and ``F`` specifiers:    |
+|             | This is the number of digits to be printed **after** the       |
+|             | decimal point (by default, this is 6).                         |
+|             |                                                                |
+|             | For ``g`` and ``G`` specifiers: this is the maximum number of  |
+|             | significant digits to be printed.                              |
+|             |                                                                |
+|             | For ``s``: this is the maximum number of characters to be      |
+|             | printed. By default all characters are printed untill the      |
+|             | ending null character is encountered.                          |
+|             |                                                                |
+|             | If the period is specified without an explicit valu for        |
+|             | *precision*, ``0`` is assumed.                                 |
++-------------+----------------------------------------------------------------+
+| ``.*``      | The *precision* is not specified in the *format* string, but   |
+|             | as an additional integer value argument preceding the argument |
+|             | that has to be formatted.                                      |
++-------------+----------------------------------------------------------------+

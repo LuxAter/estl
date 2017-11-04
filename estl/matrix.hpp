@@ -1386,6 +1386,27 @@ estl::matrix<_Tp, _Nr, _Nc> echelon_form(
   return mat;
 }
 
+/**
+ * @brief Multiplies two matricies together.
+ *
+ * Multiples two matricies together, in a simple method of iteration. It is well
+ * suited for matricies with on order less than \f$2^{10}\f$, matricies larger
+ * than this size should use an implementation of Strassen's algorithm.
+ *
+ * @note This is not an efficient algorithm for matrix multiplication, it has a
+ * complexity of \f$O(n^2)\f$. If an efficient algorithm is needed for larger
+ * matricies, use a different algorithm, or implement your own.
+ *
+ * @tparam _Tp Value type of the first matrix and the returned matrix.
+ * @tparam _Nr Number of rows in the first matrix, and in the returned matrix.
+ * @tparam _N Number of columns in the first matrix, and the number of rows in
+ * the second matrix.
+ * @tparam _Nc Number of columns in the second matrix and the returned matrix.
+ * @param lhs First matrix to multiply.
+ * @param rhs Second matrix to multiply.
+ *
+ * @return A matrix of `_Tp` that is `_Nr` by `_Nc`.
+ */
 template <typename _Tp, std::size_t _Nr, std::size_t _N, std::size_t _Nc>
 estl::matrix<_Tp, _Nr, _Nc> multiplication(
     const estl::matrix<_Tp, _Nr, _N>& lhs,
