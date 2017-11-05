@@ -358,7 +358,7 @@ class matrix {
    *
    * @return Reference to the last element.
    */
-  reference back() { return reference(__data[size()]); }
+  reference back() { return reference(__data[size() - 1]); }
   /**
    * @brief Access the last element.
    *
