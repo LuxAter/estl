@@ -21,7 +21,7 @@
  * @author Arden Rasmussen
  * @version 0.0
  * @date 2017-10-30
- * @copyright GNUGeneral Public License
+ * @copyright GNU General Public License
  *
  * This provides a two dimensional matrix container class, along with basic
  * matrix operations.
@@ -442,7 +442,17 @@ class matrix {
    * element storage.
    */
   std::array<std::array<_Tp, _Nc>, _Nr> data_2darray() const {
-    return std::array<std::array<_Tp, _Nc>, _Nr>();
+    std::array<std::array<_Tp, _Nc>, _Nr> arr;
+    const_iterator mat_it = begin();
+    for (typename std::array<std::array<_Tp, _Nc>, _Nr>::iterator it =
+             arr.begin();
+         it != arr.end(); ++it) {
+      for (typename std::array<_Tp, _Nc>::iterator sub_it = it->begin();
+           sub_it != it->end(); ++sub_it, ++mat_it) {
+        *sub_it = *mat_it;
+      }
+    }
+    return arr;
   }
   /**
    * @brief Direct access to the underlying array.
