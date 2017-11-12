@@ -374,6 +374,7 @@ template <typename T>
 T scan_delim(std::istream& in, std::string __delim, bool __width = false,
              unsigned int __scan_width = 0,
              unsigned int num_fmt = estl::Format::NONE) {
+  // TODO(2017-11-11, Arden): Remove hexfloat workaround
   bool __preloaded = false;
   if (in.rdbuf()->in_avail() > 0) {
     __preloaded = true;

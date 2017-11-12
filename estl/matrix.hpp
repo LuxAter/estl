@@ -121,18 +121,36 @@ class matrix {
     _Al al;
     __data = al.allocate(size());
   }
-  // TODO(2017-10-31, Arden): Add flag for initializer_list being too large.
   matrix(const std::initializer_list<_Tp>& mat) {
     _Al al;
     __data = al.allocate(size());
+    if (mat.size() > size()) {
+      std::__throw_out_of_range_fmt(
+          __N("initializer_list.size() (which is %zu) > __Ne (which is %zu)"),
+          mat.size(), size());
+    }
     std::copy(mat.begin(), mat.end(), __data);
   }
-  // TODO(2017-10-31, Arden): Add flag for initializer_list being too large.
-  // TODO(2017-10-31, Arden): Fix double initializer zero bug.
   matrix(const std::initializer_list<std::initializer_list<_Tp>>& mat) {
+    if (mat.size() != _Nr) {
+      std::__throw_out_of_range_fmt(
+          __N("initializer_list.size() (which is %zu) != _Nr (which is %zu)"),
+          mat.size(), _Nr);
+    }
     _Al al;
     __data = al.allocate(size());
-    std::copy(mat.begin()->begin(), mat.begin()->begin() + size(), __data);
+    iterator index = begin();
+    for (typename std::initializer_list<
+             std::initializer_list<_Tp>>::const_iterator it = mat.begin();
+         it != mat.end(); ++it) {
+      if (it->size() != _Nc) {
+        std::__throw_out_of_range_fmt(
+            __N("initializer_list.size() (which is %zu) != _Nc (which is %zu)"),
+            it->size(), _Nc);
+      }
+      std::copy(it->begin(), it->end(), index);
+      index += it->size();
+    }
   }
   template <class InputIt>
   matrix(InputIt first, InputIt last) {
