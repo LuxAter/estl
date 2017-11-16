@@ -85,3 +85,48 @@ TEST_F(MatrixTest, Operations) {
   mat = {5.0, 0, 0, 0, 5, 0, 0, 0, 5.0};
   EXPECT_EQ(a, mat);
 }
+
+TEST_F(MatrixTest, Operators) {
+  estl::matrix<double, 3, 3> mat;
+  mat = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0};
+  b += 1.0;
+  EXPECT_EQ(b, mat);
+  mat = {-1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};
+  b -= 2.0;
+  EXPECT_EQ(b, mat);
+  mat = {-2.0, 0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0};
+  b *= 2.0;
+  EXPECT_EQ(b, mat);
+  mat = {-0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3, 3.5};
+  b /= 4.0;
+  EXPECT_EQ(b, mat);
+}
+
+TEST_F(MatrixTest, Boolian) {
+  EXPECT_EQ(b == a, false);
+  EXPECT_EQ(b != a, true);
+  EXPECT_EQ(b > a, false);
+  EXPECT_EQ(b < a, true);
+  EXPECT_EQ(b >= b, true);
+  EXPECT_EQ(b > a, false);
+  EXPECT_EQ(b <= b, true);
+  EXPECT_EQ(b <= a, true);
+}
+
+TEST_F(MatrixTest, MatrixOperators) {
+  estl::matrix<double, 3, 3> mat, res;
+  mat = {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
+  b += mat;
+  res = {1.0, 1.0, 2.0, 3.0, 5.0, 5.0, 6.0, 7.0, 9.0};
+  EXPECT_EQ(b, res);
+  b -= mat;
+  res = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0};
+  EXPECT_EQ(b, res);
+  res = {0.0, 0.0, 0.0, 0.0, 4.0, 0.0, 0.0, 0.0, 8.0};
+  b *= mat;
+  EXPECT_EQ(b, res);
+  mat = {2.0, 1.0, 1.0, 1.0, 2.0, 1.0, 1.0, 1.0, 2.0};
+  res = {0.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 4.0};
+  b /= mat;
+  EXPECT_EQ(b, res);
+}

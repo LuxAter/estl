@@ -837,7 +837,7 @@ class matrix {
    */
   template <typename _T>
   inline estl::matrix<_Tp, _Nr, _Nc>& operator*=(const _T& rhs) {
-    *this = *this / rhs;
+    *this = *this * rhs;
     return *this;
   }
   /**
@@ -852,7 +852,7 @@ class matrix {
    */
   template <typename _T>
   inline estl::matrix<_Tp, _Nr, _Nc>& operator/=(const _T& rhs) {
-    *this = *this * rhs;
+    *this = *this / rhs;
     return *this;
   }
 
