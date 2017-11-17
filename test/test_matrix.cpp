@@ -113,20 +113,16 @@ TEST_F(MatrixTest, Boolian) {
   EXPECT_EQ(b <= a, true);
 }
 
-TEST_F(MatrixTest, MatrixOperators) {
-  estl::matrix<double, 3, 3> mat, res;
-  mat = {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
-  b += mat;
-  res = {1.0, 1.0, 2.0, 3.0, 5.0, 5.0, 6.0, 7.0, 9.0};
-  EXPECT_EQ(b, res);
-  b -= mat;
-  res = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0};
-  EXPECT_EQ(b, res);
-  res = {0.0, 0.0, 0.0, 0.0, 4.0, 0.0, 0.0, 0.0, 8.0};
-  b *= mat;
-  EXPECT_EQ(b, res);
-  mat = {2.0, 1.0, 1.0, 1.0, 2.0, 1.0, 1.0, 1.0, 2.0};
-  res = {0.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 4.0};
-  b /= mat;
-  EXPECT_EQ(b, res);
+TEST_F(MatrixTest, Functions) {
+  b[0] = 5.0;
+  EXPECT_EQ(estl::trace(b), 17.0);
+  EXPECT_FLOAT_EQ(estl::determinant(b), -15.0);
+  estl::matrix<double, 3, 3> mat = {0.2,  -0.4,         0.2,
+                                    -0.4, -28.0 / 15.0, 19.0 / 15.0,
+                                    0.2,  29.0 / 15.0,  -17.0 / 15.0};
+  EXPECT_TRUE(MatrixMatch(estl::inverse(b), mat));
+  a = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+  b = {9, 8, 7, 6, 5, 4, 3, 2, 1};
+  mat = {30, 24, 18, 84, 69, 54, 138, 114, 90};
+  EXPECT_EQ(estl::multiplication(a, b), mat);
 }
