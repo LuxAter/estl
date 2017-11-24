@@ -131,4 +131,8 @@ TEST_F(MatrixTest, Functions) {
   b = {9, 8, 7, 6, 5, 4, 3, 2, 1};
   mat = {30, 24, 18, 84, 69, 54, 138, 114, 90};
   EXPECT_EQ(estl::multiplication(a, b), mat);
+  estl::matrix<double, 3, 4> c = {
+      {1, -3, 3, -4}, {2, 3, -1, 15}, {4, -3, -1, 19}};
+  estl::matrix<double, 3, 4> d = {{1, 0, 0, 5}, {0, 1, 0, 1}, {-0, -0, 1, -2}};
+  EXPECT_TRUE(MatrixMatch(estl::echelon_form(c), d));
 }
