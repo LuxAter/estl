@@ -231,7 +231,48 @@ referenced with multiple indecies.</p>
 <dl class="function">
 <dt id="_CPPv2N6matrix6matrixEv">
 <span id="matrix::matrix"></span><code class="descclassname">matrix::</code><code class="descname">matrix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N6matrix6matrixEv" title="Permalink to this definition">¶</a><br /></dt>
-<dd><p>This is the default constructor.</p>
+<dd><p>Default matrix constructor.</p>
+<p>This allocates the memory required for the desired matrix, and fills the
+elements with <code class="docutils literal"><span class="pre">_Tp()</span></code>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N6matrix6matrixEv">
+<code class="descclassname">matrix::</code><code class="descname">matrix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N6matrix6matrixEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Matrix Constructor.</p>
+<p>Allocates the memory required for the matrix, and copies the elements of the
+initializer list to the elements of the matrix.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Throws:</th><td class="field-body"><strong>out_of_range</strong> – Throw out of range if the size of <code class="docutils literal"><span class="pre">mat</span></code> is
+greater than the size of the matrix.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><strong>mat</strong> – list of elements to copy into the matrix.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<code class="descclassname">matrix::</code><code class="descname">matrix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Matrix Constructor.</p>
+<p>Allocates the memory required for the matrix, and copies the elements of the
+two dimensional initializer list to the elements of the matrix.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Throws:</th><td class="field-body"><ul class="first last simple">
+<li><strong>out_of_range</strong> – If <code class="docutils literal"><span class="pre">mat</span></code> is greater than <code class="docutils literal"><span class="pre">_Nr</span></code>.</li>
+<li><strong>out_of_range</strong> – If <code class="docutils literal"><span class="pre">mat[i]</span></code> is greater than <code class="docutils literal"><span class="pre">_Nc</span></code>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>

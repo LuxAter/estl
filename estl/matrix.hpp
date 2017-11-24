@@ -117,10 +117,40 @@ class matrix {
    * @name Constructor
    * @{ */
 
+  /**
+   * @brief Default matrix constructor
+   *
+   * This allocates the memory required for the desired matrix.
+   */
   matrix() {
     _Al al;
     __data = al.allocate(size());
+    fill(_Tp());
   }
+  /**
+   * @brief Matrix constructor
+   *
+   * Allocates the memory required for the matrx and fills every element with
+   * the supplied value.
+   *
+   * @param val Value to copy to every element of the matrix.
+   */
+  matrix(_Tp val) {
+    _Al al;
+    __data = al.allocate(size());
+    fill(val);
+  }
+  /**
+   * @brief Matrix Constructor
+   *
+   * Allocates the memory required for the matrix, and copies the elements of
+   * the initializer list to the elements of the matrix.
+   *
+   * @throw out_of_range Throws out of range if initializer_list list is
+   * greater than the size of the matrix.
+   *
+   * @param mat initializer_list of elements to copy.
+   */
   matrix(const std::initializer_list<_Tp>& mat) {
     _Al al;
     __data = al.allocate(size());

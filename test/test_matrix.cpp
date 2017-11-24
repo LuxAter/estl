@@ -25,9 +25,11 @@ template <typename _Tp, std::size_t _Nr, std::size_t _Nc>
 }
 
 TEST_F(MatrixTest, Constructor) {
-  EXPECT_TRUE(MatrixMatch(a, {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}));
-  EXPECT_TRUE(MatrixMatch(b, {0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0}));
-  estl::matrix<double, 3, 3> mat(b);
+  estl::matrix<double, 3, 3> mat({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
+  EXPECT_EQ(a, mat);
+  mat = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0};
+  EXPECT_EQ(b, mat);
+  mat = b;
   EXPECT_TRUE(MatrixMatch(b, mat));
 }
 
@@ -100,17 +102,21 @@ TEST_F(MatrixTest, Operators) {
   mat = {-0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3, 3.5};
   b /= 4.0;
   EXPECT_EQ(b, mat);
+  std::stringstream ss;
+  ss << b;
+  std::string str = ss.str();
+  EXPECT_EQ(str, "[[-0.5, 0, 0.5], [1, 1.5, 2], [2.5, 3, 3.5]]");
 }
 
 TEST_F(MatrixTest, Boolian) {
   EXPECT_EQ(b == a, false);
   EXPECT_EQ(b != a, true);
-  EXPECT_EQ(b > a, false);
-  EXPECT_EQ(b < a, true);
+  EXPECT_EQ(b > a, true);
+  EXPECT_EQ(b < a, false);
   EXPECT_EQ(b >= b, true);
-  EXPECT_EQ(b > a, false);
+  EXPECT_EQ(b >= a, true);
   EXPECT_EQ(b <= b, true);
-  EXPECT_EQ(b <= a, true);
+  EXPECT_EQ(b <= a, false);
 }
 
 TEST_F(MatrixTest, Functions) {
