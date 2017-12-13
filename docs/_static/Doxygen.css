@@ -1,0 +1,513 @@
+/* Material Doxygen CSS File 0.0 */
+
+/* Basic Variables including colors, and sizes */
+
+:root {
+  --cyan-1: #1ABC9C;
+  --cyan-2: #16A085;
+  --green-1: #2ECC71;
+  --green-2: #27AE60;
+  --blue-1: #3498DB;
+  --blue-2: #2980B9;
+  --magenta-1: #9B59B6;
+  --magenta-2: #8E44AD;
+  --black-1: #34495E;
+  --black-2: #2C3E50;
+  --yellow-1: #F1C40F;
+  --yellow-2: #F39C12;
+  --orange-1: #E67E22;
+  --orange-2: #D35400;
+  --red-1: #E74C3c;
+  --red-2: #C0392B;
+  --red-3: #fceae8;
+  --white-1: #ECF0F1;
+  --white-2: #BDC3C7;
+  --white-3: #FFFFFF;
+  --grey-1: #95A5A6;
+  --grey-2: #7F8C8D;
+}
+
+:root {
+  --mem-title-color: var(--blue-2);
+  --mem-title-text: var(--white-1);
+  --mem-proto-color: var(--blue-1);
+  --mem-proto-text: var(--white-1);
+  --mem-doc-color: var(--background-2);
+  --mem-doc-text: var(--foreground);
+
+  --template-color: var(--grey-2);
+  --mem-temp-color: var(--white-2);
+
+  --param-text: var(--yellow-2);
+  --param-color: none;
+  --tparam-text: var(--yellow-2);
+  --tparam-color: none;
+
+  --label-color: var(--magenta-1);
+  --label-text: var(--white-1);
+
+  --link-text: var(--green-1);
+
+  --background: var(--white-3);
+  --background-2: var(--white-1);
+  --foreground: var(--black-1);
+  --foreground-2: var(--black-2);
+  --foreground-3: var(--grey-2);
+
+  --summary-color: var(--blue-1);
+  --summary-text: var(--white-1);
+
+  --todo: var(--green-1);
+  --note: var(--blue-1);
+  --warning: var(--red-1);
+}
+
+code {
+  font-style: italic;
+  /* background-color: var(--red-3); */
+  color: var(--red-2);
+}
+
+
+/* Typography Details {{{ */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
+  font-family: inherit;
+  font-weight: 700;
+  line-height: 1.1;
+  color: inherit;
+}
+
+h1,
+h2,
+h3 {
+  margin-top: 31px;
+  margin-bottom: 15px;
+}
+
+h4,
+h5,
+h6 {
+  margin-top: 16px;
+  margin-bottom: 15px;
+}
+
+h6 {
+  font-weight: normal;
+}
+
+h1,
+.h1 {
+  font-size: 62px;
+}
+
+h2,
+.h2 {
+  font-size: 52px;
+}
+
+h3,
+.h3 {
+  font-size: 40px;
+}
+
+h4,
+.h4 {
+  font-size: 29px;
+}
+
+h5,
+.h5 {
+  font-size: 28px;
+}
+
+h6,
+.h6 {
+  font-size: 24px;
+}
+
+/* }}} */
+
+/* Page Details {{{ */
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+div.contents {
+  margin-top: 10px;
+  margin-left: 10%;
+  margin-right: 10%;
+}
+
+.contents a:visited {
+  color: var(--link-text);
+}
+
+a.el {
+  font-weight: bold;
+  color: var(--link-text);
+}
+
+div.summary a {
+  padding: 2px;
+  color: var(--summary-text);
+  border-radius: 2px;
+  background-color: var(--summary-color);
+}
+
+/* }}} */
+
+/* Header Details {{{ */
+
+div.header {
+  background-color: var(--background);
+  background-image: none;
+}
+
+h2.groupheader {
+  color: var(--foreground);
+  border-color: var(--background-2);
+}
+
+/* }}} */
+
+/* NavPath Details {{{ */
+
+div#titlearea {
+  border-bottom: 2px solid;
+  border-color: var(--foreground-2);
+}
+
+/* .sm.sm-dox { */
+
+/* background-image: none; */
+
+/* background-color: var(--black-2); */
+
+/* } */
+
+.navpath {
+  display: none;
+}
+
+/* }}} */
+
+/* TOC Details {{{ */
+
+table.memberdecls {
+  width: 100%;
+}
+
+.directory tr.even {
+  background-color: var(--background-2);
+}
+
+tr.heading h2 {
+  color: var(--foreground);
+  border-color: var(--foreground-2);
+}
+
+td.memSeparator {
+  background-color: var(--foreground-3);
+  border-color: var(--foreground-3);
+}
+
+
+.mdescLeft,
+.mdescRight {
+  color: var(--foreground-2);
+}
+
+.memTemplParams {
+  color: var(--template-color);
+}
+
+.mdescLeft,
+.mdescRight,
+.memItemLeft,
+.memItemRight,
+.memTemplItemLeft,
+.memTemplItemRight,
+.memTemplParams {
+  background-color: var(--background-2);
+  border: none;
+  margin: 4px;
+  padding: 1px 0 0 8px;
+}
+
+span.icon {
+  font-weight: bold;
+  background-color: var(--blue-1);
+}
+
+/* }}} */
+
+/* Member Details {{{ */
+
+.memtitle {
+  padding: 8px;
+  border: none;
+  border-top-right-radius: 2px;
+  border-top-left-radius: 2px;
+  background-image: none;
+  background-color: var(--mem-title-color);
+  color: var(--mem-title-text);
+  line-height: 24px;
+  font-weight: 400;
+  font-size: 16px;
+  margin: 0px;
+  float: none;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+}
+
+.memproto .memtemplate {
+  color: var(--mem-temp-text);
+}
+
+.memitem {
+  padding: 0px;
+  border: none;
+  border-bottom-right-radius: 2px;
+  border-bottom-left-radius: 2px;
+  margin: 0px;
+  margin-bottom: 20px;
+  box-shadow: none;
+}
+
+.memproto,
+dl.reflist dt {
+  border: none;
+  border-top-right-radius: 0px;
+  padding: 8px;
+  font-weight: 400;
+  text-shadow: none;
+  background-color: var(--mem-proto-color);
+  color: var(--mem-proto-text);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+}
+
+.memdoc,
+dl.reflist dd {
+  padding: 8px;
+  font-size: 14px;
+  font-weight: 400;
+  background: var(--mem-doc-color);
+  color: var(--mem-doc-text);
+  border: none;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+}
+
+.permalink {
+  font-size: 65%;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.overload {
+  font-size: 65%;
+  vertical-align: middle;
+  font-family: Roboto, sans-serif;
+}
+
+.memtemplate {
+  font-size: 80%;
+  color: var(--template-color);
+  font-weight: 13px;
+  margin-left: 10px;
+}
+
+.memitem.glow {
+  box-shadow: none;
+}
+
+.memname {
+  font-weight: 400;
+  margin-left: 0px;
+}
+
+.memname td {
+  vertical-align: bottom
+}
+
+table.mlabels {
+  border-spacing: 0px;
+
+}
+
+td.mlabels-left {
+  vertical-align: middle;
+  width: 100%;
+  padding: 0px;
+}
+
+td.mlabels-right {
+  vertical-align: bottom;
+  padding: 0px;
+  padding-bottom: 5px;
+  white-space: nowrap;
+}
+
+span.mlabels {
+  margin-left: 8px;
+}
+
+span.mlabel {
+  background-color: var(--label-color);
+  text-shadow: none;
+  color: var(--label-text);
+  margin-right: 4px;
+  padding: 4px;
+  border: none;
+  border-radius: 2px;
+  font-size: 7pt;
+  white-space: nowrap;
+  vertical-align: middle;
+  font-size: 12px;
+}
+
+
+/* }}} */
+
+/* Parameter Settings {{{ */
+
+.paramkey {
+  text-align: right;
+}
+
+.paramtype {
+  white-space: nowrap;
+}
+
+.paramname {
+  color: var(--param-text);
+  background-color: var(--param-color);
+  padding: 0px;
+  white-space: nowrap;
+}
+
+.paramname em {
+  font-style: normal;
+}
+
+.paramname code {
+  line-height: 14px;
+}
+
+/* }}} */
+
+/* Admonitions Details {{{ */
+
+dl.todo,
+dl.note,
+dl.warning {
+  border: none;
+  border-radius: 4px;
+  margin: 0px;
+  padding: 3px;
+}
+
+dl.todo {
+  background-color: var(--todo);
+}
+
+dl.note {
+  background-color: var(--note);
+}
+
+dl.warning {
+  background-color: var(--warning);
+}
+
+
+dl.todo dt,
+dl.note dt,
+dl.warning dt {
+  color: var(--foreground-2);
+}
+
+dl.todo a.el {
+  color: var(--foreground-2);
+}
+
+/* }}} */
+
+/* Navbar Details {{{ */
+
+div.doc li {
+  background: none;
+}
+
+.navpath li.navlem a:hover {
+  background-image: none;
+  color: #F00;
+}
+
+/* }}} */
+
+/* Table Details {{{ */
+
+table.fieldtable {
+  background-color: var(--background-2);
+  border-radius: 2px;
+  border: none;
+  box-shadow: none;
+  margin: auto;
+  width: 100%;
+}
+
+.fieldtable th {
+  background-image: none;
+  border-radius: 0px;
+  border-top-left-radius: 2px;
+  border-top-right-radius: 2px;
+  border-width: 2px;
+  background-color: var(--background-3);
+  color: var(--foreground-2);
+  border-color: var(--foreground-3);
+}
+
+.fieldtable td.fieldname {
+  border-color: var(--foreground-3);
+}
+
+.fieldtable td.fielddoc {
+  border-color: var(--foreground-3);
+}
+
+/* }}} */
+
+/* Index Details {{{ */
+
+div.qindex {
+  background-color: var(--background-2);
+  border: none;
+  color: var(--foreground);
+}
+
+div.ah,
+span.ah {
+  background-color: var(--green-1);
+  color: var(--foreground);
+  font-weight: bold;
+  margin-bottom: 3px;
+  margin-top: 3px;
+  box-shadow: none;
+  background-image: none;
+  padding: 0.2em;
+  border: none;
+}
+
+/* }}} */

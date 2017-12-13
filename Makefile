@@ -1,6 +1,6 @@
 SHELL = /bin/bash
 
-export NAME= estl
+export NAME= estl.out
 export LINK=  
 export INCLUDE=
 export TYPE= lib
@@ -9,7 +9,8 @@ export SOURCE_DIR= source
 export TEST_DIR= test
 export EXTERNAL_DIR = external
 export BUILD_DIR= build
-export INCLUDE_DIR= include
+export INCLUDE_DIR= estl
+export DOC_DIR= docs
 
 export BASE_PATH=$(shell pwd)
 
@@ -131,3 +132,17 @@ test:
 clean-test:
 	$(call print_section,Unit Tests)
 	if [ -d "$(TEST_DIR)" ]; then cd "$(TEST_DIR)" && $(MAKE) clean; fi
+
+.PHONY: docs
+docs:
+	$(call print_section,Documentation)
+	$(call print,Running doxygen...,$(COMPILE_COLOR))
+	doxygen
+
+.PHONY: clean-docs
+clean-docs:
+	$(call print_section,Documentation)
+	if [ -d "$(DOC_DIR)/html" ]; then rm "$(DOC_DIR)/html" -r; fi
+	if [ -d "$(DOC_DIR)/latex" ]; then rm "$(DOC_DIR)/latex" -r; fi
+	if [ -d "$(DOC_DIR)/xml" ]; then rm "$(DOC_DIR)/xml" -r; fi
+	$(call print,Cleaned Documentation,$(CLEAN_COLOR))

@@ -1,10 +1,27 @@
-// Copyright 2017 Arden Rasmussen
+/* Copyright (C)
+ * 2017 - Arden Rasmussen
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ */
+
 /**
  * @file stream.hpp
  * @brief iostream functions utilizing variadic templates.
  * @author Arden Rasmussen
- * @version 0.0
+ * @version 1.0
  * @date 2017-10-12
+ * @copyright GNUGeneral Public License
  *
  * These functions improve upon the default `printf` and `scanf` functions both
  * in type safety, and in extensibility. As these implementations can task any
@@ -23,6 +40,9 @@
 #include <string>
 #include <type_traits>
 
+/**
+ * @brief Base ESTL namespace for all estl objects.
+ */
 namespace estl {
 
 /**
@@ -30,7 +50,12 @@ namespace estl {
  *
  * @see scan_delim
  */
-enum Format { NONE = 0, OCT = 1, HEX = 2, FLOAT_HEX = 3 };
+enum Format {
+  NONE = 0,      ///< No additional formating.
+  OCT = 1,       ///< Octal based integers.
+  HEX = 2,       ///< Hexadecimal based integers.
+  FLOAT_HEX = 3  ///< Floating hexadecimal based floating integers.
+};
 
 /**
  * @brief Prints the rest of the formated string, after all variables have been
@@ -301,6 +326,32 @@ void cprint(std::string __format, Args&... args) {
 }
 
 /**
+ * @brief Error stream interface for formatted print.
+ *
+ * @tparam Args Packed set of variadic template arguments.
+ * @param __format Format string defining the format of the output to `cerr`.
+ * @param args Packed set of additional variables.
+ */
+template <typename... Args>
+void eprint(std::string __format, Args&... args) {
+  print(std::cerr, __format, args...);
+}
+
+/**
+ * @brief Log stream interface for formatted print.
+ *
+ * @note This function is `lprint` with a lower case *L*.
+ *
+ * @tparam Args Packed set of variadic template arguments.
+ * @param __format Format string defining the format of the output to `clog`.
+ * @param args Packed set of additional varaibles.
+ */
+template <typename... Args>
+void lprint(std::string __format, Args&... args) {
+  print(std::clog, __format, args...);
+}
+
+/**
  * @brief Reads from *istream* until stopped.
  *
  * Reads characters from istream until there are no more characters to read, or
@@ -323,6 +374,7 @@ template <typename T>
 T scan_delim(std::istream& in, std::string __delim, bool __width = false,
              unsigned int __scan_width = 0,
              unsigned int num_fmt = estl::Format::NONE) {
+  // TODO(2017-11-11, Arden): Remove hexfloat workaround
   bool __preloaded = false;
   if (in.rdbuf()->in_avail() > 0) {
     __preloaded = true;
