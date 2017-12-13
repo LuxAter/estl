@@ -1421,6 +1421,18 @@ estl::matrix<_Tp, _Nr, _Nc> inverse(const estl::matrix<_Tp, _Nr, _Nc>& lhs) {
   return inv;
 }
 
+/**
+ * @brief Reduces the matrix into echelon form.
+ *
+ * Computes the echelon form the matrix.
+ *
+ * @tparam _Tp Value type of the container.
+ * @tparam _Nr Number of rows in the container.
+ * @tparam _Nc Number of columns in the container.
+ * @param lhs Matrix to find the echelon form of.
+ *
+ * @return Echelon form matrix to the given matrix.
+ */
 template <typename _Tp, std::size_t _Nr, std::size_t _Nc>
 estl::matrix<_Tp, _Nr, _Nc> echelon_form(
     const estl::matrix<_Tp, _Nr, _Nc>& lhs) {
