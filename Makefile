@@ -10,6 +10,7 @@ export TEST_DIR= test
 export EXTERNAL_DIR = external
 export BUILD_DIR= build
 export INCLUDE_DIR= estl
+export DOC_DIR= docs
 
 export BASE_PATH=$(shell pwd)
 
@@ -141,4 +142,7 @@ docs:
 .PHONY: clean-docs
 clean-docs:
 	$(call print_section,Documentation)
+	if [ -d "$(DOC_DIR)/html" ]; then rm "$(DOC_DIR)/html" -r; fi
+	if [ -d "$(DOC_DIR)/latex" ]; then rm "$(DOC_DIR)/latex" -r; fi
+	if [ -d "$(DOC_DIR)/xml" ]; then rm "$(DOC_DIR)/xml" -r; fi
 	$(call print,Cleaned Documentation,$(CLEAN_COLOR))
