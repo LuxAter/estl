@@ -1,7 +1,7 @@
 SHELL = /bin/bash
 
 export NAME= estl.out
-export LINK=  
+export LINK=
 export INCLUDE=
 export TYPE= lib
 
@@ -14,15 +14,15 @@ export DOC_DIR= docs
 
 export BASE_PATH=$(shell pwd)
 
-export COMPILER=clang++
-export CXXFLAGS= -MMD -std=c++14 -w -c
+export COMPILER=clang++-5.0
+export CXXFLAGS= -MMD -std=c++17 -w -c
 
 export INSTALL_PATH=/usr/local
 
-export GCOV_LINK = --coverage
-export GCOV_FLAG = -fprofile-arcs -ftest-coverage -fno-inline -fno-inline-small-functions -fno-default-inline
-# export GCOV_LINK =
-# export GCOV_FLAG =
+# export GCOV_LINK = --coverage
+# export GCOV_FLAG = -fprofile-arcs -ftest-coverage -fno-inline -fno-inline-small-functions -fno-default-inline
+export GCOV_LINK =
+export GCOV_FLAG =
 
 export COMMON_INCLUDE=-I$(BASE_PATH)/$(INCLUDE_DIR) $(INCLUDE)
 
@@ -60,6 +60,7 @@ endef
 
 .PHONY : all
 all: external source test
+# all: source
 
 .PHONY : clean
 clean: clean-source clean-test

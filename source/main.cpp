@@ -13,9 +13,14 @@ int main(int argc, char const* argv[]) {
   std::cout << a << "*" << b << "=" << estl::dot(a, b) << "\n";
   std::cout << a << "X" << b << "=" << estl::cross(a, b) << "\n";
   estl::vector<double, 4> c = {1, 0, 0, 0}, d = {0, 1, 0, 0}, e = {0, 0, 1, 0};
-  std::cout << c << d << e << "=" << estl::cross(c, d, e) << '\n';
+  // std::cout << c << d << e << "=" << estl::cross(c, d, e) << '\n';
 
-  estl::matrix<double, 3, 3> mat = {{2, 3, 4}, {6, 7, 8}, {10, 11, 12}};
-  std::cout << mat << "->" << estl::determinant(mat) << "\n";
+  // estl::matrix<double, 3, 3> mat = {{2, 3, 4}, {6, 7, 8}, {10, 11, 12}};
+  estl::matrix<double, 3, 3> mat = { 0, 1, 2, 3, 4, 5, 6, 7, 8};
+  std::cout << mat <<"\n";
+  // mat.at(1, 2) = -3.1415;
+  double val = estl::determinant(mat);
+  std::cout << val << "\n";
+  // std::cout << mat << "->" << estl::determinant(mat) << "\n";
   return 0;
 }

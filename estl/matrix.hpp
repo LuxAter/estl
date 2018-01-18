@@ -211,17 +211,20 @@ class matrix {
     _Al al;
     __data = al.allocate(size());
     std::copy(mat.begin(), mat.end(), __data);
+    return *this;
   }
   matrix& operator=(const std::initializer_list<_Tp>& mat) {
     _Al al;
     __data = al.allocate(size());
     std::copy(mat.begin(), mat.end(), __data);
+    return *this;
   }
   matrix& operator=(
       const std::initializer_list<std::initializer_list<_Tp>>& mat) {
     _Al al;
     __data = al.allocate(size());
     std::copy(mat.begin()->begin(), mat.end()->begin() + size(), __data);
+    return *this;
   }
   /** @} */
 
@@ -1370,7 +1373,8 @@ _Tp determinant(const estl::matrix<_Tp, _Nr, _Nc>& lhs) {
       _Tp mult = mat.at(row, it) / mat.at(it, it);
       for (typename estl::matrix<_Tp, _Nr, _Nc>::size_type column = it;
            column != mat.columns(); column++) {
-        mat.at(row, column) -= mult * mat.at(it, column);
+        // TODO(2018-01-16, Arden): This line cause major fault!
+        mat.at(row, column) -= (mult * mat.at(it, column));
       }
     }
   }
