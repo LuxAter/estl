@@ -31,6 +31,7 @@
 #ifndef ESTL_VECTOR_HPP_
 #define ESTL_VECTOR_HPP_
 
+#include <cmath>
 #include <initializer_list>
 #include <iostream>
 
@@ -95,11 +96,13 @@ class vector {
     _Al al;
     data_ = al.allocate(size());
     std::copy(vec.begin(), vec.end(), data_);
+    return *this;
   }
   vector& operator=(const std::initializer_list<_Tp>& vec) {
     _Al al;
     data_ = al.allocate(size());
     std::copy(vec.begin(), vec.end(), data_);
+    return *this;
   }
 
   reference at(size_type i) {
@@ -381,10 +384,65 @@ estl::vector<_Tp, _N> cross(estl::vector<_Tp, _N> vec, _Vecs... args) {
         }
       }
     }
-    std::cout << mat << "<<\n";
     res[i] = estl::determinant(mat);
-    std::cout << res[i] << "<<\n";
   }
+  return res;
+}
+
+template <typename _Tp, std::size_t _N>
+_Tp length(estl::vector<_Tp, _N> vec) {
+  _Tp total;
+  for (typename estl::vector<_Tp, _N>::iterator it = vec.begin();
+       it != vec.end(); ++it) {
+    total += pow(*it, 2.0);
+  }
+  return pow(total, 0.5);
+}
+
+template <typename _Tp, std::size_t _N>
+estl::vector<_Tp, _N> normalize(estl::vector<_Tp, _N> vec) {
+  estl::vector<_Tp, _N> new_vec(vec);
+  _Tp len = length(vec);
+  for (typename estl::vector<_Tp, _N>::iterator it = new_vec.begin();
+       it != new_vec.end(); it++) {
+    *it /= len;
+  }
+  return new_vec;
+}
+
+template <typename _Tp, std::size_t _N>
+estl::vector<_Tp, _N> SphericalCoordinates(estl::vector<_Tp, _N> vec) {
+  estl::vector<_Tp, _N> res;
+  *res.begin() = estl::length(vec);
+  for (typename estl::vector<_Tp, _N>::iterator it = vec.begin(),
+                                                res_it = res.begin() + 1;
+       it != vec.end() - 1 && res_it != res.end(); ++it, ++res_it) {
+    _Tp len(0);
+    for (typename estl::vector<_Tp, _N>::iterator sub = it; sub != vec.end();
+         ++sub) {
+      len += pow(*sub, 2.0);
+    }
+    len = pow(len, 0.5);
+    if (it == vec.end() - 2 && vec.back() < 0) {
+      *res_it = (2 * M_PI) - acos(*it / len);
+    } else {
+      *res_it = acos(*it / len);
+    }
+  }
+  return res;
+}
+
+template <typename _Tp, std::size_t _N>
+estl::vector<_Tp, _N> CartesianCoordinates(estl::vector<_Tp, _N> vec) {
+  estl::vector<_Tp, _N> res;
+  _Tp prod = vec[0];
+  for (typename estl::vector<_Tp, _N>::iterator it = vec.begin() + 1,
+                                                res_it = res.begin();
+       it != vec.end() && res_it != res.end(); ++it, ++res_it) {
+    *res_it = prod * cos(*it);
+    prod *= sin(*it);
+  }
+  *(res.end() - 1) = prod;
   return res;
 }
 
