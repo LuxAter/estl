@@ -39,32 +39,111 @@
 #include "variadic.hpp"
 
 namespace estl {
+
+/**
+ * @brief A standard container representing a mathmatical vector.
+ *
+ * `estl::matrix` is a container that encapsulates fixed size mathmatical
+ * vectors.
+ *
+ * This container is an aggregate type with the same sematics as a struct
+ * holding a C-stype array `T[N]` as its only non-static data member. Elements
+ * of this container can be referenced witha  single index.
+ *
+ * @tparam _Tp Type of element. Required to be a complete type.
+ * @tparam _N Number of elements in the container.
+ * @tparam _Al Allocator type, Not necessary in most situations.
+ */
 template <typename _Tp, std::size_t _N, typename _Al = std::allocator<_Tp>>
 class vector {
  public:
+  /**
+   * @brief _Al
+   */
   typedef _Al allocator_type;
+  /**
+   * @brief _Tp
+   */
   typedef typename _Al::value_type value_type;
+  /**
+   * @brief value_type&
+   */
   typedef typename _Al::reference reference;
+  /**
+   * @brief const value_type&
+   */
   typedef typename _Al::const_reference const_reference;
+  /**
+   * @brief std::ptrdiff_t
+   */
   typedef typename _Al::difference_type difference_type;
+  /**
+   * @brief std::size_t
+   */
   typedef typename _Al::size_type size_type;
+  /**
+   * @brief value_type*
+   */
   typedef typename _Al::pointer pointer;
+  /**
+   * @brief const value_type*
+   */
   typedef typename _Al::const_pointer const_pointer;
+  /**
+   * @brief Random access iterator
+   */
   typedef typename _Al::pointer iterator;
+  /**
+   * @brief Constant random access iterator
+   */
   typedef typename _Al::const_pointer const_iterator;
+  /**
+   * @brief std::reverse_iterator<iterator>
+   */
   typedef std::reverse_iterator<iterator> reverse_iterator;
+  /**
+   * @brief std::reverse_iterator<const_iterator>
+   */
   typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
+  /**
+   * @name Constructor
+   * @{ */
+
+  /**
+   * @brief Default vector constructor
+   *
+   * THis allocates the memory required for the desired vector.
+   */
   vector() {
     _Al al;
     data_ = al.allocate(size());
     fill(_Tp());
   }
+  /**
+   * @brief Vector constructor
+   *
+   * Allocates the memory required for the vector and fills every element with
+   * the supplied value.
+   *
+   * @param val
+   */
   vector(_Tp val) {
     _Al al;
     data_ = al.allocate(size());
     fill(val);
   }
+  /**
+   * @brief Vector constructor
+   *
+   * Allocates the memory required for the vector, and copies the elements fo
+   * the initializer list to the elements of the vector.
+   *
+   * @throw out_of_range Thows out of range if initializer_list is greater than
+   * the size of the matrix.
+   *
+   * @param vec initializer_list of elements to copy.
+   */
   vector(const std::initializer_list<_Tp>& vec) {
     _Al al;
     data_ = al.allocate(size());
@@ -75,22 +154,57 @@ class vector {
     }
     std::copy(vec.begin(), vec.end(), data_);
   }
+  /**
+   * @brief Vector constructor
+   *
+   * Allocates the memory required for the vector, and copies the contents of
+   * the memory between `first` and `last` to the elements of the vector.
+   *
+   * @tparam _InputIt Type of iterator of source data.
+   * @param first First location in memory of source data.
+   * @param last Last location in memory of source data.
+   */
   template <class _InputIt>
   vector(_InputIt first, _InputIt last) {
     _Al al;
     data_ = al.allocate(size());
     std::copy(first, last, data_);
   }
+  /**
+   * @brief Copy constructor
+   *
+   * Allocates the memory required for the vector, and copies the elements of
+   * `vec` to the elements of the vector.
+   *
+   * @param vec Vector to copy.
+   */
   vector(const vector& vec) {
     _Al al;
     data_ = al.allocate(size());
     std::copy(vec.begin(), vec.end(), data_);
   }
 
+  /**  @} */
+
+  /**
+   * @name Destructor
+   * @{ */
+
+  /**
+   * @brief Destructor
+   *
+   * Deallocates the memory for the vector.
+   */
   ~vector() {
     _Al al;
     al.deallocate(data_, size());
   }
+
+  /**  @} */
+
+  /**
+   * @name Operator=
+   * @{ */
 
   vector& operator=(const vector& vec) {
     _Al al;
@@ -105,6 +219,25 @@ class vector {
     return *this;
   }
 
+  /**  @} */
+
+  /**
+   * @name Element Access
+   * @{ */
+
+  /**
+   * @brief Access specified element with bounds checking.
+   *
+   * Returns a reference to the element at specified location `i`, with bounds
+   * checking. If `i` is not withing the range of the container, an exception of
+   * type `std::out_of_range` is thrown.
+   *
+   * @throw out_of_range If `i` is outside of the range of the container.
+   *
+   * @param i Position of the element to return.
+   *
+   * @return Reference to the requested element.
+   */
   reference at(size_type i) {
     if (i >= size()) {
       std::__throw_out_of_range_fmt(
@@ -113,7 +246,19 @@ class vector {
       return reference(data_[i]);
     }
   }
-
+  /**
+   * @brief Access specified element with bounds checking.
+   *
+   * Returns a reference to the element at specified location `i`, with bounds
+   * checking. If `i` is not withing the range of the container, an exception of
+   * type `std::out_of_range` is thrown.
+   *
+   * @throw out_of_range If `i` is outside of the range of the container.
+   *
+   * @param i Position of the element to return.
+   *
+   * @return Reference to the requested element.
+   */
   constexpr const_reference at(size_type i) const {
     if (i >= size()) {
       std::__throw_out_of_range_fmt(
@@ -122,18 +267,86 @@ class vector {
       return const_reference(data_[i]);
     }
   }
+  /**
+   * @brief Access specified element.
+   *
+   * Returns a reference to the element at specified location `i`. No bounds
+   * checking is preformed.
+   *
+   * @param i Position of the element to return.
+   *
+   * @return Reference to the requested element.
+   */
   reference operator[](size_type i) noexcept { return reference(data_[i]); }
+  /**
+   * @brief Access specified element.
+   *
+   * Returns a reference to the element at specified location `i`. No bounds
+   * checking is preformed.
+   *
+   * @param i Position of the element to return.
+   *
+   * @return Reference to the requested element.
+   */
   constexpr const_reference operator[](size_type i) const noexcept {
     return const_reference(data_[i]);
   }
+  /**
+   * @brief Access the first element.
+   *
+   * Returns a reference to the first element in the container. Calling `front` on an empty container is undefined.
+   *
+   * @return Reference to the first element.
+   */
   reference front() { return reference(data_[0]); }
+  /**
+   * @brief Access the first element.
+   *
+   * Returns a reference to the first element in the container. Calling `front` on an empty container is undefined.
+   *
+   * @return Reference to the first element.
+   */
   constexpr const_reference font() const { return const_reference(data_[0]); }
+  /**
+   * @brief Access the last element.
+   *
+   * Returns reference to the last element in the container. Calling `back` on an empty container is undefined.
+   *
+   * @return Reference to the last element.
+   */
   reference back() { return reference(data_[size() - 1]); }
+  /**
+   * @brief Access the last element.
+   *
+   * Returns reference to the last element in the container. Calling `back` on an empty container is undefined.
+   *
+   * @return Reference to the last element.
+   */
   constexpr const_reference back() const {
     return const_reference(data_[size() - 1]);
   }
+  /**
+   * @brief Direct access to the underlying array.
+   *
+   * Returns pointer to the underlying array serving as element storage. The pointer is such that range `[data(); data() + size()]` is always a valid range, even if the container is empty.
+   *
+   * @return Pointer to the underlying element storage. For non-empty containers, the returned pointer compares equal to the address of the first element.
+   */
   pointer data() { return data_; }
+  /**
+   * @brief Direct access to the underlying array.
+   *
+   * Returns pointer to the underlying array serving as element storage. The pointer is such that range `[data(); data() + size()]` is always a valid range, even if the container is empty.
+   *
+   * @return Pointer to the underlying element storage. For non-empty containers, the returned pointer compares equal to the address of the first element.
+   */
   const_pointer data() const { return data_; }
+
+  /**  @} */
+
+  /**
+   * @name Iterators
+   * @{ */
 
   iterator begin() { return iterator(data_); }
   const_iterator begin() const { return const_iterator(data_); }
@@ -169,6 +382,8 @@ class vector {
   const_reverse_iterator crelement(size_type i) const {
     return const_reverse_iterator(data_ + i);
   }
+
+  /**  @} */
 
   bool empty() const noexcept { return size() == 0; }
   constexpr inline size_type size() const noexcept { return _N; }
