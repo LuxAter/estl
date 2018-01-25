@@ -19,10 +19,15 @@ export CXXFLAGS= -MMD -std=c++17 -w -c
 
 export INSTALL_PATH=/usr/local
 
-# export GCOV_LINK = --coverage
-# export GCOV_FLAG = -fprofile-arcs -ftest-coverage -fno-inline -fno-inline-small-functions -fno-default-inline
+export CIF=${CI}
+
+ifdef CIF
+export GCOV_LINK = --coverage
+export GCOV_FLAG = -fprofile-arcs -ftest-coverage -fno-inline -fno-inline-small-functions -fno-default-inline
+else
 export GCOV_LINK =
 export GCOV_FLAG =
+endif
 
 export COMMON_INCLUDE=-I$(BASE_PATH)/$(INCLUDE_DIR) $(INCLUDE)
 

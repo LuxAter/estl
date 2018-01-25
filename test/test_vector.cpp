@@ -107,6 +107,5 @@ TEST_F(VectorTest, Functions){
   EXPECT_EQ(estl::normalize(b), vec);
   vec = {sqrt(14.0), asin(sqrt(5.0/14.0)), atan(2.0)};
   EXPECT_EQ(estl::SphericalCoordinates(b), vec);
-  // std::cout << b << estl::CartesianCoordinates(estl::SphericalCoordinates(b)) << "\n";
   EXPECT_TRUE(VectorMatch(estl::CartesianCoordinates(estl::SphericalCoordinates(b)), b));
 }
