@@ -19,9 +19,8 @@ export CXXFLAGS= -MMD -std=c++17 -w -c
 
 export INSTALL_PATH=/usr/local
 
-export CIF=${CI}
 
-ifdef CIF
+ifdef CI
 export GCOV_LINK = --coverage
 export GCOV_FLAG = -fprofile-arcs -ftest-coverage -fno-inline -fno-inline-small-functions -fno-default-inline
 else
