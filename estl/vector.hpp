@@ -721,7 +721,7 @@ std::ostream& operator<<(std::ostream& out, const estl::vector<_Tp, _N> vec) {
   for (std::size_t i = 0; i < _N; i++) {
     out << vec[i];
     if (i != _N - 1) {
-      out << ',';
+      out << ", ";
     }
   }
   out << '>';
@@ -1249,19 +1249,24 @@ template <typename _Tp, std::size_t _N>
 estl::vector<_Tp, _N> SphericalCoordinates(estl::vector<_Tp, _N> vec) {
   estl::vector<_Tp, _N> res;
   *res.begin() = estl::length(vec);
-  for (typename estl::vector<_Tp, _N>::iterator it = vec.begin(),
-                                                res_it = res.begin() + 1;
-       it != vec.end() - 1 && res_it != res.end(); ++it, ++res_it) {
-    _Tp len(0);
-    for (typename estl::vector<_Tp, _N>::iterator sub = it; sub != vec.end();
-         ++sub) {
-      len += pow(*sub, 2.0);
-    }
-    len = pow(len, 0.5);
-    if (it == vec.end() - 2 && vec.back() < 0) {
-      *res_it = (2 * M_PI) - acos(*it / len);
-    } else {
-      *res_it = acos(*it / len);
+  if (vec.size() == 3) {
+    res[1] = acos(vec[2] / res[0]);
+    res[2] = atan(vec[1] / vec[0]);
+  } else {
+    for (typename estl::vector<_Tp, _N>::iterator it = vec.begin(),
+                                                  res_it = res.begin() + 1;
+         it != vec.end() - 1 && res_it != res.end(); ++it, ++res_it) {
+      _Tp len(0);
+      for (typename estl::vector<_Tp, _N>::iterator sub = it; sub != vec.end();
+           ++sub) {
+        len += pow(*sub, 2.0);
+      }
+      len = pow(len, 0.5);
+      if (it == vec.end() - 2 && vec.back() < 0) {
+        *res_it = (2 * M_PI) - acos(*it / len);
+      } else {
+        *res_it = acos(*it / len);
+      }
     }
   }
   return res;
@@ -1282,14 +1287,20 @@ estl::vector<_Tp, _N> SphericalCoordinates(estl::vector<_Tp, _N> vec) {
 template <typename _Tp, std::size_t _N>
 estl::vector<_Tp, _N> CartesianCoordinates(estl::vector<_Tp, _N> vec) {
   estl::vector<_Tp, _N> res;
-  _Tp prod = vec[0];
-  for (typename estl::vector<_Tp, _N>::iterator it = vec.begin() + 1,
-                                                res_it = res.begin();
-       it != vec.end() && res_it != res.end(); ++it, ++res_it) {
-    *res_it = prod * cos(*it);
-    prod *= sin(*it);
+  if (vec.size() == 3) {
+    res[0] = vec[0] * sin(vec[1]) * cos(vec[2]);
+    res[1] = vec[0] * sin(vec[1]) * sin(vec[2]);
+    res[2] = vec[0] * cos(vec[1]);
+  } else {
+    _Tp prod = vec[0];
+    for (typename estl::vector<_Tp, _N>::iterator it = vec.begin() + 1,
+                                                  res_it = res.begin();
+         it != vec.end() && res_it != res.end(); ++it, ++res_it) {
+      *res_it = prod * cos(*it);
+      prod *= sin(*it);
+    }
+    *(res.end() - 1) = prod;
   }
-  *(res.end() - 1) = prod;
   return res;
 }
 

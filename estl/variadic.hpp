@@ -34,6 +34,16 @@
 #include <vector>
 
 namespace estl {
+  /**
+   * @brief Unpacks parameter pack to a tuple.
+   *
+   * Unpacks a parameter pack to a tuple containing the parameters.
+   *
+   * @tparam _Types Type pack.
+   * @param data Parameter pack.
+   *
+   * @return Tuple of parameter pack.
+   */
 template <typename... _Types>
 std::tuple<_Types...> unpack_tuple(_Types... data) {
   return std::tuple<_Types...>(data...);
