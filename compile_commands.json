@@ -4,13 +4,8 @@
             "c++", 
             "-c", 
             "-I/home/arden/Programming/cpp/estl/estl", 
-            "-std=c++14", 
+            "-std=c++17", 
             "-w", 
-            "-fprofile-arcs", 
-            "-ftest-coverage", 
-            "-fno-inline", 
-            "-fno-inline-small-functions", 
-            "-fno-default-inline", 
             "-o", 
             "/home/arden/Programming/cpp/estl/build/source/./main.o", 
             "main.cpp"
@@ -22,16 +17,16 @@
         "arguments": [
             "c++", 
             "-c", 
-            "-isystem", 
-            "/home/arden/Programming/cpp/estl/external/googletest/googletest/include", 
-            "-I/home/arden/Programming/cpp/estl/external/googletest/googletest", 
-            "-pthread", 
+            "-I/home/arden/Programming/cpp/estl/estl", 
+            "-I/home/arden/Programming/cpp/estl/external/googletest/googletest/include", 
+            "-std=c++17", 
+            "-w", 
             "-o", 
-            "/home/arden/Programming/cpp/estl/build/gtest/gtest-all.o", 
-            "googletest/googletest/src/gtest-all.cc"
+            "/home/arden/Programming/cpp/estl/build/test/./test_vector.o", 
+            "test_vector.cpp"
         ], 
-        "directory": "/home/arden/Programming/cpp/estl/external", 
-        "file": "googletest/googletest/src/gtest-all.cc"
+        "directory": "/home/arden/Programming/cpp/estl/test", 
+        "file": "test_vector.cpp"
     }, 
     {
         "arguments": [
@@ -39,13 +34,8 @@
             "-c", 
             "-I/home/arden/Programming/cpp/estl/estl", 
             "-I/home/arden/Programming/cpp/estl/external/googletest/googletest/include", 
-            "-std=c++14", 
+            "-std=c++17", 
             "-w", 
-            "-fprofile-arcs", 
-            "-ftest-coverage", 
-            "-fno-inline", 
-            "-fno-inline-small-functions", 
-            "-fno-default-inline", 
             "-o", 
             "/home/arden/Programming/cpp/estl/build/test/./test_stream.o", 
             "test_stream.cpp"
@@ -59,33 +49,13 @@
             "-c", 
             "-I/home/arden/Programming/cpp/estl/estl", 
             "-I/home/arden/Programming/cpp/estl/external/googletest/googletest/include", 
-            "-std=c++14", 
+            "-std=c++17", 
             "-w", 
-            "-fprofile-arcs", 
-            "-ftest-coverage", 
-            "-fno-inline", 
-            "-fno-inline-small-functions", 
-            "-fno-default-inline", 
             "-o", 
             "/home/arden/Programming/cpp/estl/build/test/./test_matrix.o", 
             "test_matrix.cpp"
         ], 
         "directory": "/home/arden/Programming/cpp/estl/test", 
         "file": "test_matrix.cpp"
-    }, 
-    {
-        "arguments": [
-            "c++", 
-            "-c", 
-            "-isystem", 
-            "/home/arden/Programming/cpp/estl/external/googletest/googletest/include", 
-            "-I/home/arden/Programming/cpp/estl/external/googletest/googletest", 
-            "-pthread", 
-            "-o", 
-            "/home/arden/Programming/cpp/estl/build/gtest/gtests_main.o", 
-            "googletest/googletest/src/gtest_main.cc"
-        ], 
-        "directory": "/home/arden/Programming/cpp/estl/external", 
-        "file": "googletest/googletest/src/gtest_main.cc"
     }
 ]

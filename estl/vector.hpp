@@ -113,7 +113,7 @@ class vector {
   /**
    * @brief Default vector constructor
    *
-   * THis allocates the memory required for the desired vector.
+   * This allocates the memory required for the desired vector.
    */
   vector() {
     _Al al;
