@@ -34,6 +34,10 @@
 
 #include <iostream>
 
+#include "../any.hpp"
+
+bool operator<(const std::any lhs, const std::any rhs) { return true; }
+
 namespace estl {
 enum Action {
   ACTION_STORE = 0,
@@ -93,6 +97,12 @@ class Argument {
     ArgOpt opt = SetVariable(a);
     opt = SetVariable(b, opt);
   }
+  Argument(std::initializer_list<std::string> name, std::any a,
+           std::initializer_list<std::any> b) {
+    SetName(name);
+    ArgOpt opt = SetVariable(a);
+    opt = SetVariable(b, opt);
+  }
   Argument(const Argument& arg)
       : names_(arg.names_),
         action_(arg.action_),
@@ -133,51 +143,128 @@ class Argument {
         n_args_ = std::any_cast<NArgs>(val);
       }
     } else if (opt == ARG_OPT_ACTION) {
-      if (val.type() == typeid(std::string) ||
-          val.type() == typeid(const char*)) {
-        std::string action_str;
-        if (val.type() == typeid(std::string)) {
-          action_str = std::any_cast<std::string>(val);
-        } else {
-          action_str = std::string(std::any_cast<const char*>(val));
-        }
-        if (action_str == "store") {
-          action_ = ACTION_STORE;
-        } else if (action_str == "store_const") {
-          action_ = ACTION_STORE_CONST;
-        } else if (action_str == "store_true") {
-          action_ = ACTION_STORE_TRUE;
-        } else if (action_str == "store_false") {
-          action_ = ACTION_STORE_FALSE;
-        } else if (action_str == "append") {
-          action_ = ACTION_APPEND;
-        } else if (action_str == "append_const") {
-          action_ = ACTION_APPEND_CONST;
-        } else if (action_str == "count") {
-          action_ = ACTION_COUNT;
-        } else if (action_str == "help") {
-          action_ = ACTION_HELP;
-        } else if (action_str == "version") {
-          action_ = ACTION_VERSION;
-        }
-      } else if (val.type() == typeid(Action)) {
-        action_ = std::any_cast<Action>(val);
-      }
+      SetAction(val);
     } else if (opt == ARG_OPT_N_ARGS) {
-      if (val.type() == typeid(std::string) ||
-          val.type() == typeid(const char*)) {
-      } else if (val.type() == typeid(int)) {
+      SetNArgs(val);
+    } else if (opt == ARG_OPT_ARG_COUNT) {
+      if (val.type() == typeid(int)) {
         n_args_count_ = std::any_cast<int>(val);
+      }
+    } else if (opt == ARG_OPT_CONST) {
+      const_ = val;
+    } else if (opt == ARG_OPT_DEFAULT) {
+      default_ = val;
+    } else if (opt == ARG_OPT_CHOICES) {
+      SetChoices(val);
+    } else if (opt == ARG_OPT_REQUIRED) {
+      if (val.type() == typeid(bool)) {
+        required_ = std::any_cast<bool>(val);
+      }
+    } else if (opt == ARG_OPT_HELP) {
+      if (val.type() == typeid(std::string)) {
+        help_ = std::any_cast<std::string>(val);
+      } else if (val.type() == typeid(const char*)) {
+        help_ = std::string(std::any_cast<const char*>(val));
+      }
+    } else if (opt == ARG_OPT_METAVAR) {
+      if (val.type() == typeid(std::string)) {
+        metavar_ = std::any_cast<std::string>(val);
+      } else if (val.type() == typeid(const char*)) {
+        metavar_ = std::string(std::any_cast<const char*>(val));
+      }
+    } else if (opt == ARG_OPT_DEST) {
+      if (val.type() == typeid(std::string)) {
+        dest_ = std::any_cast<std::string>(val);
+      } else if (val.type() == typeid(const char*)) {
+        dest_ = std::string(std::any_cast<const char*>(val));
+      }
+    }
+    return ARG_OPT_NONE;
+  }
+
+  void SetAction(std::any val) {
+    if (val.type() == typeid(std::string) ||
+        val.type() == typeid(const char*)) {
+      std::string action_str;
+      if (val.type() == typeid(std::string)) {
+        action_str = std::any_cast<std::string>(val);
+      } else {
+        action_str = std::string(std::any_cast<const char*>(val));
+      }
+      if (action_str == "store") {
+        action_ = ACTION_STORE;
+      } else if (action_str == "store_const") {
+        action_ = ACTION_STORE_CONST;
+      } else if (action_str == "store_true") {
+        action_ = ACTION_STORE_TRUE;
+      } else if (action_str == "store_false") {
+        action_ = ACTION_STORE_FALSE;
+      } else if (action_str == "append") {
+        action_ = ACTION_APPEND;
+      } else if (action_str == "append_const") {
+        action_ = ACTION_APPEND_CONST;
+      } else if (action_str == "count") {
+        action_ = ACTION_COUNT;
+      } else if (action_str == "help") {
+        action_ = ACTION_HELP;
+      } else if (action_str == "version") {
+        action_ = ACTION_VERSION;
+      }
+    } else if (val.type() == typeid(Action)) {
+      action_ = std::any_cast<Action>(val);
+    }
+  }
+
+  void SetNArgs(std::any val) {
+    if (val.type() == typeid(std::string) ||
+        val.type() == typeid(const char*)) {
+      std::string args_str;
+      if (val.type() == typeid(std::string)) {
+        args_str = std::any_cast<std::string>(val);
+      } else {
+        args_str = std::string(std::any_cast<const char*>(val));
+      }
+      if (args_str == "one") {
+        n_args_ = ARGS_ONE;
+      } else if (args_str == "n") {
+        n_args_ = ARGS_N;
+      } else if (args_str == "?") {
+        n_args_ = ARGS_OPTIONAL;
+      } else if (args_str == "*") {
+        n_args_ = ARGS_KLEENE_STAR;
+      } else if (args_str == "+") {
+        n_args_ = ARGS_KLEENE_PLUS;
+      } else if (args_str.find_first_not_of("0123456789") ==
+                 std::string::npos) {
+        n_args_count_ = stoi(args_str);
         if (n_args_count_ == 1) {
           n_args_ = ARGS_ONE;
         } else {
           n_args_ = ARGS_N;
         }
-      } else if (val.type() == typeid(NArgs)) {
-        n_args_ = std::any_cast<NArgs>(val);
       }
+    } else if (val.type() == typeid(int)) {
+      n_args_count_ = std::any_cast<int>(val);
+      if (n_args_count_ == 1) {
+        n_args_ = ARGS_ONE;
+      } else {
+        n_args_ = ARGS_N;
+      }
+    } else if (val.type() == typeid(NArgs)) {
+      n_args_ = std::any_cast<NArgs>(val);
     }
-    return ARG_OPT_NONE;
+  }
+
+  void SetChoices(std::any val) {
+    if (val.type() == typeid(std::initializer_list<std::any>)) {
+      choices_ = std::set<std::any>(
+          std::any_cast<std::initializer_list<std::any>>(val));
+    } else if (val.type() == typeid(std::set<std::any>)) {
+      choices_ = std::any_cast<std::set<std::any>>(val);
+    } else if (val.type() == typeid(std::vector<std::any>)) {
+      std::vector<std::any> vec = std::any_cast<std::vector<std::any>>(val);
+      choices_ = std::set<std::any>(vec.begin(), vec.end());
+    }
   }
 
   //  private:
