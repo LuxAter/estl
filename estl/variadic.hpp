@@ -30,6 +30,7 @@
 #ifndef ESTL_VARIADIC_HPP_
 #define ESTL_VARIADIC_HPP_
 
+#include <any>
 #include <tuple>
 #include <vector>
 
@@ -78,6 +79,18 @@ std::vector<_T> unpack_vector(_T first) {
 template <typename _T, typename... _Types>
 std::vector<_T> unpack_vector(_T first, _Types... data) {
   std::vector<_T> vec = unpack_vector(data...);
+  vec.insert(vec.begin(), first);
+  return vec;
+}
+
+template <typename _T>
+std::vector<std::any> unpack_any(_T first) {
+  return std::vector<std::any>{first};
+}
+
+template <typename _T, typename... _Types>
+std::vector<std::any> unpack_any(_T first, _Types... data) {
+  std::vector<std::any> vec = unpack_any(data...);
   vec.insert(vec.begin(), first);
   return vec;
 }

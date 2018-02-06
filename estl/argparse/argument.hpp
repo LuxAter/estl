@@ -36,8 +36,6 @@
 
 #include "../any.hpp"
 
-bool operator<(const std::any lhs, const std::any rhs) { return true; }
-
 namespace estl {
 enum Action {
   ACTION_STORE = 0,
@@ -70,8 +68,16 @@ enum ArgOpt {
   ARG_OPT_REQUIRED = 7,
   ARG_OPT_HELP = 8,
   ARG_OPT_METAVAR = 9,
-  ARG_OPT_DEST = 10
+  ARG_OPT_DEST = 10,
+  ARG_OPT_END = 11
 };
+
+struct any_comp {
+  bool operator()(const std::any& lhs, const std::any& rhs) {
+    return lhs < rhs;
+  }
+};
+
 class Argument {
  public:
   Argument() {}
@@ -81,28 +87,28 @@ class Argument {
                name) {
     SetName(name);
   }
-  Argument(std::initializer_list<std::string> name, std::any a) {
+  Argument(std::initializer_list<std::string> name,
+           std::initializer_list<std::any> args) {
+    std::vector<std::any> args_(args);
     SetName(name);
-    ArgOpt opt = SetVariable(a);
+    ArgOpt opt = ARG_OPT_NONE;
+    for (std::vector<std::any>::iterator it = args_.begin(); it != args_.end();
+         ++it) {
+      opt = SetVariable(*it, opt);
+    }
   }
   Argument(std::variant<std::initializer_list<std::string>, std::string,
                         std::set<std::string>>
                name,
-           std::any a) {
+           std::vector<std::any> args) {
     SetName(name);
-    ArgOpt opt = SetVariable(a);
+    ArgOpt opt = ARG_OPT_NONE;
+    for (std::vector<std::any>::iterator it = args.begin(); it != args.end();
+         ++it) {
+      opt = SetVariable(*it, opt);
+    }
   }
-  Argument(std::initializer_list<std::string> name, std::any a, std::any b) {
-    SetName(name);
-    ArgOpt opt = SetVariable(a);
-    opt = SetVariable(b, opt);
-  }
-  Argument(std::initializer_list<std::string> name, std::any a,
-           std::initializer_list<std::any> b) {
-    SetName(name);
-    ArgOpt opt = SetVariable(a);
-    opt = SetVariable(b, opt);
-  }
+
   Argument(const Argument& arg)
       : names_(arg.names_),
         action_(arg.action_),
@@ -141,6 +147,21 @@ class Argument {
         action_ = std::any_cast<Action>(val);
       } else if (val.type() == typeid(NArgs)) {
         n_args_ = std::any_cast<NArgs>(val);
+      } else if (val.type() == typeid(bool)) {
+        required_ = std::any_cast<bool>(val);
+      } else if (val.type() == typeid(int)) {
+        n_args_count_ = std::any_cast<int>(val);
+        if (n_args_count_ == 1) {
+          n_args_ = ARGS_ONE;
+        } else {
+          n_args_ = ARGS_N;
+        }
+      } else if (val.type() == typeid(std::initializer_list<std::any>) ||
+                 val.type() == typeid(std::set<std::any, estl::any_comp>) ||
+                 val.type() == typeid(std::vector<std::any>)) {
+        SetChoices(val);
+      } else {
+        default_ = val;
       }
     } else if (opt == ARG_OPT_ACTION) {
       SetAction(val);
@@ -257,13 +278,13 @@ class Argument {
 
   void SetChoices(std::any val) {
     if (val.type() == typeid(std::initializer_list<std::any>)) {
-      choices_ = std::set<std::any>(
+      choices_ = std::set<std::any, estl::any_comp>(
           std::any_cast<std::initializer_list<std::any>>(val));
-    } else if (val.type() == typeid(std::set<std::any>)) {
-      choices_ = std::any_cast<std::set<std::any>>(val);
+    } else if (val.type() == typeid(std::set<std::any, estl::any_comp>)) {
+      choices_ = std::any_cast<std::set<std::any, estl::any_comp>>(val);
     } else if (val.type() == typeid(std::vector<std::any>)) {
       std::vector<std::any> vec = std::any_cast<std::vector<std::any>>(val);
-      choices_ = std::set<std::any>(vec.begin(), vec.end());
+      choices_ = std::set<std::any, estl::any_comp>(vec.begin(), vec.end());
     }
   }
 
@@ -273,13 +294,72 @@ class Argument {
   NArgs n_args_ = ARGS_ONE;
   unsigned int n_args_count_ = 1;
   std::any const_, default_;
-  std::set<std::any> choices_;
+  std::set<std::any, estl::any_comp> choices_;
   bool required_ = true;
   std::string help_, metavar_, dest_;
 };
 
+bool operator<(const estl::Argument& lhs, const estl::Argument& rhs) {
+  return lhs.names_ < rhs.names_;
+}
+
+std::ostream& operator<<(std::ostream& out, const std::any& lhs) {
+  if (lhs.type() == typeid(bool)) {
+    out << std::any_cast<bool>(lhs);
+  } else if (lhs.type() == typeid(char)) {
+    out << std::any_cast<char>(lhs);
+  } else if (lhs.type() == typeid(signed char)) {
+    out << std::any_cast<signed char>(lhs);
+  } else if (lhs.type() == typeid(unsigned char)) {
+    out << std::any_cast<unsigned char>(lhs);
+  } else if (lhs.type() == typeid(signed short int)) {
+    out << std::any_cast<signed short int>(lhs);
+  } else if (lhs.type() == typeid(unsigned short int)) {
+    out << std::any_cast<unsigned short int>(lhs);
+  } else if (lhs.type() == typeid(signed int)) {
+    out << std::any_cast<signed int>(lhs);
+  } else if (lhs.type() == typeid(unsigned int)) {
+    out << std::any_cast<unsigned int>(lhs);
+  } else if (lhs.type() == typeid(signed long int)) {
+    out << std::any_cast<signed long int>(lhs);
+  } else if (lhs.type() == typeid(unsigned long int)) {
+    out << std::any_cast<unsigned long int>(lhs);
+  } else if (lhs.type() == typeid(signed long long int)) {
+    out << std::any_cast<signed long long int>(lhs);
+  } else if (lhs.type() == typeid(unsigned long long int)) {
+    out << std::any_cast<unsigned long long int>(lhs);
+  } else if (lhs.type() == typeid(float)) {
+    out << std::any_cast<float>(lhs);
+  } else if (lhs.type() == typeid(double)) {
+    out << std::any_cast<double>(lhs);
+  } else if (lhs.type() == typeid(long double)) {
+    out << std::any_cast<long double>(lhs);
+  } else if (lhs.type() == typeid(const char*)) {
+    out << std::any_cast<const char*>(lhs);
+  } else if (lhs.type() == typeid(std::string)) {
+    out << std::any_cast<std::string>(lhs);
+  } else {
+    out << "UNKNOWN";
+  }
+  return out;
+}
+
 template <typename _T>
 std::ostream& operator<<(std::ostream& out, const std::set<_T>& st) {
+  out << "{";
+  for (typename std::set<_T>::const_iterator it = st.begin(); it != st.end();
+       ++it) {
+    out << *it;
+    if (it != --(st.end())) {
+      out << ", ";
+    }
+  }
+  out << "}";
+  return out;
+}
+
+template <typename _T, typename _C>
+std::ostream& operator<<(std::ostream& out, const std::set<_T, _C>& st) {
   out << "{";
   for (typename std::set<_T>::const_iterator it = st.begin(); it != st.end();
        ++it) {
@@ -297,8 +377,9 @@ std::ostream& operator<<(std::ostream& out, const Argument& lhs) {
   out << "Action: " << lhs.action_ << "\n";
   out << "N Args: " << lhs.n_args_ << "\n";
   out << "N Args Count: " << lhs.n_args_count_ << "\n";
-  // out << "Const: " << lhs.const_ << "\n";
-  // out << "Default: " << lhs.default_ << "\n";
+  out << "Const: " << lhs.const_ << "\n";
+  out << "Default: " << lhs.default_ << "\n";
+  out << "Choices: " << lhs.choices_ << "\n";
   out << "Required: " << lhs.required_ << "\n";
   out << "Help: " << lhs.help_ << "\n";
   out << "Metavar: " << lhs.metavar_ << "\n";
