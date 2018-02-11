@@ -8,10 +8,11 @@
 #include <set>
 #include <variant>
 
-#include "any.hpp"
-#include "argparse/data.hpp"
+// #include "any.hpp"
 
-#include "argparse.hpp"
+#include "variable.hpp"
+
+// #include "argparse.hpp"
 // #include "argparse/argument.hpp"
 // #include "matrix.hpp"
 // #include "stream.hpp"
@@ -21,12 +22,10 @@
 void tmp(std::string tmp) { std::cout << "a\n"; }
 
 int main(int argc, char const* argv[]) {
-  estl::argparse::DataValue val;
-
-  signed short int valid = val;
-  signed int inv = val;
-  std::cout << valid << ":" << inv << "\n";
-
+  estl::Variable var(3.1415);
+  std::cout << var;
+  var = "Hello World!";
+  std::cout << var;
   //     estl::ArgumentParser parser("This is an example parser",
   //                                 "This will go after the options");
   // parser.SetVersion("v0.3.5");
