@@ -206,6 +206,261 @@ class Variable {
     return value_;
   }
 
+  void PushBack(estl::Variable val) {
+    switch (val.Type()) {
+      case BOOL: {
+        PushBack(val.GetBool());
+        break;
+      }
+      case CHAR: {
+        PushBack(val.GetChar());
+        break;
+      }
+      case SIGNED_CHAR: {
+        PushBack(val.GetSignedChar());
+        break;
+      }
+      case UNSIGNED_CHAR: {
+        PushBack(val.GetUnsignedChar());
+        break;
+      }
+      case SIGNED_SHORT_INT: {
+        PushBack(val.GetSignedShortInt());
+        break;
+      }
+      case UNSIGNED_SHORT_INT: {
+        PushBack(val.GetUnsignedShortInt());
+        break;
+      }
+      case SIGNED_INT: {
+        PushBack(val.GetSignedInt());
+        break;
+      }
+      case UNSIGNED_INT: {
+        PushBack(val.GetUnsignedInt());
+        break;
+      }
+      case SIGNED_LONG_INT: {
+        PushBack(val.GetSignedLongInt());
+        break;
+      }
+      case UNSIGNED_LONG_INT: {
+        PushBack(val.GetUnsignedLongInt());
+        break;
+      }
+      case SIGNED_LONG_LONG_INT: {
+        PushBack(val.GetSignedLongLongInt());
+        break;
+      }
+      case UNSIGNED_LONG_LONG_INT: {
+        PushBack(val.GetUnsignedLongLongInt());
+        break;
+      }
+      case FLOAT: {
+        PushBack(val.GetFloat());
+        break;
+      }
+      case DOUBLE: {
+        PushBack(val.GetDouble());
+        break;
+      }
+      case LONG_DOUBLE: {
+        PushBack(val.GetLongDouble());
+        break;
+      }
+      case STRING: {
+        PushBack(val.GetString());
+        break;
+      }
+      case CHAR_ARRAY: {
+        PushBack(val.GetCharArray());
+        break;
+      }
+    }
+  }
+  void PushBack(bool val) {
+    if (is_valid_ == true &&
+        std::holds_alternative<std::vector<bool>>(value_) == true) {
+      std::vector<bool> vec = std::get<std::vector<bool>>(value_);
+      vec.push_back(val);
+      value_ = vec;
+    } else if (is_valid_ == false) {
+      value_ = std::vector<bool>{val};
+    }
+  }
+  void PushBack(char val) {
+    if (is_valid_ == true &&
+        std::holds_alternative<std::vector<char>>(value_) == true) {
+      std::vector<char> vec = std::get<std::vector<char>>(value_);
+      vec.push_back(val);
+      value_ = vec;
+    } else if (is_valid_ == false) {
+      value_ = std::vector<char>{val};
+    }
+  }
+  void PushBack(signed char val) {
+    if (is_valid_ == true &&
+        std::holds_alternative<std::vector<signed char>>(value_) == true) {
+      std::vector<signed char> vec = std::get<std::vector<signed char>>(value_);
+      vec.push_back(val);
+      value_ = vec;
+    } else if (is_valid_ == false) {
+      value_ = std::vector<signed char>{val};
+    }
+  }
+  void PushBack(unsigned char val) {
+    if (is_valid_ == true &&
+        std::holds_alternative<std::vector<unsigned char>>(value_) == true) {
+      std::vector<unsigned char> vec =
+          std::get<std::vector<unsigned char>>(value_);
+      vec.push_back(val);
+      value_ = vec;
+    } else if (is_valid_ == false) {
+      value_ = std::vector<unsigned char>{val};
+    }
+  }
+  void PushBack(signed short int val) {
+    if (is_valid_ == true &&
+        std::holds_alternative<std::vector<signed short int>>(value_) == true) {
+      std::vector<signed short int> vec =
+          std::get<std::vector<signed short int>>(value_);
+      vec.push_back(val);
+      value_ = vec;
+    } else if (is_valid_ == false) {
+      value_ = std::vector<signed short int>{val};
+    }
+  }
+  void PushBack(unsigned short int val) {
+    if (is_valid_ == true &&
+        std::holds_alternative<std::vector<unsigned short int>>(value_) ==
+            true) {
+      std::vector<unsigned short int> vec =
+          std::get<std::vector<unsigned short int>>(value_);
+      vec.push_back(val);
+      value_ = vec;
+    } else if (is_valid_ == false) {
+      value_ = std::vector<unsigned short int>{val};
+    }
+  }
+  void PushBack(signed int val) {
+    if (is_valid_ == true &&
+        std::holds_alternative<std::vector<signed int>>(value_) == true) {
+      std::vector<signed int> vec = std::get<std::vector<signed int>>(value_);
+      vec.push_back(val);
+      value_ = vec;
+    } else if (is_valid_ == false) {
+      value_ = std::vector<signed int>{val};
+    }
+  }
+  void PushBack(unsigned int val) {
+    if (is_valid_ == true &&
+        std::holds_alternative<std::vector<unsigned int>>(value_) == true) {
+      std::vector<unsigned int> vec =
+          std::get<std::vector<unsigned int>>(value_);
+      vec.push_back(val);
+      value_ = vec;
+    } else if (is_valid_ == false) {
+      value_ = std::vector<unsigned int>{val};
+    }
+  }
+  void PushBack(signed long int val) {
+    if (is_valid_ == true &&
+        std::holds_alternative<std::vector<signed long int>>(value_) == true) {
+      std::vector<signed long int> vec =
+          std::get<std::vector<signed long int>>(value_);
+      vec.push_back(val);
+      value_ = vec;
+    } else if (is_valid_ == false) {
+      value_ = std::vector<signed long int>{val};
+    }
+  }
+  void PushBack(unsigned long int val) {
+    if (is_valid_ == true &&
+        std::holds_alternative<std::vector<unsigned long int>>(value_) ==
+            true) {
+      std::vector<unsigned long int> vec =
+          std::get<std::vector<unsigned long int>>(value_);
+      vec.push_back(val);
+      value_ = vec;
+    } else if (is_valid_ == false) {
+      value_ = std::vector<unsigned long int>{val};
+    }
+  }
+  void PushBack(signed long long int val) {
+    if (is_valid_ == true &&
+        std::holds_alternative<std::vector<signed long long int>>(value_) ==
+            true) {
+      std::vector<signed long long int> vec =
+          std::get<std::vector<signed long long int>>(value_);
+      vec.push_back(val);
+      value_ = vec;
+    } else if (is_valid_ == false) {
+      value_ = std::vector<signed long long int>{val};
+    }
+  }
+  void PushBack(unsigned long long int val) {
+    if (is_valid_ == true &&
+        std::holds_alternative<std::vector<unsigned long long int>>(value_) ==
+            true) {
+      std::vector<unsigned long long int> vec =
+          std::get<std::vector<unsigned long long int>>(value_);
+      vec.push_back(val);
+      value_ = vec;
+    } else if (is_valid_ == false) {
+      value_ = std::vector<unsigned long long int>{val};
+    }
+  }
+  void PushBack(float val) {
+    if (is_valid_ == true &&
+        std::holds_alternative<std::vector<float>>(value_) == true) {
+      std::vector<float> vec = std::get<std::vector<float>>(value_);
+      vec.push_back(val);
+      value_ = vec;
+    } else if (is_valid_ == false) {
+      value_ = std::vector<float>{val};
+    }
+  }
+  void PushBack(double val) {
+    if (is_valid_ == true &&
+        std::holds_alternative<std::vector<double>>(value_) == true) {
+      std::vector<double> vec = std::get<std::vector<double>>(value_);
+      vec.push_back(val);
+      value_ = vec;
+    } else if (is_valid_ == false) {
+      value_ = std::vector<double>{val};
+    }
+  }
+  void PushBack(long double val) {
+    if (is_valid_ == true &&
+        std::holds_alternative<std::vector<long double>>(value_) == true) {
+      std::vector<long double> vec = std::get<std::vector<long double>>(value_);
+      vec.push_back(val);
+      value_ = vec;
+    } else if (is_valid_ == false) {
+      value_ = std::vector<long double>{val};
+    }
+  }
+  void PushBack(std::string val) {
+    if (is_valid_ == true &&
+        std::holds_alternative<std::vector<std::string>>(value_) == true) {
+      std::vector<std::string> vec = std::get<std::vector<std::string>>(value_);
+      vec.push_back(val);
+      value_ = vec;
+    } else if (is_valid_ == false) {
+      value_ = std::vector<std::string>{val};
+    }
+  }
+  void PushBack(const char* val) {
+    if (is_valid_ == true &&
+        std::holds_alternative<std::vector<const char*>>(value_) == true) {
+      std::vector<const char*> vec = std::get<std::vector<const char*>>(value_);
+      vec.push_back(val);
+      value_ = vec;
+    } else if (is_valid_ == false) {
+      value_ = std::vector<const char*>{val};
+    }
+  }
+
   bool GetBool() const {
     if (is_valid_ == true && std::holds_alternative<bool>(value_) == true) {
       return std::get<bool>(value_);

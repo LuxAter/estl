@@ -1,6 +1,8 @@
 #ifndef ESTL_ARGPARSE_HPP_
 #define ESTL_ARGPARSE_HPP_
 
+#include <algorithm>
+#include <iostream>
 #include <iterator>
 #include <set>
 #include <sstream>
@@ -343,83 +345,7 @@ class ArgumentParser {
     std::string GetChoicesStr() const {
       std::stringstream out;
       out << '{';
-      switch (choices_.Type()) {
-        case estl::Variable::BOOL_VECTOR: {
-          std::vector<bool> vec = choices_.GetBoolVector();
-          std::copy(vec.begin(), vec.end(),
-                    std::ostream_iterator<bool>(out, ", "));
-        }
-        case estl::Variable::CHAR_VECTOR: {
-          std::vector<char> vec = choices_.GetCharVector();
-          std::copy(vec.begin(), vec.end(),
-                    std::ostream_iterator<char>(out, ", "));
-        }
-        case estl::Variable::SIGNED_SHORT_INT_VECTOR: {
-          std::vector<char> vec = choices_.GetCharVector();
-          std::copy(vec.begin(), vec.end(),
-                    std::ostream_iterator<char>(out, ", "));
-        }
-        case estl::Variable::UNSIGNED_SHORT_INT_VECTOR: {
-          std::vector<char> vec = choices_.GetCharVector();
-          std::copy(vec.begin(), vec.end(),
-                    std::ostream_iterator<char>(out, ", "));
-        }
-        case estl::Variable::SIGNED_INT_VECTOR: {
-          std::vector<char> vec = choices_.GetCharVector();
-          std::copy(vec.begin(), vec.end(),
-                    std::ostream_iterator<char>(out, ", "));
-        }
-        case estl::Variable::UNSIGNED_INT_VECTOR: {
-          std::vector<char> vec = choices_.GetCharVector();
-          std::copy(vec.begin(), vec.end(),
-                    std::ostream_iterator<char>(out, ", "));
-        }
-        case estl::Variable::SIGNED_LONG_INT_VECTOR: {
-          std::vector<char> vec = choices_.GetCharVector();
-          std::copy(vec.begin(), vec.end(),
-                    std::ostream_iterator<char>(out, ", "));
-        }
-        case estl::Variable::UNSIGNED_LONG_INT_VECTOR: {
-          std::vector<char> vec = choices_.GetCharVector();
-          std::copy(vec.begin(), vec.end(),
-                    std::ostream_iterator<char>(out, ", "));
-        }
-        case estl::Variable::SIGNED_LONG_LONG_INT_VECTOR: {
-          std::vector<char> vec = choices_.GetCharVector();
-          std::copy(vec.begin(), vec.end(),
-                    std::ostream_iterator<char>(out, ", "));
-        }
-        case estl::Variable::UNSIGNED_LONG_LONG_INT_VECTOR: {
-          std::vector<char> vec = choices_.GetCharVector();
-          std::copy(vec.begin(), vec.end(),
-                    std::ostream_iterator<char>(out, ", "));
-        }
-        case estl::Variable::FLOAT_VECTOR: {
-          std::vector<char> vec = choices_.GetCharVector();
-          std::copy(vec.begin(), vec.end(),
-                    std::ostream_iterator<char>(out, ", "));
-        }
-        case estl::Variable::DOUBLE_VECTOR: {
-          std::vector<char> vec = choices_.GetCharVector();
-          std::copy(vec.begin(), vec.end(),
-                    std::ostream_iterator<char>(out, ", "));
-        }
-        case estl::Variable::LONG_DOUBLE_VECTOR: {
-          std::vector<char> vec = choices_.GetCharVector();
-          std::copy(vec.begin(), vec.end(),
-                    std::ostream_iterator<char>(out, ", "));
-        }
-        case estl::Variable::STRING_VECTOR: {
-          std::vector<char> vec = choices_.GetCharVector();
-          std::copy(vec.begin(), vec.end(),
-                    std::ostream_iterator<char>(out, ", "));
-        }
-        case estl::Variable::CHAR_ARRAY_VECTOR: {
-          std::vector<char> vec = choices_.GetCharVector();
-          std::copy(vec.begin(), vec.end(),
-                    std::ostream_iterator<char>(out, ", "));
-        }
-      }
+      out << choices_;
       out << '}';
       return out.str();
     }
@@ -433,7 +359,379 @@ class ArgumentParser {
       return estl::Variable();
     }
 
+    std::string GetHelp() const {
+      std::stringstream out;
+      std::string str;
+      int len = 2;
+      out << "  ";
+      str = GetNamesStr();
+      out << str;
+      len += str.size();
+      if (choices_.IsValid() == true) {
+        out << "\n    ";
+        str = GetChoicesStr();
+        out << str;
+        len = str.size() + 4;
+      }
+      if (len < 28) {
+        out << std::string(30 - len, ' ');
+      } else {
+        out << "\n" << std::string(30, ' ');
+      }
+      if (help_.size() < 50) {
+        out << help_;
+      } else {
+        len = 0;
+        std::stringstream help_stream(help_);
+        while (std::getline(help_stream, str, ' ')) {
+          if (len >= 50) {
+            out << "\n" << std::string(30, ' ');
+            len = 0;
+          }
+          out << str << ' ';
+          len += str.size();
+        }
+      }
+      return out.str();
+    }
+    std::string GetUsage() const {
+      std::stringstream out;
+      if (required_ == false) {
+        out << '[';
+      }
+      out << GetNamesStr();
+      if (required_ == false) {
+        out << ']';
+      }
+      return out.str();
+    }
+
+    bool InNames(std::string arg_name) const {
+      if (names_.find(arg_name) != names_.end()) {
+        return true;
+      }
+      return false;
+    }
+    bool HasValue() const { return value_.IsValid(); }
+
+    bool Satisfied() const {
+      if (required_ == true) {
+        return value_.IsValid();
+      }
+      return true;
+    }
+    bool TakesArgs() const {
+      if (action_ == STORE || action_ == APPEND) {
+        return true;
+      }
+      return false;
+    }
+
+    bool ParseArgss(std::vector<std::string>& args) {
+      if (args.size() == 0 || InNames(args.front()) == false) {
+        return false;
+      }
+      args.erase(args.begin());
+      if (TakesArgs() == true && args.size() == 0 && n_args_ != KLEENE_STAR &&
+          n_args_ != OPTIONAL) {
+        ArgumentRequiredError(0);
+      } else if (TakesArgs() == true) {
+        PreformArgumentAction(args);
+      } else {
+        PreformAction();
+      }
+      return true;
+    }
+
    private:
+    void PreformArgumentAction(std::vector<std::string>& args) {
+      if (args.front()[0] == '-') {
+        if (n_args_ == OPTIONAL || n_args_ == KLEENE_STAR) {
+        } else {
+          ArgumentRequiredError(0);
+        }
+        return;
+      }
+      if (n_args_ == N || n_args_ == OPTIONAL || n_args_ == ONE) {
+        int num_args = 0;
+        for (num_args = 0; num_args < n_args_count_ && args.size() > 0 &&
+                           args.front()[0] != '-';
+             num_args++) {
+          estl::Variable argument = GetArgument(args.front());
+          if (argument.IsValid() == true) {
+            args.erase(args.begin());
+            if (action_ == STORE && n_args_count_ == 1) {
+              value_ = argument;
+            } else if (action_ == APPEND || n_args_count_ > 1) {
+              value_.PushBack(argument);
+            }
+          } else {
+            break;
+          }
+        }
+        if (num_args != n_args_count_ && n_args_ != OPTIONAL) {
+          ArgumentRequiredError(n_args_count_ - num_args);
+        }
+      } else if (n_args_ == KLEENE_PLUS || n_args_ == KLEENE_STAR) {
+        int num_args = 0;
+        while (args.size() > 0 && args.front()[0] != '-') {
+          estl::Variable argument = GetArgument(args.front());
+          if (argument.IsValid() == true) {
+            value_.PushBack(argument);
+            num_args++;
+          } else {
+            break;
+          }
+        }
+        if (n_args_ == KLEENE_PLUS && num_args == 0) {
+          ArgumentRequiredError(1);
+        }
+      }
+    }
+
+    void PreformAction() {
+      switch (action_) {
+        case STORE_TRUE: {
+          value_ = true;
+          break;
+        }
+        case STORE_FALSE: {
+          value_ = false;
+          break;
+        }
+        case STORE_CONST: {
+          value_ = const_;
+          break;
+        }
+        case APPEND_CONST: {
+          value_.PushBack(const_);
+          break;
+        }
+        default: { break; }
+      }
+    }
+
+    void ArgumentRequiredError(int flag) const {
+      if (flag == 0) {
+        std::cerr << "ERROR: Argument(s) are required for \"";
+      } else {
+        std::cerr << "ERROR: " << flag << " more arguments are required for \"";
+      }
+      std::cerr << GetNamesStr();
+      std::cerr << "\"\n";
+    }
+
+    estl::Variable GetArgument(std::string arg_str) {
+      estl::Variable argument = ConvertToType(arg_str);
+      if (argument.IsValid() == false) {
+        std::cerr << "ERROR: Invalid type for argument \"" << GetNamesStr()
+                  << "\" (" << arg_str << ")\n";
+      } else if (InChoices(argument) == false) {
+        std::cerr << "ERROR: Argument (" << arg_str << ") not in choices for\""
+                  << GetNamesStr() << "\" choices are: " << GetChoicesStr()
+                  << "\n";
+      } else {
+        return argument;
+      }
+      return estl::Variable();
+    }
+
+    bool InChoices(estl::Variable argument) {
+      if (choices_.IsValid() == false || choices_.IsVector() == false) {
+        return true;
+      }
+      unsigned int choices_type = choices_.Type(), arg_type = argument.Type();
+      if (choices_type == estl::Variable::BOOL_VECTOR &&
+          arg_type == estl::Variable::BOOL) {
+        std::vector<bool> vec = choices_.GetBoolVector();
+        if (std::find(vec.begin(), vec.end(), argument.GetBool()) !=
+            vec.end()) {
+          return true;
+        }
+        return false;
+      } else if (choices_type == estl::Variable::CHAR_VECTOR &&
+                 arg_type == estl::Variable::CHAR) {
+        std::vector<char> vec = choices_.GetCharVector();
+        if (std::find(vec.begin(), vec.end(), argument.GetChar()) !=
+            vec.end()) {
+          return true;
+        }
+        return false;
+      } else if (choices_type == estl::Variable::SIGNED_CHAR_VECTOR &&
+                 arg_type == estl::Variable::SIGNED_CHAR) {
+        std::vector<signed char> vec = choices_.GetSignedCharVector();
+        if (std::find(vec.begin(), vec.end(), argument.GetSignedChar()) !=
+            vec.end()) {
+          return true;
+        }
+        return false;
+      } else if (choices_type == estl::Variable::UNSIGNED_CHAR_VECTOR &&
+                 arg_type == estl::Variable::UNSIGNED_CHAR) {
+        std::vector<unsigned char> vec = choices_.GetUnsignedCharVector();
+        if (std::find(vec.begin(), vec.end(), argument.GetUnsignedChar()) !=
+            vec.end()) {
+          return true;
+        }
+        return false;
+      } else if (choices_type == estl::Variable::SIGNED_SHORT_INT_VECTOR &&
+                 arg_type == estl::Variable::SIGNED_SHORT_INT) {
+        std::vector<signed short int> vec = choices_.GetSignedShortIntVector();
+        if (std::find(vec.begin(), vec.end(), argument.GetSignedShortInt()) !=
+            vec.end()) {
+          return true;
+        }
+        return false;
+      } else if (choices_type == estl::Variable::UNSIGNED_SHORT_INT_VECTOR &&
+                 arg_type == estl::Variable::UNSIGNED_SHORT_INT) {
+        std::vector<unsigned short int> vec =
+            choices_.GetUnsignedShortIntVector();
+        if (std::find(vec.begin(), vec.end(), argument.GetUnsignedShortInt()) !=
+            vec.end()) {
+          return true;
+        }
+        return false;
+      } else if (choices_type == estl::Variable::SIGNED_INT_VECTOR &&
+                 arg_type == estl::Variable::SIGNED_INT) {
+        std::vector<signed int> vec = choices_.GetSignedIntVector();
+        if (std::find(vec.begin(), vec.end(), argument.GetSignedInt()) !=
+            vec.end()) {
+          return true;
+        }
+        return false;
+      } else if (choices_type == estl::Variable::UNSIGNED_INT_VECTOR &&
+                 arg_type == estl::Variable::UNSIGNED_INT) {
+        std::vector<unsigned int> vec = choices_.GetUnsignedIntVector();
+        if (std::find(vec.begin(), vec.end(), argument.GetUnsignedInt()) !=
+            vec.end()) {
+          return true;
+        }
+        return false;
+      } else if (choices_type == estl::Variable::SIGNED_LONG_INT_VECTOR &&
+                 arg_type == estl::Variable::SIGNED_LONG_INT) {
+        std::vector<signed long int> vec = choices_.GetSignedLongIntVector();
+        if (std::find(vec.begin(), vec.end(), argument.GetSignedLongInt()) !=
+            vec.end()) {
+          return true;
+        }
+        return false;
+      } else if (choices_type == estl::Variable::UNSIGNED_LONG_INT_VECTOR &&
+                 arg_type == estl::Variable::UNSIGNED_LONG_INT) {
+        std::vector<unsigned long int> vec =
+            choices_.GetUnsignedLongIntVector();
+        if (std::find(vec.begin(), vec.end(), argument.GetUnsignedLongInt()) !=
+            vec.end()) {
+          return true;
+        }
+        return false;
+      } else if (choices_type == estl::Variable::SIGNED_LONG_LONG_INT_VECTOR &&
+                 arg_type == estl::Variable::SIGNED_LONG_LONG_INT) {
+        std::vector<signed long long int> vec =
+            choices_.GetSignedLongLongIntVector();
+        if (std::find(vec.begin(), vec.end(),
+                      argument.GetSignedLongLongInt()) != vec.end()) {
+          return true;
+        }
+        return false;
+      } else if (choices_type ==
+                     estl::Variable::UNSIGNED_LONG_LONG_INT_VECTOR &&
+                 arg_type == estl::Variable::UNSIGNED_LONG_LONG_INT) {
+        std::vector<unsigned long long int> vec =
+            choices_.GetUnsignedLongLongIntVector();
+        if (std::find(vec.begin(), vec.end(),
+                      argument.GetUnsignedLongLongInt()) != vec.end()) {
+          return true;
+        }
+        return false;
+      } else if (choices_type == estl::Variable::FLOAT_VECTOR &&
+                 arg_type == estl::Variable::FLOAT) {
+        std::vector<float> vec = choices_.GetFloatVector();
+        if (std::find(vec.begin(), vec.end(), argument.GetFloat()) !=
+            vec.end()) {
+          return true;
+        }
+        return false;
+      } else if (choices_type == estl::Variable::DOUBLE_VECTOR &&
+                 arg_type == estl::Variable::DOUBLE) {
+        std::vector<double> vec = choices_.GetDoubleVector();
+        if (std::find(vec.begin(), vec.end(), argument.GetDouble()) !=
+            vec.end()) {
+          return true;
+        }
+        return false;
+      } else if (choices_type == estl::Variable::LONG_DOUBLE_VECTOR &&
+                 arg_type == estl::Variable::LONG_DOUBLE) {
+        std::vector<long double> vec = choices_.GetLongDoubleVector();
+        if (std::find(vec.begin(), vec.end(), argument.GetLongDouble()) !=
+            vec.end()) {
+          return true;
+        }
+        return false;
+      } else if (choices_type == estl::Variable::STRING_VECTOR &&
+                 arg_type == estl::Variable::STRING) {
+        std::vector<std::string> vec = choices_.GetStringVector();
+        if (std::find(vec.begin(), vec.end(), argument.GetString()) !=
+            vec.end()) {
+          return true;
+        }
+        return false;
+      } else if (choices_type == estl::Variable::CHAR_ARRAY_VECTOR &&
+                 arg_type == estl::Variable::CHAR_ARRAY) {
+        std::vector<const char*> vec = choices_.GetCharArrayVector();
+        if (std::find(vec.begin(), vec.end(), argument.GetCharArray()) !=
+            vec.end()) {
+          return true;
+        }
+        return false;
+      }
+      return false;
+    }
+
+    estl::Variable ConvertToType(std::string arg_str) {
+      switch (type_) {
+        case estl::Variable::NONE:
+        case estl::Variable::STRING: {
+          return arg_str;
+        }
+        case estl::Variable::SIGNED_SHORT_INT: {
+          return static_cast<signed short int>(std::stoi(arg_str));
+        }
+        case estl::Variable::UNSIGNED_SHORT_INT: {
+          return static_cast<unsigned short int>(std::stoi(arg_str));
+        }
+        case estl::Variable::SIGNED_INT: {
+          return std::stoi(arg_str);
+        }
+        case estl::Variable::UNSIGNED_INT: {
+          return static_cast<unsigned int>(std::stoul(arg_str));
+        }
+        case estl::Variable::SIGNED_LONG_INT: {
+          return std::stol(arg_str);
+        }
+        case estl::Variable::UNSIGNED_LONG_INT: {
+          return std::stoul(arg_str);
+        }
+        case estl::Variable::SIGNED_LONG_LONG_INT: {
+          return std::stoll(arg_str);
+        }
+        case estl::Variable::UNSIGNED_LONG_LONG_INT: {
+          return std::stoull(arg_str);
+        }
+        case estl::Variable::FLOAT: {
+          return std::stof(arg_str);
+        }
+        case estl::Variable::DOUBLE: {
+          return std::stod(arg_str);
+        }
+        case estl::Variable::LONG_DOUBLE: {
+          return std::stold(arg_str);
+        }
+        case estl::Variable::CHAR_ARRAY: {
+          return arg_str.c_str();
+        }
+        default: { return estl::Variable(); }
+      }
+    }
+
     bool required_ = false;
     unsigned int n_args_count_ = 1;
     std::string help_, metavar_, dest_, group_;
