@@ -1,761 +1,370 @@
-/* Copyright (C)
- * 2018 - Arden Rasmussen
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- *
- */
-
-/**
- * @file argparse.hpp
- * @brief Argument parser class for C++
- * @author Arden Rasmussen
- * @version 0.0
- * @date 2018-02-03
- */
-
 #ifndef ESTL_ARGPARSE_HPP_
 #define ESTL_ARGPARSE_HPP_
 
-#include <any>
-#include <map>
+#include <iterator>
 #include <set>
 #include <sstream>
 #include <string>
-#include <typeinfo>
 
-#include "argparse/argument.hpp"
-#include "variadic.hpp"
-
-#include <iostream>
+#include "variable.hpp"
 
 namespace estl {
-
 class ArgumentParser {
  public:
-  ArgumentParser(std::string prolog, std::string epilog)
-      : prolog_(prolog), epilog_(epilog) {}
+  enum Action {
+    STORE = 40,
+    STORE_CONST = 41,
+    STORE_TRUE = 42,
+    STORE_FALSE = 43,
+    APPEND = 44,
+    APPEND_CONST = 45,
+    COUNT = 46,
+    HELP = 47,
+    VERSION = 48
+  };
+  enum NArgs {
+    ONE = 50,
+    N = 51,
+    OPTIONAL = 52,
+    KLEENE_STAR = 53,
+    KLEENE_PLUS = 54
+  };
+  enum ArgOpt {
+    ARG_NONE = 60,
+    ARG_ACTION = 61,
+    ARG_N_ARGS = 62,
+    ARG_N_ARGS_COUNT = 63,
+    ARG_CONST = 64,
+    ARG_DEFAULT = 65,
+    ARG_CHOICES = 66,
+    ARG_REQUIRED = 67,
+    ARG_HELP = 68,
+    ARG_METAVAR = 69,
+    ARG_DEST = 70,
+    ARG_TYPE = 71
+  };
+
+  ArgumentParser() {}
+  explicit ArgumentParser(std::string& prog)
+      : prog_(prog), add_help_(true), add_version_(false) {}
+  ArgumentParser(std::string& prolog, std::string& epilog)
+      : prolog_(prolog),
+        epilog_(epilog),
+        add_help_(true),
+        add_version_(false) {}
+  ArgumentParser(std::string& prog, std::string& prolog, std::string& epilog)
+      : prog_(prog),
+        prolog_(prolog),
+        epilog_(epilog),
+        add_help_(true),
+        add_version_(false) {}
+  ArgumentParser(const ArgumentParser& copy)
+      : prog_(copy.prog_),
+        prolog_(copy.prolog_),
+        epilog_(copy.epilog_),
+        usage_(copy.usage_),
+        version_(copy.version_),
+        current_group_(copy.current_group_),
+        add_help_(copy.add_help_),
+        add_version_(copy.add_version_) {}
   ~ArgumentParser() {}
 
-  void SetVersion(std::string version) { version_ = version; }
+  void SetProg(std::string prog) { prog_ = prog; }
   void SetProlog(std::string prolog) { prolog_ = prolog; }
   void SetEpilog(std::string epilog) { epilog_ = epilog; }
-  void SetProg(std::string prog) { prog_ = prog; }
   void SetUsage(std::string usage) { usage_ = usage; }
-
   void Group(std::string group) { current_group_ = group; }
 
-  std::string GetUsage() { return "Usage: " + prog_ + " " + usage_; }
-  std::string GetVersion() { return prog_ + " " + version_; }
-  std::string GetHelp() {
-    std::stringstream out;
-    if (GetUsage() != std::string()) {
-      out << GetUsage() << "\n";
+  std::string GetHelp() {}
+  std::string GetUsage() {
+    std::string res = "usage: ";
+    if (prog_ != std::string()) {
+      res += prog_ + ' ';
     }
-    if (GetVersion() != std::string()) {
-      out << GetVersion() << "\n";
-    }
-    out << prolog_ << "\n\n";
-    std::map<std::string, std::vector<std::string>> help_groups;
-    for (std::set<Argument>::iterator it = arguments_.begin();
-         it != arguments_.end(); ++it) {
-      if (help_groups.find((*it).GetGroup()) != help_groups.end()) {
-        help_groups.at((*it).GetGroup()).push_back((*it).GetHelp());
-      } else {
-        help_groups.insert(std::pair<std::string, std::vector<std::string>>(
-            (*it).GetGroup(), std::vector<std::string>{(*it).GetHelp()}));
-      }
-    }
-    for (std::map<std::string, std::vector<std::string>>::iterator it =
-             help_groups.begin();
-         it != help_groups.end(); ++it) {
-      out << (*it).first << ":\n";
-      for (std::vector<std::string>::iterator args = (*it).second.begin();
-           args != (*it).second.end(); ++args) {
-        out << (*args) << "\n";
-      }
-    }
-    if (help_groups.size() != 0) {
-      out << "\n";
-    }
-    out << epilog_ << "\n";
-    return out.str();
-  }
-
-  void AddArgument(std::variant<std::string, std::set<std::string>> a,
-                   std::any b = std::monostate(), std::any c = std::monostate(),
-                   std::any d = std::monostate(), std::any e = std::monostate(),
-                   std::any f = std::monostate(), std::any g = std::monostate(),
-                   std::any h = std::monostate(), std::any i = std::monostate(),
-                   std::any j = std::monostate(), std::any k = std::monostate(),
-                   std::any l = std::monostate(), std::any m = std::monostate(),
-                   std::any n = std::monostate(), std::any o = std::monostate(),
-                   std::any p = std::monostate(), std::any q = std::monostate(),
-                   std::any r = std::monostate(), std::any s = std::monostate(),
-                   std::any t = std::monostate(), std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::variant<std::string, std::set<std::string>> a,
-                   std::initializer_list<std::any> b,
-                   std::any c = std::monostate(), std::any d = std::monostate(),
-                   std::any e = std::monostate(), std::any f = std::monostate(),
-                   std::any g = std::monostate(), std::any h = std::monostate(),
-                   std::any i = std::monostate(), std::any j = std::monostate(),
-                   std::any k = std::monostate(), std::any l = std::monostate(),
-                   std::any m = std::monostate(), std::any n = std::monostate(),
-                   std::any o = std::monostate(), std::any p = std::monostate(),
-                   std::any q = std::monostate(), std::any r = std::monostate(),
-                   std::any s = std::monostate(), std::any t = std::monostate(),
-                   std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::variant<std::string, std::set<std::string>> a,
-                   std::any b, std::initializer_list<std::any> c,
-                   std::any d = std::monostate(), std::any e = std::monostate(),
-                   std::any f = std::monostate(), std::any g = std::monostate(),
-                   std::any h = std::monostate(), std::any i = std::monostate(),
-                   std::any j = std::monostate(), std::any k = std::monostate(),
-                   std::any l = std::monostate(), std::any m = std::monostate(),
-                   std::any n = std::monostate(), std::any o = std::monostate(),
-                   std::any p = std::monostate(), std::any q = std::monostate(),
-                   std::any r = std::monostate(), std::any s = std::monostate(),
-                   std::any t = std::monostate(), std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::variant<std::string, std::set<std::string>> a,
-                   std::any b, std::any c, std::initializer_list<std::any> d,
-                   std::any e = std::monostate(), std::any f = std::monostate(),
-                   std::any g = std::monostate(), std::any h = std::monostate(),
-                   std::any i = std::monostate(), std::any j = std::monostate(),
-                   std::any k = std::monostate(), std::any l = std::monostate(),
-                   std::any m = std::monostate(), std::any n = std::monostate(),
-                   std::any o = std::monostate(), std::any p = std::monostate(),
-                   std::any q = std::monostate(), std::any r = std::monostate(),
-                   std::any s = std::monostate(), std::any t = std::monostate(),
-                   std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::variant<std::string, std::set<std::string>> a,
-                   std::any b, std::any c, std::any d,
-                   std::initializer_list<std::any> e,
-                   std::any f = std::monostate(), std::any g = std::monostate(),
-                   std::any h = std::monostate(), std::any i = std::monostate(),
-                   std::any j = std::monostate(), std::any k = std::monostate(),
-                   std::any l = std::monostate(), std::any m = std::monostate(),
-                   std::any n = std::monostate(), std::any o = std::monostate(),
-                   std::any p = std::monostate(), std::any q = std::monostate(),
-                   std::any r = std::monostate(), std::any s = std::monostate(),
-                   std::any t = std::monostate(), std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::variant<std::string, std::set<std::string>> a,
-                   std::any b, std::any c, std::any d, std::any e,
-                   std::initializer_list<std::any> f,
-                   std::any g = std::monostate(), std::any h = std::monostate(),
-                   std::any i = std::monostate(), std::any j = std::monostate(),
-                   std::any k = std::monostate(), std::any l = std::monostate(),
-                   std::any m = std::monostate(), std::any n = std::monostate(),
-                   std::any o = std::monostate(), std::any p = std::monostate(),
-                   std::any q = std::monostate(), std::any r = std::monostate(),
-                   std::any s = std::monostate(), std::any t = std::monostate(),
-                   std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::variant<std::string, std::set<std::string>> a,
-                   std::any b, std::any c, std::any d, std::any e, std::any f,
-                   std::initializer_list<std::any> g,
-                   std::any h = std::monostate(), std::any i = std::monostate(),
-                   std::any j = std::monostate(), std::any k = std::monostate(),
-                   std::any l = std::monostate(), std::any m = std::monostate(),
-                   std::any n = std::monostate(), std::any o = std::monostate(),
-                   std::any p = std::monostate(), std::any q = std::monostate(),
-                   std::any r = std::monostate(), std::any s = std::monostate(),
-                   std::any t = std::monostate(), std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::variant<std::string, std::set<std::string>> a,
-                   std::any b, std::any c, std::any d, std::any e, std::any f,
-                   std::any g, std::initializer_list<std::any> h,
-                   std::any i = std::monostate(), std::any j = std::monostate(),
-                   std::any k = std::monostate(), std::any l = std::monostate(),
-                   std::any m = std::monostate(), std::any n = std::monostate(),
-                   std::any o = std::monostate(), std::any p = std::monostate(),
-                   std::any q = std::monostate(), std::any r = std::monostate(),
-                   std::any s = std::monostate(), std::any t = std::monostate(),
-                   std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::variant<std::string, std::set<std::string>> a,
-                   std::any b, std::any c, std::any d, std::any e, std::any f,
-                   std::any g, std::any h, std::initializer_list<std::any> i,
-                   std::any j = std::monostate(), std::any k = std::monostate(),
-                   std::any l = std::monostate(), std::any m = std::monostate(),
-                   std::any n = std::monostate(), std::any o = std::monostate(),
-                   std::any p = std::monostate(), std::any q = std::monostate(),
-                   std::any r = std::monostate(), std::any s = std::monostate(),
-                   std::any t = std::monostate(), std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::variant<std::string, std::set<std::string>> a,
-                   std::any b, std::any c, std::any d, std::any e, std::any f,
-                   std::any g, std::any h, std::any i,
-                   std::initializer_list<std::any> j,
-                   std::any k = std::monostate(), std::any l = std::monostate(),
-                   std::any m = std::monostate(), std::any n = std::monostate(),
-                   std::any o = std::monostate(), std::any p = std::monostate(),
-                   std::any q = std::monostate(), std::any r = std::monostate(),
-                   std::any s = std::monostate(), std::any t = std::monostate(),
-                   std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::variant<std::string, std::set<std::string>> a,
-                   std::any b, std::any c, std::any d, std::any e, std::any f,
-                   std::any g, std::any h, std::any i, std::any j,
-                   std::initializer_list<std::any> k,
-                   std::any l = std::monostate(), std::any m = std::monostate(),
-                   std::any n = std::monostate(), std::any o = std::monostate(),
-                   std::any p = std::monostate(), std::any q = std::monostate(),
-                   std::any r = std::monostate(), std::any s = std::monostate(),
-                   std::any t = std::monostate(), std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::variant<std::string, std::set<std::string>> a,
-                   std::any b, std::any c, std::any d, std::any e, std::any f,
-                   std::any g, std::any h, std::any i, std::any j, std::any k,
-                   std::initializer_list<std::any> l,
-                   std::any m = std::monostate(), std::any n = std::monostate(),
-                   std::any o = std::monostate(), std::any p = std::monostate(),
-                   std::any q = std::monostate(), std::any r = std::monostate(),
-                   std::any s = std::monostate(), std::any t = std::monostate(),
-                   std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::variant<std::string, std::set<std::string>> a,
-                   std::any b, std::any c, std::any d, std::any e, std::any f,
-                   std::any g, std::any h, std::any i, std::any j, std::any k,
-                   std::any l, std::initializer_list<std::any> m,
-                   std::any n = std::monostate(), std::any o = std::monostate(),
-                   std::any p = std::monostate(), std::any q = std::monostate(),
-                   std::any r = std::monostate(), std::any s = std::monostate(),
-                   std::any t = std::monostate(), std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::variant<std::string, std::set<std::string>> a,
-                   std::any b, std::any c, std::any d, std::any e, std::any f,
-                   std::any g, std::any h, std::any i, std::any j, std::any k,
-                   std::any l, std::any m, std::initializer_list<std::any> n,
-                   std::any o = std::monostate(), std::any p = std::monostate(),
-                   std::any q = std::monostate(), std::any r = std::monostate(),
-                   std::any s = std::monostate(), std::any t = std::monostate(),
-                   std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::variant<std::string, std::set<std::string>> a,
-                   std::any b, std::any c, std::any d, std::any e, std::any f,
-                   std::any g, std::any h, std::any i, std::any j, std::any k,
-                   std::any l, std::any m, std::any n,
-                   std::initializer_list<std::any> o,
-                   std::any p = std::monostate(), std::any q = std::monostate(),
-                   std::any r = std::monostate(), std::any s = std::monostate(),
-                   std::any t = std::monostate(), std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::variant<std::string, std::set<std::string>> a,
-                   std::any b, std::any c, std::any d, std::any e, std::any f,
-                   std::any g, std::any h, std::any i, std::any j, std::any k,
-                   std::any l, std::any m, std::any n, std::any o,
-                   std::initializer_list<std::any> p,
-                   std::any q = std::monostate(), std::any r = std::monostate(),
-                   std::any s = std::monostate(), std::any t = std::monostate(),
-                   std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::variant<std::string, std::set<std::string>> a,
-                   std::any b, std::any c, std::any d, std::any e, std::any f,
-                   std::any g, std::any h, std::any i, std::any j, std::any k,
-                   std::any l, std::any m, std::any n, std::any o, std::any p,
-                   std::initializer_list<std::any> q,
-                   std::any r = std::monostate(), std::any s = std::monostate(),
-                   std::any t = std::monostate(), std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::variant<std::string, std::set<std::string>> a,
-                   std::any b, std::any c, std::any d, std::any e, std::any f,
-                   std::any g, std::any h, std::any i, std::any j, std::any k,
-                   std::any l, std::any m, std::any n, std::any o, std::any p,
-                   std::any q, std::initializer_list<std::any> r,
-                   std::any s = std::monostate(), std::any t = std::monostate(),
-                   std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::variant<std::string, std::set<std::string>> a,
-                   std::any b, std::any c, std::any d, std::any e, std::any f,
-                   std::any g, std::any h, std::any i, std::any j, std::any k,
-                   std::any l, std::any m, std::any n, std::any o, std::any p,
-                   std::any q, std::any r, std::initializer_list<std::any> s,
-                   std::any t = std::monostate(), std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::variant<std::string, std::set<std::string>> a,
-                   std::any b, std::any c, std::any d, std::any e, std::any f,
-                   std::any g, std::any h, std::any i, std::any j, std::any k,
-                   std::any l, std::any m, std::any n, std::any o, std::any p,
-                   std::any q, std::any r, std::any s,
-                   std::initializer_list<std::any> t,
-                   std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::variant<std::string, std::set<std::string>> a,
-                   std::any b, std::any c, std::any d, std::any e, std::any f,
-                   std::any g, std::any h, std::any i, std::any j, std::any k,
-                   std::any l, std::any m, std::any n, std::any o, std::any p,
-                   std::any q, std::any r, std::any s, std::any t,
-                   std::initializer_list<std::any> u,
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::variant<std::string, std::set<std::string>> a,
-                   std::any b, std::any c, std::any d, std::any e, std::any f,
-                   std::any g, std::any h, std::any i, std::any j, std::any k,
-                   std::any l, std::any m, std::any n, std::any o, std::any p,
-                   std::any q, std::any r, std::any s, std::any t, std::any u,
-                   std::initializer_list<std::any> v) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-
-  void AddArgument(std::initializer_list<std::string> a,
-                   std::any b = std::monostate(), std::any c = std::monostate(),
-                   std::any d = std::monostate(), std::any e = std::monostate(),
-                   std::any f = std::monostate(), std::any g = std::monostate(),
-                   std::any h = std::monostate(), std::any i = std::monostate(),
-                   std::any j = std::monostate(), std::any k = std::monostate(),
-                   std::any l = std::monostate(), std::any m = std::monostate(),
-                   std::any n = std::monostate(), std::any o = std::monostate(),
-                   std::any p = std::monostate(), std::any q = std::monostate(),
-                   std::any r = std::monostate(), std::any s = std::monostate(),
-                   std::any t = std::monostate(), std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::initializer_list<std::string> a,
-                   std::initializer_list<std::any> b,
-                   std::any c = std::monostate(), std::any d = std::monostate(),
-                   std::any e = std::monostate(), std::any f = std::monostate(),
-                   std::any g = std::monostate(), std::any h = std::monostate(),
-                   std::any i = std::monostate(), std::any j = std::monostate(),
-                   std::any k = std::monostate(), std::any l = std::monostate(),
-                   std::any m = std::monostate(), std::any n = std::monostate(),
-                   std::any o = std::monostate(), std::any p = std::monostate(),
-                   std::any q = std::monostate(), std::any r = std::monostate(),
-                   std::any s = std::monostate(), std::any t = std::monostate(),
-                   std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::initializer_list<std::string> a, std::any b,
-                   std::initializer_list<std::any> c,
-                   std::any d = std::monostate(), std::any e = std::monostate(),
-                   std::any f = std::monostate(), std::any g = std::monostate(),
-                   std::any h = std::monostate(), std::any i = std::monostate(),
-                   std::any j = std::monostate(), std::any k = std::monostate(),
-                   std::any l = std::monostate(), std::any m = std::monostate(),
-                   std::any n = std::monostate(), std::any o = std::monostate(),
-                   std::any p = std::monostate(), std::any q = std::monostate(),
-                   std::any r = std::monostate(), std::any s = std::monostate(),
-                   std::any t = std::monostate(), std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::initializer_list<std::string> a, std::any b, std::any c,
-                   std::initializer_list<std::any> d,
-                   std::any e = std::monostate(), std::any f = std::monostate(),
-                   std::any g = std::monostate(), std::any h = std::monostate(),
-                   std::any i = std::monostate(), std::any j = std::monostate(),
-                   std::any k = std::monostate(), std::any l = std::monostate(),
-                   std::any m = std::monostate(), std::any n = std::monostate(),
-                   std::any o = std::monostate(), std::any p = std::monostate(),
-                   std::any q = std::monostate(), std::any r = std::monostate(),
-                   std::any s = std::monostate(), std::any t = std::monostate(),
-                   std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::initializer_list<std::string> a, std::any b, std::any c,
-                   std::any d, std::initializer_list<std::any> e,
-                   std::any f = std::monostate(), std::any g = std::monostate(),
-                   std::any h = std::monostate(), std::any i = std::monostate(),
-                   std::any j = std::monostate(), std::any k = std::monostate(),
-                   std::any l = std::monostate(), std::any m = std::monostate(),
-                   std::any n = std::monostate(), std::any o = std::monostate(),
-                   std::any p = std::monostate(), std::any q = std::monostate(),
-                   std::any r = std::monostate(), std::any s = std::monostate(),
-                   std::any t = std::monostate(), std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::initializer_list<std::string> a, std::any b, std::any c,
-                   std::any d, std::any e, std::initializer_list<std::any> f,
-                   std::any g = std::monostate(), std::any h = std::monostate(),
-                   std::any i = std::monostate(), std::any j = std::monostate(),
-                   std::any k = std::monostate(), std::any l = std::monostate(),
-                   std::any m = std::monostate(), std::any n = std::monostate(),
-                   std::any o = std::monostate(), std::any p = std::monostate(),
-                   std::any q = std::monostate(), std::any r = std::monostate(),
-                   std::any s = std::monostate(), std::any t = std::monostate(),
-                   std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::initializer_list<std::string> a, std::any b, std::any c,
-                   std::any d, std::any e, std::any f,
-                   std::initializer_list<std::any> g,
-                   std::any h = std::monostate(), std::any i = std::monostate(),
-                   std::any j = std::monostate(), std::any k = std::monostate(),
-                   std::any l = std::monostate(), std::any m = std::monostate(),
-                   std::any n = std::monostate(), std::any o = std::monostate(),
-                   std::any p = std::monostate(), std::any q = std::monostate(),
-                   std::any r = std::monostate(), std::any s = std::monostate(),
-                   std::any t = std::monostate(), std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::initializer_list<std::string> a, std::any b, std::any c,
-                   std::any d, std::any e, std::any f, std::any g,
-                   std::initializer_list<std::any> h,
-                   std::any i = std::monostate(), std::any j = std::monostate(),
-                   std::any k = std::monostate(), std::any l = std::monostate(),
-                   std::any m = std::monostate(), std::any n = std::monostate(),
-                   std::any o = std::monostate(), std::any p = std::monostate(),
-                   std::any q = std::monostate(), std::any r = std::monostate(),
-                   std::any s = std::monostate(), std::any t = std::monostate(),
-                   std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::initializer_list<std::string> a, std::any b, std::any c,
-                   std::any d, std::any e, std::any f, std::any g, std::any h,
-                   std::initializer_list<std::any> i,
-                   std::any j = std::monostate(), std::any k = std::monostate(),
-                   std::any l = std::monostate(), std::any m = std::monostate(),
-                   std::any n = std::monostate(), std::any o = std::monostate(),
-                   std::any p = std::monostate(), std::any q = std::monostate(),
-                   std::any r = std::monostate(), std::any s = std::monostate(),
-                   std::any t = std::monostate(), std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::initializer_list<std::string> a, std::any b, std::any c,
-                   std::any d, std::any e, std::any f, std::any g, std::any h,
-                   std::any i, std::initializer_list<std::any> j,
-                   std::any k = std::monostate(), std::any l = std::monostate(),
-                   std::any m = std::monostate(), std::any n = std::monostate(),
-                   std::any o = std::monostate(), std::any p = std::monostate(),
-                   std::any q = std::monostate(), std::any r = std::monostate(),
-                   std::any s = std::monostate(), std::any t = std::monostate(),
-                   std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::initializer_list<std::string> a, std::any b, std::any c,
-                   std::any d, std::any e, std::any f, std::any g, std::any h,
-                   std::any i, std::any j, std::initializer_list<std::any> k,
-                   std::any l = std::monostate(), std::any m = std::monostate(),
-                   std::any n = std::monostate(), std::any o = std::monostate(),
-                   std::any p = std::monostate(), std::any q = std::monostate(),
-                   std::any r = std::monostate(), std::any s = std::monostate(),
-                   std::any t = std::monostate(), std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::initializer_list<std::string> a, std::any b, std::any c,
-                   std::any d, std::any e, std::any f, std::any g, std::any h,
-                   std::any i, std::any j, std::any k,
-                   std::initializer_list<std::any> l,
-                   std::any m = std::monostate(), std::any n = std::monostate(),
-                   std::any o = std::monostate(), std::any p = std::monostate(),
-                   std::any q = std::monostate(), std::any r = std::monostate(),
-                   std::any s = std::monostate(), std::any t = std::monostate(),
-                   std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::initializer_list<std::string> a, std::any b, std::any c,
-                   std::any d, std::any e, std::any f, std::any g, std::any h,
-                   std::any i, std::any j, std::any k, std::any l,
-                   std::initializer_list<std::any> m,
-                   std::any n = std::monostate(), std::any o = std::monostate(),
-                   std::any p = std::monostate(), std::any q = std::monostate(),
-                   std::any r = std::monostate(), std::any s = std::monostate(),
-                   std::any t = std::monostate(), std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::initializer_list<std::string> a, std::any b, std::any c,
-                   std::any d, std::any e, std::any f, std::any g, std::any h,
-                   std::any i, std::any j, std::any k, std::any l, std::any m,
-                   std::initializer_list<std::any> n,
-                   std::any o = std::monostate(), std::any p = std::monostate(),
-                   std::any q = std::monostate(), std::any r = std::monostate(),
-                   std::any s = std::monostate(), std::any t = std::monostate(),
-                   std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::initializer_list<std::string> a, std::any b, std::any c,
-                   std::any d, std::any e, std::any f, std::any g, std::any h,
-                   std::any i, std::any j, std::any k, std::any l, std::any m,
-                   std::any n, std::initializer_list<std::any> o,
-                   std::any p = std::monostate(), std::any q = std::monostate(),
-                   std::any r = std::monostate(), std::any s = std::monostate(),
-                   std::any t = std::monostate(), std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::initializer_list<std::string> a, std::any b, std::any c,
-                   std::any d, std::any e, std::any f, std::any g, std::any h,
-                   std::any i, std::any j, std::any k, std::any l, std::any m,
-                   std::any n, std::any o, std::initializer_list<std::any> p,
-                   std::any q = std::monostate(), std::any r = std::monostate(),
-                   std::any s = std::monostate(), std::any t = std::monostate(),
-                   std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::initializer_list<std::string> a, std::any b, std::any c,
-                   std::any d, std::any e, std::any f, std::any g, std::any h,
-                   std::any i, std::any j, std::any k, std::any l, std::any m,
-                   std::any n, std::any o, std::any p,
-                   std::initializer_list<std::any> q,
-                   std::any r = std::monostate(), std::any s = std::monostate(),
-                   std::any t = std::monostate(), std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::initializer_list<std::string> a, std::any b, std::any c,
-                   std::any d, std::any e, std::any f, std::any g, std::any h,
-                   std::any i, std::any j, std::any k, std::any l, std::any m,
-                   std::any n, std::any o, std::any p, std::any q,
-                   std::initializer_list<std::any> r,
-                   std::any s = std::monostate(), std::any t = std::monostate(),
-                   std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::initializer_list<std::string> a, std::any b, std::any c,
-                   std::any d, std::any e, std::any f, std::any g, std::any h,
-                   std::any i, std::any j, std::any k, std::any l, std::any m,
-                   std::any n, std::any o, std::any p, std::any q, std::any r,
-                   std::initializer_list<std::any> s,
-                   std::any t = std::monostate(), std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::initializer_list<std::string> a, std::any b, std::any c,
-                   std::any d, std::any e, std::any f, std::any g, std::any h,
-                   std::any i, std::any j, std::any k, std::any l, std::any m,
-                   std::any n, std::any o, std::any p, std::any q, std::any r,
-                   std::any s, std::initializer_list<std::any> t,
-                   std::any u = std::monostate(),
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::initializer_list<std::string> a, std::any b, std::any c,
-                   std::any d, std::any e, std::any f, std::any g, std::any h,
-                   std::any i, std::any j, std::any k, std::any l, std::any m,
-                   std::any n, std::any o, std::any p, std::any q, std::any r,
-                   std::any s, std::any t, std::initializer_list<std::any> u,
-                   std::any v = std::monostate()) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-  void AddArgument(std::initializer_list<std::string> a, std::any b, std::any c,
-                   std::any d, std::any e, std::any f, std::any g, std::any h,
-                   std::any i, std::any j, std::any k, std::any l, std::any m,
-                   std::any n, std::any o, std::any p, std::any q, std::any r,
-                   std::any s, std::any t, std::any u,
-                   std::initializer_list<std::any> v) {
-    AddAnyArgument(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-                   u, v);
-  }
-
-  std::map<std::string, std::any> ParseArgs(int argc, const char* argv[]) {
-    std::vector<std::string> args = PrepArguments(argc, argv);
-    std::map<std::string, std::any> data;
-    while (args.size() > 0) {
-      bool res = false;
-      for (std::set<Argument>::iterator it = arguments_.begin();
-           it != arguments_.end() && res == false; ++it) {
-        res = (*it).ParseArgs(args);
-      }
-      if (res == false) {
-        std::cerr << "ERROR: Unrecognized argument \"" << args.front()
-                  << "\"\n";
-        args.erase(args.begin());
-      }
-    }
-    for (std::set<Argument>::iterator it = arguments_.begin();
-         it != arguments_.end(); ++it) {
-      if ((*it).Satisfied() == true) {
-        if ((*it).HasValue() == true) {
-          data.insert(std::pair<std::string, std::any>((*it).GetDest(),
-                                                       (*it).GetValue()));
-        }
-      } else {
-        std::cerr << "ERROR: Argument \"" << (*it).GetNamesStr()
-                  << "\" is required\n";
-      }
-    }
-    return data;
-  }
-
- private:
-  std::vector<std::string> PrepArguments(int argc, const char* argv[]) {
-    std::vector<std::string> args(argv + 1, argv + argc);
-    if (prog_ == std::string()) {
-      prog_ = argv[0];
-      prog_.erase(prog_.begin(), prog_.begin() + 2);
-    }
-    for (std::size_t i = 0; i < args.size(); i++) {
-      std::stringstream ss(args[i]);
-      std::string item;
-      args.erase(args.begin() + i);
-      while (std::getline(ss, item, '=')) {
-        args.insert(args.begin() + i, item);
-        i++;
-      }
-      i--;
-    }
-    for (std::size_t i = 0; i < args.size(); i++) {
-      if (args[i].size() > 2 && args[i][0] == '-' && args[i][1] != '-' &&
-          InAnyArgument(args[i]) == false) {
-        std::string tmp = args[i];
-        tmp.erase(tmp.begin());
-        args.erase(args.begin() + i);
-        for (std::string::iterator it = tmp.begin(); it != tmp.end(); ++it) {
-          args.insert(args.begin() + i, "-" + std::string(1, *it));
-          i++;
-        }
-        i--;
-      }
-    }
-    return args;
-  }
-  void AddAnyArgument(
-      std::variant<std::initializer_list<std::string>,
-                   std::variant<std::string, std::set<std::string>>>
-          a,
-      std::any b, std::any c, std::any d, std::any e, std::any f, std::any g,
-      std::any h, std::any i, std::any j, std::any k, std::any l, std::any m,
-      std::any n, std::any o, std::any p, std::any q, std::any r, std::any s,
-      std::any t, std::any u, std::any v) {
-    std::vector<std::any> tmp{b, c, d, e, f, g, h, i, j, k, l,
-                              m, n, o, p, q, r, s, t, u, v};
-    std::vector<std::any> args;
-    for (std::size_t i = 0; i < tmp.size(); i++) {
-      if (tmp[i].type() != typeid(std::monostate)) {
-        args.push_back(tmp[i]);
-      }
-    }
-    Argument new_arg(a, args);
-    if (current_group_ == std::string()) {
-      if (new_arg.Positional() == true) {
-        new_arg.SetGroup("Positional Arguments");
-      } else {
-        new_arg.SetGroup("Optional Arguments");
-      }
+    if (usage_ != std::string()) {
+      res += usage_;
     } else {
-      new_arg.SetGroup(current_group_);
+      res += "WIP";
     }
-    arguments_.insert(new_arg);
+    return res;
+  }
+  std::string GetVersion() {
+    std::string res;
+    if (prog_ != std::string()) {
+      res = prog_ + ' ';
+    }
+    res += version_;
+    return res;
   }
 
-  bool InAnyArgument(std::string arg_name) {
-    for (std::set<Argument>::iterator it = arguments_.begin();
-         it != arguments_.end(); ++it) {
-      if ((*it).IsMatch(arg_name) == true) {
-        return true;
+ protected:
+ private:
+  class Argument {
+   public:
+    Argument() {}
+    Argument(std::variant<std::initializer_list<std::string>,
+                          std::variant<std::string, std::set<std::string>>>
+                 names,
+             std::vector<estl::Variable> args) {
+      SetName(names);
+      ArgOpt opt = ARG_NONE;
+      for (auto it : args) {
+        opt = SetVariable(it, opt);
       }
     }
-    return false;
-  }
+    Argument(const Argument& copy)
+        : required_(copy.required_),
+          n_args_count_(copy.n_args_count_),
+          help_(copy.help_),
+          metavar_(copy.metavar_),
+          dest_(copy.dest_),
+          group_(copy.group_),
+          names_(copy.names_),
+          choices_(copy.choices_),
+          action_(copy.action_),
+          n_args_(copy.n_args_),
+          value_(copy.value_),
+          default_(copy.default_) {}
 
-  std::string prog_, usage_, prolog_, epilog_, version_, current_group_;
-  std::set<Argument> arguments_;
+    void SetName(std::variant<std::initializer_list<std::string>,
+                              std::variant<std::string, std::set<std::string>>>
+                     names) {
+      if (std::holds_alternative<std::initializer_list<std::string>>(names)) {
+        names_ = std::set<std::string>(
+            std::get<std::initializer_list<std::string>>(names));
+      } else if (std::holds_alternative<
+                     std::variant<std::string, std::set<std::string>>>(names)) {
+        std::variant<std::string, std::set<std::string>> sub_names =
+            std::get<std::variant<std::string, std::set<std::string>>>(names);
+        if (std::holds_alternative<std::string>(sub_names)) {
+          names_ = std::set<std::string>{std::get<std::string>(sub_names)};
+        } else {
+          names_ = std::get<std::set<std::string>>(sub_names);
+        }
+      }
+    }
+
+    ArgOpt SetVariable(estl::Variable val, ArgOpt opt) {
+      if (opt == ARG_NONE) {
+        if (val.Type() == estl::Variable::Types::UNSIGNED_INT) {
+          return ParseUnsignedInt(val);
+        } else if (val.Type() == estl::Variable::Types::STRING ||
+                   val.Type() == estl::Variable::Types::CHAR_ARRAY) {
+          if (help_ == std::string()) {
+            SetHelp(val);
+          } else if (dest_ == std::string()) {
+            SetDest(val);
+          } else if (metavar_ == std::string()) {
+            SetMetavar(val);
+          } else {
+            SetDefault(val);
+          }
+        } else if (val.Type() == estl::Variable::Types::SIGNED_INT) {
+          SetNArgs(val);
+        } else if (val.IsVector() == true) {
+          SetChoices(val);
+        } else if (val.Type() == estl::Variable::Types::BOOL) {
+          SetRequired(val);
+        }
+      }
+      return ARG_NONE;
+    }
+
+    ArgOpt ParseUnsignedInt(estl::Variable val) {
+      unsigned int uint = val;
+      if (uint < 40) {
+        type_ = static_cast<estl::Variable::Types>(uint);
+      } else if (uint < 50) {
+        action_ = static_cast<Action>(uint);
+      } else if (uint < 60) {
+        n_args_ = static_cast<NArgs>(uint);
+      } else if (uint < 80) {
+        return static_cast<ArgOpt>(uint);
+      } else {
+        SetDefault(val);
+      }
+      return ARG_NONE;
+    }
+
+    void SetHelp(estl::Variable val) {
+      if (val.Type() == estl::Variable::STRING) {
+        help_ = val.GetString();
+      } else {
+        help_ = std::string(val.GetCharArray());
+      }
+    }
+    void SetDest(estl::Variable val) {
+      if (val.Type() == estl::Variable::STRING) {
+        dest_ = val.GetString();
+      } else {
+        dest_ = std::string(val.GetCharArray());
+      }
+    }
+    void SetMetavar(estl::Variable val) {
+      if (val.Type() == estl::Variable::STRING) {
+        metavar_ = val.GetString();
+      } else {
+        metavar_ = std::string(val.GetCharArray());
+      }
+    }
+    void SetNArgs(estl::Variable val) {
+      if (val.Type() == estl::Variable::SIGNED_INT) {
+        n_args_count_ = val.GetSignedInt();
+        if (n_args_count_ == 1) {
+          n_args_ = ONE;
+        } else {
+          n_args_ = N;
+        }
+      } else if (val.Type() == estl::Variable::STRING ||
+                 val.Type() == estl::Variable::CHAR_ARRAY) {
+        std::string nargs = val.GetString();
+        if (val.Type() == estl::Variable::CHAR_ARRAY) {
+          nargs = std::string(val.GetCharArray());
+        }
+        if (nargs == "one") {
+          n_args_ = ONE;
+          n_args_count_ = 1;
+        } else if (nargs == "n") {
+          n_args_ = N;
+        } else if (nargs == "?") {
+          n_args_ = OPTIONAL;
+        } else if (nargs == "*") {
+          n_args_ = KLEENE_STAR;
+        } else if (nargs == "+") {
+          n_args_ = KLEENE_PLUS;
+        } else if (nargs.find_first_not_of("0123456789") == std::string::npos) {
+          n_args_count_ = stoi(nargs);
+          if (n_args_count_ == 1) {
+            n_args_ = ONE;
+          } else {
+            n_args_ = N;
+          }
+        }
+      }
+    }
+    void SetRequired(estl::Variable val) { required_ = val; }
+    void SetChoices(estl::Variable val) { choices_ = val; }
+    void SetDefault(estl::Variable val) { default_ = val; }
+
+    void SetGroup(std::string val) { group_ = val; }
+
+    std::set<std::string> GetNames() const { return names_; }
+    std::string GetDest() const { return dest_; }
+    std::string GetGroup() const { return group_; }
+
+    std::string GetNamesStr() const {
+      std::stringstream out;
+      std::copy(names_.begin(), names_.end(),
+                std::ostream_iterator<std::string>(out, ", "));
+      return out.str();
+    }
+    std::string GetChoicesStr() const {
+      std::stringstream out;
+      out << '{';
+      switch (choices_.Type()) {
+        case estl::Variable::BOOL_VECTOR: {
+          std::vector<bool> vec = choices_.GetBoolVector();
+          std::copy(vec.begin(), vec.end(),
+                    std::ostream_iterator<bool>(out, ", "));
+        }
+        case estl::Variable::CHAR_VECTOR: {
+          std::vector<char> vec = choices_.GetCharVector();
+          std::copy(vec.begin(), vec.end(),
+                    std::ostream_iterator<char>(out, ", "));
+        }
+        case estl::Variable::SIGNED_SHORT_INT_VECTOR: {
+          std::vector<char> vec = choices_.GetCharVector();
+          std::copy(vec.begin(), vec.end(),
+                    std::ostream_iterator<char>(out, ", "));
+        }
+        case estl::Variable::UNSIGNED_SHORT_INT_VECTOR: {
+          std::vector<char> vec = choices_.GetCharVector();
+          std::copy(vec.begin(), vec.end(),
+                    std::ostream_iterator<char>(out, ", "));
+        }
+        case estl::Variable::SIGNED_INT_VECTOR: {
+          std::vector<char> vec = choices_.GetCharVector();
+          std::copy(vec.begin(), vec.end(),
+                    std::ostream_iterator<char>(out, ", "));
+        }
+        case estl::Variable::UNSIGNED_INT_VECTOR: {
+          std::vector<char> vec = choices_.GetCharVector();
+          std::copy(vec.begin(), vec.end(),
+                    std::ostream_iterator<char>(out, ", "));
+        }
+        case estl::Variable::SIGNED_LONG_INT_VECTOR: {
+          std::vector<char> vec = choices_.GetCharVector();
+          std::copy(vec.begin(), vec.end(),
+                    std::ostream_iterator<char>(out, ", "));
+        }
+        case estl::Variable::UNSIGNED_LONG_INT_VECTOR: {
+          std::vector<char> vec = choices_.GetCharVector();
+          std::copy(vec.begin(), vec.end(),
+                    std::ostream_iterator<char>(out, ", "));
+        }
+        case estl::Variable::SIGNED_LONG_LONG_INT_VECTOR: {
+          std::vector<char> vec = choices_.GetCharVector();
+          std::copy(vec.begin(), vec.end(),
+                    std::ostream_iterator<char>(out, ", "));
+        }
+        case estl::Variable::UNSIGNED_LONG_LONG_INT_VECTOR: {
+          std::vector<char> vec = choices_.GetCharVector();
+          std::copy(vec.begin(), vec.end(),
+                    std::ostream_iterator<char>(out, ", "));
+        }
+        case estl::Variable::FLOAT_VECTOR: {
+          std::vector<char> vec = choices_.GetCharVector();
+          std::copy(vec.begin(), vec.end(),
+                    std::ostream_iterator<char>(out, ", "));
+        }
+        case estl::Variable::DOUBLE_VECTOR: {
+          std::vector<char> vec = choices_.GetCharVector();
+          std::copy(vec.begin(), vec.end(),
+                    std::ostream_iterator<char>(out, ", "));
+        }
+        case estl::Variable::LONG_DOUBLE_VECTOR: {
+          std::vector<char> vec = choices_.GetCharVector();
+          std::copy(vec.begin(), vec.end(),
+                    std::ostream_iterator<char>(out, ", "));
+        }
+        case estl::Variable::STRING_VECTOR: {
+          std::vector<char> vec = choices_.GetCharVector();
+          std::copy(vec.begin(), vec.end(),
+                    std::ostream_iterator<char>(out, ", "));
+        }
+        case estl::Variable::CHAR_ARRAY_VECTOR: {
+          std::vector<char> vec = choices_.GetCharVector();
+          std::copy(vec.begin(), vec.end(),
+                    std::ostream_iterator<char>(out, ", "));
+        }
+      }
+      out << '}';
+      return out.str();
+    }
+
+    estl::Variable GetValue() const {
+      if (value_.IsValid() == true) {
+        return value_;
+      } else if (default_.IsValid() == true) {
+        return default_;
+      }
+      return estl::Variable();
+    }
+
+   private:
+    bool required_ = false;
+    unsigned int n_args_count_ = 1;
+    std::string help_, metavar_, dest_, group_;
+    std::set<std::string> names_;
+    Action action_;
+    NArgs n_args_;
+    estl::Variable value_, default_, choices_;
+    estl::Variable::Types type_;
+  };
+
+  std::string prog_, prolog_, epilog_, usage_, version_, current_group_;
   bool add_help_, add_version_;
 };
-
 }  // namespace estl
 
 #endif  // ESTL_ARGPARSE_HPP_

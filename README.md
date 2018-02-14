@@ -5,6 +5,7 @@
 [![Documentation](https://img.shields.io/badge/Documentation-gh--pages-blue.svg)](https://luxatrumstudio.github.io/estl/)
 
 [![GitHub last commit](https://img.shields.io/github/last-commit/LuxAtrumStudio/estl.svg)](<>)
+[![GitHub commits](https://img.shields.io/github/commits-since/LuxAtrumStudio/estl/v0.0.svg)](<>)
 [![GitHub commit activity the past week, 4 weeks, year](https://img.shields.io/github/commit-activity/y/LuxAtrumStudio/estl.svg)](<>)
 [![GitHub repo size in bytes](https://img.shields.io/github/repo-size/LuxAtrumStudio/estl.svg)](<>)
 

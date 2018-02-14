@@ -16,7 +16,7 @@ export BASE_PATH=$(shell pwd)
 
 # export COMPILER=clang++
 export COMPILER=g++
-export CXXFLAGS= -MMD -std=c++17 -w -c -fPIC
+export CXXFLAGS= -MMD -std=c++17 -w -c -fPIC -O3
 
 export INSTALL_PATH=/usr/local
 

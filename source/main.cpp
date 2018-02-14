@@ -1,31 +1,23 @@
-#include <math.h>
-#include <stdio.h>
-#include <iomanip>
 #include <iostream>
-
-#include <any>
-#include <functional>
-#include <set>
-#include <variant>
 
 // #include "any.hpp"
 
-#include "variable.hpp"
+// #include "variable.hpp"
 
-// #include "argparse.hpp"
+#include "argparse.hpp"
 // #include "argparse/argument.hpp"
 // #include "matrix.hpp"
 // #include "stream.hpp"
 // #include "variadic.hpp"
 // #include "vector.hpp"
 
-void tmp(std::string tmp) { std::cout << "a\n"; }
+// void tmp(std::string tmp) { std::cout << "a\n"; }
 
 int main(int argc, char const* argv[]) {
-  estl::Variable var(3.1415);
-  std::cout << var;
-  var = "Hello World!";
-  std::cout << var;
+  // estl::Variable var(3.1415);
+  // std::cout << var;
+  // var = "Hello World!";
+  // std::cout << var;
   //     estl::ArgumentParser parser("This is an example parser",
   //                                 "This will go after the options");
   // parser.SetVersion("v0.3.5");
