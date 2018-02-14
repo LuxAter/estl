@@ -33,15 +33,14 @@ class ArgumentParser {
     ARG_NONE = 60,
     ARG_ACTION = 61,
     ARG_N_ARGS = 62,
-    ARG_N_ARGS_COUNT = 63,
-    ARG_CONST = 64,
-    ARG_DEFAULT = 65,
-    ARG_CHOICES = 66,
-    ARG_REQUIRED = 67,
-    ARG_HELP = 68,
-    ARG_METAVAR = 69,
-    ARG_DEST = 70,
-    ARG_TYPE = 71
+    ARG_CONST = 63,
+    ARG_DEFAULT = 64,
+    ARG_CHOICES = 65,
+    ARG_REQUIRED = 66,
+    ARG_HELP = 67,
+    ARG_METAVAR = 68,
+    ARG_DEST = 69,
+    ARG_TYPE = 70
   };
 
   ArgumentParser() {}
@@ -120,11 +119,11 @@ class ArgumentParser {
           dest_(copy.dest_),
           group_(copy.group_),
           names_(copy.names_),
-          choices_(copy.choices_),
           action_(copy.action_),
           n_args_(copy.n_args_),
           value_(copy.value_),
-          default_(copy.default_) {}
+          default_(copy.default_),
+          choices_(copy.choices_) {}
 
     void SetName(std::variant<std::initializer_list<std::string>,
                               std::variant<std::string, std::set<std::string>>>
@@ -166,6 +165,28 @@ class ArgumentParser {
         } else if (val.Type() == estl::Variable::Types::BOOL) {
           SetRequired(val);
         }
+      } else if (opt == ARG_ACTION) {
+        SetAction(val);
+      } else if (opt == ARG_CHOICES) {
+        SetChoices(val);
+      } else if (opt == ARG_CONST) {
+        SetConst(val);
+      } else if (opt == ARG_DEFAULT) {
+        SetDefault(val);
+      } else if (opt == ARG_DEST) {
+        SetDest(val);
+      } else if (opt == ARG_HELP) {
+        SetHelp(val);
+      } else if (opt == ARG_METAVAR) {
+        SetMetavar(val);
+      } else if (opt == ARG_N_ARGS) {
+        SetNArgs(val);
+      } else if (opt == ARG_REQUIRED) {
+        SetNArgs(val);
+      } else if (opt == ARG_TYPE) {
+        SetType(val);
+      } else {
+        SetDefault(val);
       }
       return ARG_NONE;
     }
@@ -208,7 +229,18 @@ class ArgumentParser {
       }
     }
     void SetNArgs(estl::Variable val) {
-      if (val.Type() == estl::Variable::SIGNED_INT) {
+      if (val.Type() == estl::Variable::UNSIGNED_INT) {
+        unsigned int uint = val.GetUnsignedInt();
+        if (uint >= 50 && uint < 60) {
+          n_args_ = static_cast<NArgs>(uint);
+        } else if (uint == 1) {
+          n_args_ = ONE;
+          n_args_count_ = 1;
+        } else {
+          n_args_ = N;
+          n_args_count_ = uint;
+        }
+      } else if (val.Type() == estl::Variable::SIGNED_INT) {
         n_args_count_ = val.GetSignedInt();
         if (n_args_count_ == 1) {
           n_args_ = ONE;
@@ -242,9 +274,59 @@ class ArgumentParser {
         }
       }
     }
+    void SetAction(estl::Variable val) {
+      if (val.Type() == estl::Variable::UNSIGNED_INT) {
+        action_ = static_cast<Action>(val.GetUnsignedInt());
+      } else if (val.Type() == estl::Variable::STRING ||
+                 val.Type() == estl::Variable::CHAR_ARRAY) {
+        std::string action_str = val.GetString();
+        if (val.Type() == estl::Variable::CHAR_ARRAY) {
+          action_str = std::string(val.GetCharArray());
+        }
+        if (action_str == "store") {
+          action_ = STORE;
+        } else if (action_str == "store_const") {
+          action_ = STORE_CONST;
+        } else if (action_str == "store_true") {
+          action_ = STORE_TRUE;
+        } else if (action_str == "store_false") {
+          action_ = STORE_FALSE;
+        } else if (action_str == "append") {
+          action_ = APPEND;
+        } else if (action_str == "append_const") {
+          action_ = APPEND_CONST;
+        } else if (action_str == "COUNT") {
+          action_ = COUNT;
+        } else if (action_str == "help") {
+          action_ = HELP;
+        } else if (action_str == "version") {
+          action_ = VERSION;
+        }
+      }
+    }
+    void SetType(estl::Variable val) {
+      if (val.Type() == estl::Variable::UNSIGNED_INT) {
+        unsigned int uint = val.GetUnsignedInt();
+        if (uint < 40) {
+          type_ = static_cast<estl::Variable::Types>(uint);
+        }
+      } else if (val.Type() == estl::Variable::STRING ||
+                 val.Type() == estl::Variable::CHAR_ARRAY) {
+        std::string type_str = val.GetString();
+        if (val.Type() == estl::Variable::CHAR_ARRAY) {
+          type_str = std::string(val.GetCharArray());
+        }
+        if (type_str == "none") {
+          type_ = estl::Variable::NONE;
+        } else if (type_str == "bool") {
+          type_ = estl::Variable::BOOL;
+        }
+      }
+    }
     void SetRequired(estl::Variable val) { required_ = val; }
     void SetChoices(estl::Variable val) { choices_ = val; }
     void SetDefault(estl::Variable val) { default_ = val; }
+    void SetConst(estl::Variable val) { const_ = val; }
 
     void SetGroup(std::string val) { group_ = val; }
 
@@ -358,7 +440,7 @@ class ArgumentParser {
     std::set<std::string> names_;
     Action action_;
     NArgs n_args_;
-    estl::Variable value_, default_, choices_;
+    estl::Variable value_, default_, choices_, const_;
     estl::Variable::Types type_;
   };
 
