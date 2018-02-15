@@ -93,6 +93,40 @@ class Variable {
       : is_valid_(true), value_(val) {}
   Variable(const std::vector<const char*>& val)
       : is_valid_(true), value_(val) {}
+  Variable(const std::initializer_list<bool>& val)
+      : is_valid_(true), value_(std::vector<bool>(val)) {}
+  Variable(const std::initializer_list<char>& val)
+      : is_valid_(true), value_(std::vector<char>(val)) {}
+  Variable(const std::initializer_list<signed char>& val)
+      : is_valid_(true), value_(std::vector<signed char>(val)) {}
+  Variable(const std::initializer_list<unsigned char>& val)
+      : is_valid_(true), value_(std::vector<unsigned char>(val)) {}
+  Variable(const std::initializer_list<signed short int>& val)
+      : is_valid_(true), value_(std::vector<signed short int>(val)) {}
+  Variable(const std::initializer_list<unsigned short int>& val)
+      : is_valid_(true), value_(std::vector<unsigned short int>(val)) {}
+  Variable(const std::initializer_list<signed int>& val)
+      : is_valid_(true), value_(std::vector<signed int>(val)) {}
+  Variable(const std::initializer_list<unsigned int>& val)
+      : is_valid_(true), value_(std::vector<unsigned int>(val)) {}
+  Variable(const std::initializer_list<signed long int>& val)
+      : is_valid_(true), value_(std::vector<signed long int>(val)) {}
+  Variable(const std::initializer_list<unsigned long int>& val)
+      : is_valid_(true), value_(std::vector<unsigned long int>(val)) {}
+  Variable(const std::initializer_list<signed long long int>& val)
+      : is_valid_(true), value_(std::vector<signed long long int>(val)) {}
+  Variable(const std::initializer_list<unsigned long long int>& val)
+      : is_valid_(true), value_(std::vector<unsigned long long int>(val)) {}
+  Variable(const std::initializer_list<float>& val)
+      : is_valid_(true), value_(std::vector<float>(val)) {}
+  Variable(const std::initializer_list<double>& val)
+      : is_valid_(true), value_(std::vector<double>(val)) {}
+  Variable(const std::initializer_list<long double>& val)
+      : is_valid_(true), value_(std::vector<long double>(val)) {}
+  Variable(const std::initializer_list<std::string>& val)
+      : is_valid_(true), value_(std::vector<std::string>(val)) {}
+  Variable(const std::initializer_list<const char*>& val)
+      : is_valid_(true), value_(std::vector<const char*>(val)) {}
   ~Variable() {}
 
   bool IsValid() const { return is_valid_; }
@@ -704,7 +738,7 @@ class Variable {
 
   Variable& operator=(const Variable& copy) {
     is_valid_ = copy.is_valid_;
-    value_ = copy.is_valid_;
+    value_ = copy.value_;
     return *this;
   }
   Variable& operator=(const bool& val) {

@@ -2,11 +2,14 @@
 #define ESTL_ARGPARSE_HPP_
 
 #include <algorithm>
+#include <array>
 #include <iostream>
 #include <iterator>
+#include <map>
 #include <set>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include "variable.hpp"
 
@@ -46,14 +49,14 @@ class ArgumentParser {
   };
 
   ArgumentParser() {}
-  explicit ArgumentParser(std::string& prog)
+  explicit ArgumentParser(std::string prog)
       : prog_(prog), add_help_(true), add_version_(false) {}
-  ArgumentParser(std::string& prolog, std::string& epilog)
+  ArgumentParser(std::string prolog, std::string epilog)
       : prolog_(prolog),
         epilog_(epilog),
         add_help_(true),
         add_version_(false) {}
-  ArgumentParser(std::string& prog, std::string& prolog, std::string& epilog)
+  ArgumentParser(std::string prog, std::string prolog, std::string epilog)
       : prog_(prog),
         prolog_(prolog),
         epilog_(epilog),
@@ -74,9 +77,40 @@ class ArgumentParser {
   void SetProlog(std::string prolog) { prolog_ = prolog; }
   void SetEpilog(std::string epilog) { epilog_ = epilog; }
   void SetUsage(std::string usage) { usage_ = usage; }
+  void SetVersion(std::string version) { version_ = version; }
   void Group(std::string group) { current_group_ = group; }
+  void SetAddHelp(bool setting) { add_help_ = setting; }
+  void SetAddVersion(bool setting) { add_version_ = setting; }
 
-  std::string GetHelp() {}
+  std::string GetHelp() {
+    std::stringstream out;
+    out << GetUsage() << "\n";
+    if (GetVersion() != std::string()) {
+      out << GetVersion() << "\n";
+    }
+    out << "\n";
+    out << PrintBlockString(prolog_) << "\n\n";
+    std::map<std::string, std::vector<std::string>> help_data;
+    for (auto& it : arguments_) {
+      if (help_data.find(it.GetGroup()) != help_data.end()) {
+        help_data.at(it.GetGroup()).push_back(it.GetHelp());
+      } else {
+        help_data.insert(std::pair<std::string, std::vector<std::string>>(
+            it.GetGroup(), std::vector<std::string>{it.GetHelp()}));
+      }
+    }
+    for (auto& it : help_data) {
+      out << it.first << ":\n";
+      for (auto& entry : it.second) {
+        out << entry << "\n";
+      }
+    }
+    if (help_data.size() != 0) {
+      out << "\n";
+    }
+    out << PrintBlockString(epilog_) << "\n";
+    return out.str();
+  }
   std::string GetUsage() {
     std::string res = "usage: ";
     if (prog_ != std::string()) {
@@ -90,12 +124,105 @@ class ArgumentParser {
     return res;
   }
   std::string GetVersion() {
+    if (version_ == std::string()) {
+      return std::string();
+    }
     std::string res;
     if (prog_ != std::string()) {
       res = prog_ + ' ';
     }
     res += version_;
     return res;
+  }
+
+  void AddArgument(
+      std::initializer_list<std::string> names,
+      estl::Variable a = estl::Variable(), estl::Variable b = estl::Variable(),
+      estl::Variable c = estl::Variable(), estl::Variable d = estl::Variable(),
+      estl::Variable e = estl::Variable(), estl::Variable f = estl::Variable(),
+      estl::Variable g = estl::Variable(), estl::Variable h = estl::Variable(),
+      estl::Variable i = estl::Variable(), estl::Variable j = estl::Variable(),
+      estl::Variable k = estl::Variable(), estl::Variable l = estl::Variable(),
+      estl::Variable m = estl::Variable(), estl::Variable n = estl::Variable(),
+      estl::Variable o = estl::Variable(), estl::Variable p = estl::Variable(),
+      estl::Variable q = estl::Variable(), estl::Variable r = estl::Variable(),
+      estl::Variable s = estl::Variable(), estl::Variable t = estl::Variable(),
+      estl::Variable u = estl::Variable(),
+      estl::Variable v = estl::Variable()) {
+    AddArgumentVector(names, {a, b, c, d, e, f, g, h, i, j, k,
+                              l, m, n, o, p, q, r, s, t, u, v});
+  }
+  void AddArgument(
+      std::string names, estl::Variable a = estl::Variable(),
+      estl::Variable b = estl::Variable(), estl::Variable c = estl::Variable(),
+      estl::Variable d = estl::Variable(), estl::Variable e = estl::Variable(),
+      estl::Variable f = estl::Variable(), estl::Variable g = estl::Variable(),
+      estl::Variable h = estl::Variable(), estl::Variable i = estl::Variable(),
+      estl::Variable j = estl::Variable(), estl::Variable k = estl::Variable(),
+      estl::Variable l = estl::Variable(), estl::Variable m = estl::Variable(),
+      estl::Variable n = estl::Variable(), estl::Variable o = estl::Variable(),
+      estl::Variable p = estl::Variable(), estl::Variable q = estl::Variable(),
+      estl::Variable r = estl::Variable(), estl::Variable s = estl::Variable(),
+      estl::Variable t = estl::Variable(), estl::Variable u = estl::Variable(),
+      estl::Variable v = estl::Variable()) {
+    AddArgumentVector(names, {a, b, c, d, e, f, g, h, i, j, k,
+                              l, m, n, o, p, q, r, s, t, u, v});
+  }
+
+  std::map<std::string, estl::Variable> ParseArgs(int argc,
+                                                  const char* argv[]) {
+    if (add_help_ == true) {
+      AddArgumentVector(std::initializer_list<std::string>{"-h", "--help"},
+                        {HELP, "show this help message and exit"});
+    }
+    if (add_version_ == true) {
+      AddArgumentVector({"--version"},
+                        {VERSION, "show program's version number and exit"});
+    }
+    std::vector<std::string> args = PrepArguments(argc, argv);
+    std::map<std::string, estl::Variable> data;
+    int flag = 0;
+    while (args.size() > 0) {
+      bool res = false;
+      for (auto& it : arguments_) {
+        res = it.ParseArgs(args);
+        if (res == true) {
+          if (it.GetAction() == HELP) {
+            flag = 1;
+          } else if (it.GetAction() == VERSION) {
+            flag = 2;
+          }
+          break;
+        }
+      }
+      if (res == false) {
+        std::cerr << "ERROR: Unrecognized argument \"" << args.front()
+                  << "\"\n";
+        args.erase(args.begin());
+      }
+      if (flag != 0) {
+        break;
+      }
+    }
+    if (flag == 1) {
+      std::cout << GetHelp() << "\n";
+      return data;
+    } else if (flag == 2) {
+      std::cout << GetVersion() << "\n";
+      return data;
+    }
+    for (auto& it : arguments_) {
+      if (it.Satisfied() == true) {
+        if (it.HasValue() == true) {
+          data.insert(std::pair<std::string, estl::Variable>(it.GetDest(),
+                                                             it.GetValue()));
+        }
+      } else {
+        std::cerr << "ERROR: Argument \"" << it.GetNamesStr()
+                  << "\" is required\n";
+      }
+    }
+    return data;
   }
 
  protected:
@@ -110,6 +237,9 @@ class ArgumentParser {
       SetName(names);
       ArgOpt opt = ARG_NONE;
       for (auto it : args) {
+        if (it.IsValid() == false) {
+          break;
+        }
         opt = SetVariable(it, opt);
       }
     }
@@ -125,6 +255,7 @@ class ArgumentParser {
           n_args_(copy.n_args_),
           value_(copy.value_),
           default_(copy.default_),
+          type_(copy.type_),
           choices_(copy.choices_) {}
 
     void SetName(std::variant<std::initializer_list<std::string>,
@@ -147,7 +278,8 @@ class ArgumentParser {
 
     ArgOpt SetVariable(estl::Variable val, ArgOpt opt) {
       if (opt == ARG_NONE) {
-        if (val.Type() == estl::Variable::Types::UNSIGNED_INT) {
+        if (val.Type() == estl::Variable::Types::UNSIGNED_INT ||
+            val.Type() == estl::Variable::Types::SIGNED_INT) {
           return ParseUnsignedInt(val);
         } else if (val.Type() == estl::Variable::Types::STRING ||
                    val.Type() == estl::Variable::Types::CHAR_ARRAY) {
@@ -160,8 +292,6 @@ class ArgumentParser {
           } else {
             SetDefault(val);
           }
-        } else if (val.Type() == estl::Variable::Types::SIGNED_INT) {
-          SetNArgs(val);
         } else if (val.IsVector() == true) {
           SetChoices(val);
         } else if (val.Type() == estl::Variable::Types::BOOL) {
@@ -194,11 +324,21 @@ class ArgumentParser {
     }
 
     ArgOpt ParseUnsignedInt(estl::Variable val) {
-      unsigned int uint = val;
+      unsigned int uint;
+      if (val.Type() == estl::Variable::SIGNED_INT) {
+        uint = val.GetSignedInt();
+      } else {
+        uint = val.GetUnsignedInt();
+      }
       if (uint < 40) {
         type_ = static_cast<estl::Variable::Types>(uint);
       } else if (uint < 50) {
         action_ = static_cast<Action>(uint);
+        if (action_ == STORE_TRUE && default_.IsValid() == false) {
+          default_ = false;
+        } else if (action_ == STORE_FALSE && default_.IsValid() == false) {
+          default_ = true;
+        }
       } else if (uint < 60) {
         n_args_ = static_cast<NArgs>(uint);
       } else if (uint < 80) {
@@ -279,6 +419,11 @@ class ArgumentParser {
     void SetAction(estl::Variable val) {
       if (val.Type() == estl::Variable::UNSIGNED_INT) {
         action_ = static_cast<Action>(val.GetUnsignedInt());
+        if (action_ == STORE_TRUE && default_.IsValid() == false) {
+          default_ = false;
+        } else if (action_ == STORE_FALSE && default_.IsValid() == false) {
+          default_ = true;
+        }
       } else if (val.Type() == estl::Variable::STRING ||
                  val.Type() == estl::Variable::CHAR_ARRAY) {
         std::string action_str = val.GetString();
@@ -291,13 +436,19 @@ class ArgumentParser {
           action_ = STORE_CONST;
         } else if (action_str == "store_true") {
           action_ = STORE_TRUE;
+          if (default_.IsValid() == false) {
+            default_ = false;
+          }
         } else if (action_str == "store_false") {
           action_ = STORE_FALSE;
+          if (default_.IsValid() == false) {
+            default_ = true;
+          }
         } else if (action_str == "append") {
           action_ = APPEND;
         } else if (action_str == "append_const") {
           action_ = APPEND_CONST;
-        } else if (action_str == "COUNT") {
+        } else if (action_str == "count") {
           action_ = COUNT;
         } else if (action_str == "help") {
           action_ = HELP;
@@ -323,6 +474,7 @@ class ArgumentParser {
         } else if (type_str == "bool") {
           type_ = estl::Variable::BOOL;
         }
+        // TODO(Arden): Add more string variants.
       }
     }
     void SetRequired(estl::Variable val) { required_ = val; }
@@ -333,7 +485,22 @@ class ArgumentParser {
     void SetGroup(std::string val) { group_ = val; }
 
     std::set<std::string> GetNames() const { return names_; }
-    std::string GetDest() const { return dest_; }
+    Action GetAction() const { return action_; }
+    std::string GetDest() const {
+      if (dest_ == std::string()) {
+        std::string longest = std::string();
+        for (auto& it : names_) {
+          if (it.size() > longest.size()) {
+            longest = it;
+          }
+        }
+        while (longest.size() > 0 && longest[0] == '-') {
+          longest.erase(longest.begin());
+        }
+        return longest;
+      }
+      return dest_;
+    }
     std::string GetGroup() const { return group_; }
 
     std::string GetNamesStr() const {
@@ -412,11 +579,11 @@ class ArgumentParser {
       }
       return false;
     }
-    bool HasValue() const { return value_.IsValid(); }
+    bool HasValue() const { return (value_.IsValid() || default_.IsValid()); }
 
     bool Satisfied() const {
       if (required_ == true) {
-        return value_.IsValid();
+        return (value_.IsValid() || default_.IsValid());
       }
       return true;
     }
@@ -427,7 +594,7 @@ class ArgumentParser {
       return false;
     }
 
-    bool ParseArgss(std::vector<std::string>& args) {
+    bool ParseArgs(std::vector<std::string>& args) const {
       if (args.size() == 0 || InNames(args.front()) == false) {
         return false;
       }
@@ -443,8 +610,12 @@ class ArgumentParser {
       return true;
     }
 
+    friend bool operator<(const Argument& lhs, const Argument& rhs) {
+      return lhs.GetNames() < rhs.GetNames();
+    }
+
    private:
-    void PreformArgumentAction(std::vector<std::string>& args) {
+    void PreformArgumentAction(std::vector<std::string>& args) const {
       if (args.front()[0] == '-') {
         if (n_args_ == OPTIONAL || n_args_ == KLEENE_STAR) {
         } else {
@@ -489,7 +660,7 @@ class ArgumentParser {
       }
     }
 
-    void PreformAction() {
+    void PreformAction() const {
       switch (action_) {
         case STORE_TRUE: {
           value_ = true;
@@ -521,7 +692,7 @@ class ArgumentParser {
       std::cerr << "\"\n";
     }
 
-    estl::Variable GetArgument(std::string arg_str) {
+    estl::Variable GetArgument(std::string arg_str) const {
       estl::Variable argument = ConvertToType(arg_str);
       if (argument.IsValid() == false) {
         std::cerr << "ERROR: Invalid type for argument \"" << GetNamesStr()
@@ -536,7 +707,7 @@ class ArgumentParser {
       return estl::Variable();
     }
 
-    bool InChoices(estl::Variable argument) {
+    bool InChoices(estl::Variable argument) const {
       if (choices_.IsValid() == false || choices_.IsVector() == false) {
         return true;
       }
@@ -686,7 +857,7 @@ class ArgumentParser {
       return false;
     }
 
-    estl::Variable ConvertToType(std::string arg_str) {
+    estl::Variable ConvertToType(std::string arg_str) const {
       switch (type_) {
         case estl::Variable::NONE:
         case estl::Variable::STRING: {
@@ -736,13 +907,123 @@ class ArgumentParser {
     unsigned int n_args_count_ = 1;
     std::string help_, metavar_, dest_, group_;
     std::set<std::string> names_;
-    Action action_;
-    NArgs n_args_;
-    estl::Variable value_, default_, choices_, const_;
+    Action action_ = STORE;
+    NArgs n_args_ = ONE;
+    estl::Variable default_, choices_, const_;
+    mutable estl::Variable value_;
     estl::Variable::Types type_;
   };
 
+  std::vector<std::string> PrepArguments(int argc, const char* argv[]) {
+    std::vector<std::string> args(argv + 1, argv + argc);
+    if (prog_ == std::string()) {
+      prog_ = argv[0];
+      prog_.erase(prog_.begin(), prog_.begin() + 2);
+    }
+    for (std::size_t i = 0; i < args.size(); i++) {
+      std::stringstream ss(args[i]);
+      std::string item;
+      args.erase(args.begin() + i);
+      while (std::getline(ss, item, '=')) {
+        args.insert(args.begin() + i, item);
+        i++;
+      }
+      i--;
+    }
+    for (std::size_t i = 0; i < args.size(); i++) {
+      if (args[i].size() > 2 && args[i][0] == '-' && args[i][1] != '-' &&
+          InAnyArgument(args[i]) == false) {
+        std::string tmp = args[i];
+        tmp.erase(tmp.begin());
+        args.erase(args.begin() + i);
+        for (auto& it : tmp) {
+          args.insert(args.begin() + i, "-" + std::string(1, it));
+          i++;
+        }
+        i--;
+      }
+    }
+    return args;
+  }
+
+  void AddArgumentVector(
+      std::variant<std::initializer_list<std::string>,
+                   std::variant<std::string, std::set<std::string>>>
+          name,
+      std::vector<estl::Variable> args) {
+    Argument new_arg(name, args);
+    if (current_group_ == std::string()) {
+      bool flag = false;
+      if (std::holds_alternative<std::initializer_list<std::string>>(name) ==
+          true) {
+        std::vector<std::string> vec(
+            std::get<std::initializer_list<std::string>>(name));
+        for (auto& it : vec) {
+          if (it[0] == '-') {
+            flag = true;
+            break;
+          }
+        }
+      } else {
+        std::variant<std::string, std::set<std::string>> var =
+            std::get<std::variant<std::string, std::set<std::string>>>(name);
+        if (std::holds_alternative<std::string>(var) == true) {
+          std::string str = std::get<std::string>(var);
+          if (str[0] == '-') {
+            flag = true;
+          }
+        } else {
+          std::set<std::string> st = std::get<std::set<std::string>>(var);
+          for (auto& it : st) {
+            if (it[0] == '-') {
+              flag = true;
+              break;
+            }
+          }
+        }
+      }
+      if (flag == false) {
+        new_arg.SetGroup("positional arguments");
+      } else {
+        new_arg.SetGroup("optional arguments");
+      }
+    } else {
+      new_arg.SetGroup(current_group_);
+    }
+    arguments_.insert(new_arg);
+  }
+
+  std::string PrintBlockString(std::string str, int indent = 0) {
+    if (str.size() + indent < 80) {
+      return str;
+    }
+    int len = indent;
+    std::string res;
+    std::string word;
+    std::stringstream out(str);
+    while (getline(out, word, ' ')) {
+      if (len >= 80) {
+        res += "\n";
+        res += std::string(indent, ' ');
+        len = indent;
+      }
+      res += word + ' ';
+      len += word.size() + 1;
+    }
+    return res;
+  }
+
+  bool InAnyArgument(std::string arg_name) {
+    for (auto& it : arguments_) {
+      if (it.InNames(arg_name) == true) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   std::string prog_, prolog_, epilog_, usage_, version_, current_group_;
+  std::set<Argument> arguments_;
   bool add_help_, add_version_;
 };
 }  // namespace estl

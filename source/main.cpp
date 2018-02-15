@@ -14,6 +14,22 @@
 // void tmp(std::string tmp) { std::cout << "a\n"; }
 
 int main(int argc, char const* argv[]) {
+  estl::ArgumentParser parser(
+      "A general C++ utility libraries all implemented as header only files.",
+      "Everything is split betwen the header files, so that anything not used "
+      "is not compiled into the program unneccesarily.");
+  parser.SetVersion("v0.4");
+  // parser.SetProg("estl");
+  parser.SetAddVersion(true);
+  parser.AddArgument("-t", "This is a test function",
+                     estl::ArgumentParser::STORE_TRUE);
+  parser.AddArgument({"-a", "--all"}, "This will show all options",
+                     {1, 2, 3, 4, 5}, estl::Variable::SIGNED_INT);
+  std::map<std::string, estl::Variable> data = parser.ParseArgs(argc, argv);
+  for (auto& it : data) {
+    std::cout << it.first << ":" << it.second << "\n";
+  }
+  // std::cout << parser.GetHelp();
   // estl::Variable var(3.1415);
   // std::cout << var;
   // var = "Hello World!";
