@@ -89,7 +89,9 @@ class ArgumentParser {
       out << GetVersion() << "\n";
     }
     out << "\n";
-    out << PrintBlockString(prolog_) << "\n\n";
+    if (prolog_ != std::string()) {
+      out << PrintBlockString(prolog_) << "\n\n";
+    }
     std::map<std::string, std::vector<std::string>> help_data;
     for (auto& it : arguments_) {
       if (help_data.find(it.GetGroup()) != help_data.end()) {
@@ -108,7 +110,9 @@ class ArgumentParser {
     if (help_data.size() != 0) {
       out << "\n";
     }
-    out << PrintBlockString(epilog_) << "\n";
+    if (epilog_ != std::string()) {
+      out << PrintBlockString(epilog_) << "\n";
+    }
     return out.str();
   }
   std::string GetUsage() {
@@ -505,8 +509,13 @@ class ArgumentParser {
 
     std::string GetNamesStr() const {
       std::stringstream out;
-      std::copy(names_.begin(), names_.end(),
-                std::ostream_iterator<std::string>(out, ", "));
+      for (std::set<std::string>::reverse_iterator it = names_.rbegin();
+           it != names_.rend(); ++it) {
+        out << (*it);
+        if (it != --names_.rend()) {
+          out << ", ";
+        }
+      }
       return out.str();
     }
     std::string GetChoicesStr() const {
