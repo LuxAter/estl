@@ -319,6 +319,7 @@ class Variable {
       vec.push_back(val);
       value_ = vec;
     } else if (is_valid_ == false) {
+      is_valid_ = true;
       value_ = std::vector<bool>{val};
     }
   }
@@ -329,6 +330,7 @@ class Variable {
       vec.push_back(val);
       value_ = vec;
     } else if (is_valid_ == false) {
+      is_valid_ = true;
       value_ = std::vector<char>{val};
     }
   }
@@ -339,6 +341,7 @@ class Variable {
       vec.push_back(val);
       value_ = vec;
     } else if (is_valid_ == false) {
+      is_valid_ = true;
       value_ = std::vector<signed char>{val};
     }
   }
@@ -350,6 +353,7 @@ class Variable {
       vec.push_back(val);
       value_ = vec;
     } else if (is_valid_ == false) {
+      is_valid_ = true;
       value_ = std::vector<unsigned char>{val};
     }
   }
@@ -361,6 +365,7 @@ class Variable {
       vec.push_back(val);
       value_ = vec;
     } else if (is_valid_ == false) {
+      is_valid_ = true;
       value_ = std::vector<signed short int>{val};
     }
   }
@@ -373,6 +378,7 @@ class Variable {
       vec.push_back(val);
       value_ = vec;
     } else if (is_valid_ == false) {
+      is_valid_ = true;
       value_ = std::vector<unsigned short int>{val};
     }
   }
@@ -383,6 +389,7 @@ class Variable {
       vec.push_back(val);
       value_ = vec;
     } else if (is_valid_ == false) {
+      is_valid_ = true;
       value_ = std::vector<signed int>{val};
     }
   }
@@ -394,6 +401,7 @@ class Variable {
       vec.push_back(val);
       value_ = vec;
     } else if (is_valid_ == false) {
+      is_valid_ = true;
       value_ = std::vector<unsigned int>{val};
     }
   }
@@ -405,6 +413,7 @@ class Variable {
       vec.push_back(val);
       value_ = vec;
     } else if (is_valid_ == false) {
+      is_valid_ = true;
       value_ = std::vector<signed long int>{val};
     }
   }
@@ -417,6 +426,7 @@ class Variable {
       vec.push_back(val);
       value_ = vec;
     } else if (is_valid_ == false) {
+      is_valid_ = true;
       value_ = std::vector<unsigned long int>{val};
     }
   }
@@ -429,6 +439,7 @@ class Variable {
       vec.push_back(val);
       value_ = vec;
     } else if (is_valid_ == false) {
+      is_valid_ = true;
       value_ = std::vector<signed long long int>{val};
     }
   }
@@ -441,6 +452,7 @@ class Variable {
       vec.push_back(val);
       value_ = vec;
     } else if (is_valid_ == false) {
+      is_valid_ = true;
       value_ = std::vector<unsigned long long int>{val};
     }
   }
@@ -451,6 +463,7 @@ class Variable {
       vec.push_back(val);
       value_ = vec;
     } else if (is_valid_ == false) {
+      is_valid_ = true;
       value_ = std::vector<float>{val};
     }
   }
@@ -461,6 +474,7 @@ class Variable {
       vec.push_back(val);
       value_ = vec;
     } else if (is_valid_ == false) {
+      is_valid_ = true;
       value_ = std::vector<double>{val};
     }
   }
@@ -471,6 +485,7 @@ class Variable {
       vec.push_back(val);
       value_ = vec;
     } else if (is_valid_ == false) {
+      is_valid_ = true;
       value_ = std::vector<long double>{val};
     }
   }
@@ -481,6 +496,7 @@ class Variable {
       vec.push_back(val);
       value_ = vec;
     } else if (is_valid_ == false) {
+      is_valid_ = true;
       value_ = std::vector<std::string>{val};
     }
   }
@@ -491,6 +507,7 @@ class Variable {
       vec.push_back(val);
       value_ = vec;
     } else if (is_valid_ == false) {
+      is_valid_ = true;
       value_ = std::vector<const char*>{val};
     }
   }

@@ -123,7 +123,17 @@ class ArgumentParser {
     if (usage_ != std::string()) {
       res += usage_;
     } else {
-      res += "WIP";
+      int len = res.size();
+      int indent = res.size();
+      for (auto& it : arguments_) {
+        std::string usage_str = it.GetUsage();
+        if (len + usage_str.size() >= 80) {
+          len = indent;
+          res += '\n' + std::string(indent, ' ');
+        }
+        res += usage_str + ' ';
+        len += usage_str.size();
+      }
     }
     return res;
   }
@@ -186,17 +196,38 @@ class ArgumentParser {
     std::vector<std::string> args = PrepArguments(argc, argv);
     std::map<std::string, estl::Variable> data;
     int flag = 0;
+    std::string last;
     while (args.size() > 0) {
       bool res = false;
       for (auto& it : arguments_) {
-        res = it.ParseArgs(args);
-        if (res == true) {
-          if (it.GetAction() == HELP) {
-            flag = 1;
-          } else if (it.GetAction() == VERSION) {
-            flag = 2;
+        if (it.IsPositional() == false) {
+          res = it.ParseArgs(args);
+          if (res == true) {
+            if (it.GetAction() == HELP) {
+              flag = 1;
+            } else if (it.GetAction() == VERSION) {
+              flag = 2;
+            }
+            break;
           }
-          break;
+        }
+      }
+      if (res == false && args.size() > 0 && last != args.front()) {
+        for (auto& it : arguments_) {
+          if (it.IsPositional() == true) {
+            res = it.ParseArgs(args);
+            if (res == true) {
+              if (args.size() > 0) {
+                last = args.front();
+              }
+              if (it.GetAction() == HELP) {
+                flag = 1;
+              } else if (it.GetAction() == VERSION) {
+                flag = 2;
+              }
+              break;
+            }
+          }
         }
       }
       if (res == false) {
@@ -246,6 +277,7 @@ class ArgumentParser {
         }
         opt = SetVariable(it, opt);
       }
+      UpdateRequired();
     }
     Argument(const Argument& copy)
         : required_(copy.required_),
@@ -481,7 +513,10 @@ class ArgumentParser {
         // TODO(Arden): Add more string variants.
       }
     }
-    void SetRequired(estl::Variable val) { required_ = val; }
+    void SetRequired(estl::Variable val) {
+      usr_required_ = true;
+      required_ = val;
+    }
     void SetChoices(estl::Variable val) { choices_ = val; }
     void SetDefault(estl::Variable val) { default_ = val; }
     void SetConst(estl::Variable val) { const_ = val; }
@@ -517,6 +552,15 @@ class ArgumentParser {
         }
       }
       return out.str();
+    }
+    std::string GetLongestNameStr() const {
+      std::string longest;
+      for (auto& it : names_) {
+        if (it.size() > longest.size()) {
+          longest = it;
+        }
+      }
+      return longest;
     }
     std::string GetChoicesStr() const {
       std::stringstream out;
@@ -575,7 +619,43 @@ class ArgumentParser {
       if (required_ == false) {
         out << '[';
       }
-      out << GetNamesStr();
+      if (IsPositional() == false) {
+        out << GetLongestNameStr();
+      }
+      if (TakesArgs() == true) {
+        if (IsPositional() == false) {
+          out << ' ';
+        }
+        if (default_.IsValid() == true || n_args_ == OPTIONAL ||
+            n_args_ == KLEENE_STAR) {
+          out << '[';
+        }
+        if (metavar_ == std::string()) {
+          for (auto& it : GetLongestNameStr()) {
+            if (it != '-') {
+              if (int(it) >= 97) {
+                metavar_ += char(int(it) - 32);
+              } else {
+                metavar_ += it;
+              }
+            }
+          }
+        }
+        if (n_args_ == ONE || n_args_ == N || n_args_ == OPTIONAL) {
+          for (unsigned int i = 0; i < n_args_count_; i++) {
+            out << metavar_;
+            if (i != n_args_count_ - 1) {
+              out << ' ';
+            }
+          }
+        } else if (n_args_ == KLEENE_PLUS || n_args_ == KLEENE_STAR) {
+          out << metavar_ << " [" << metavar_ << " ...]";
+        }
+        if (default_.IsValid() == true || n_args_ == OPTIONAL ||
+            n_args_ == KLEENE_STAR) {
+          out << ']';
+        }
+      }
       if (required_ == false) {
         out << ']';
       }
@@ -589,6 +669,17 @@ class ArgumentParser {
       return false;
     }
     bool HasValue() const { return (value_.IsValid() || default_.IsValid()); }
+
+    bool IsPositional() const {
+      bool flag = false;
+      for (auto& it : names_) {
+        if (it[0] == '-') {
+          flag = true;
+          break;
+        }
+      }
+      return (!flag);
+    }
 
     bool Satisfied() const {
       if (required_ == true) {
@@ -604,10 +695,13 @@ class ArgumentParser {
     }
 
     bool ParseArgs(std::vector<std::string>& args) const {
-      if (args.size() == 0 || InNames(args.front()) == false) {
+      if (args.size() == 0 ||
+          (InNames(args.front()) == false && IsPositional() == false)) {
         return false;
       }
-      args.erase(args.begin());
+      if (IsPositional() == false) {
+        args.erase(args.begin());
+      }
       if (TakesArgs() == true && args.size() == 0 && n_args_ != KLEENE_STAR &&
           n_args_ != OPTIONAL) {
         ArgumentRequiredError(0);
@@ -657,6 +751,7 @@ class ArgumentParser {
         while (args.size() > 0 && args.front()[0] != '-') {
           estl::Variable argument = GetArgument(args.front());
           if (argument.IsValid() == true) {
+            args.erase(args.begin());
             value_.PushBack(argument);
             num_args++;
           } else {
@@ -691,6 +786,27 @@ class ArgumentParser {
       }
     }
 
+    void UpdateRequired() {
+      if (usr_required_ == false) {
+        if (default_.IsValid() == true) {
+          required_ = false;
+        } else {
+          bool flag = false;
+          for (auto& it : names_) {
+            if (it[0] == '-') {
+              flag = true;
+              break;
+            }
+          }
+          if (flag == false) {
+            required_ = true;
+          } else {
+            required_ = false;
+          }
+        }
+      }
+    }
+
     void ArgumentRequiredError(int flag) const {
       if (flag == 0) {
         std::cerr << "ERROR: Argument(s) are required for \"";
@@ -707,7 +823,7 @@ class ArgumentParser {
         std::cerr << "ERROR: Invalid type for argument \"" << GetNamesStr()
                   << "\" (" << arg_str << ")\n";
       } else if (InChoices(argument) == false) {
-        std::cerr << "ERROR: Argument (" << arg_str << ") not in choices for\""
+        std::cerr << "ERROR: Argument (" << arg_str << ") not in choices for \""
                   << GetNamesStr() << "\" choices are: " << GetChoicesStr()
                   << "\n";
       } else {
@@ -912,15 +1028,16 @@ class ArgumentParser {
       }
     }
 
-    bool required_ = false;
+    bool required_ = false, usr_required_ = false;
     unsigned int n_args_count_ = 1;
-    std::string help_, metavar_, dest_, group_;
+    std::string help_, dest_, group_;
+    mutable std::string metavar_;
     std::set<std::string> names_;
     Action action_ = STORE;
     NArgs n_args_ = ONE;
     estl::Variable default_, choices_, const_;
     mutable estl::Variable value_;
-    estl::Variable::Types type_;
+    estl::Variable::Types type_ = estl::Variable::NONE;
   };
 
   std::vector<std::string> PrepArguments(int argc, const char* argv[]) {

@@ -8,3 +8,4 @@ docs/latex/*
 docs/xml/*
 estl.out
 unit-test
+.gdb_history

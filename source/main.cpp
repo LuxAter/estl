@@ -12,7 +12,7 @@ int main(int argc, char const* argv[]) {
   parser.SetAddHelp(false);
   parser.SetAddVersion(false);
   parser.SetVersion("v0.4");
-  parser.SetUsage("[options] [files...]");
+  // parser.SetUsage("[options] [files...]");
   parser.AddArgument({"-?", "--help"}, estl::ArgumentParser::HELP,
                      "show list of command-line options");
   parser.AddArgument({"-v", "--version"}, estl::ArgumentParser::VERSION,
@@ -37,6 +37,15 @@ int main(int argc, char const* argv[]) {
   parser.AddArgument({"--color-scale", "--colour-scale"},
                      estl::ArgumentParser::STORE_TRUE,
                      "highlights levels of file sizes distinctly");
+  parser.Group("testing options");
+  parser.AddArgument({"-t", "--test"}, estl::ArgumentParser::N,
+                     estl::ArgumentParser::ARG_N_ARGS, "3",
+                     "this argument requires three entries");
+  parser.AddArgument({"--name", "--names"}, estl::ArgumentParser::KLEENE_PLUS,
+                     "this requires at least one argument");
+  parser.AddArgument("ints", estl::ArgumentParser::KLEENE_PLUS,
+                     estl::Variable::SIGNED_INT, "list of numbers",
+                     {2, 4, 6, 8, 10, 12, 14, 16, 18, 20}, false);
   std::map<std::string, estl::Variable> data = parser.ParseArgs(argc, argv);
   for (auto& it : data) {
     std::cout << it.first << ":" << it.second << "\n";
