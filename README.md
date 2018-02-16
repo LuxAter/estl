@@ -5,7 +5,6 @@
 [![Documentation](https://img.shields.io/badge/Documentation-gh--pages-blue.svg)](https://luxatrumstudio.github.io/estl/)
 
 [![GitHub last commit](https://img.shields.io/github/last-commit/LuxAtrumStudio/estl.svg)](<>)
-[![GitHub commits](https://img.shields.io/github/commits-since/LuxAtrumStudio/estl/v0.0.svg)](<>)
 [![GitHub commit activity the past week, 4 weeks, year](https://img.shields.io/github/commit-activity/y/LuxAtrumStudio/estl.svg)](<>)
 [![GitHub repo size in bytes](https://img.shields.io/github/repo-size/LuxAtrumStudio/estl.svg)](<>)
 
@@ -15,7 +14,78 @@
 
 * * *
 
+## Introduction
+
 Extended standard template library. This library implements a set of new
 tools and extends the set of existing tools that are implemented by the
 C++ standard template library. There are a number of functionalities that are
-added. The baseic sections are listed below:
+added. The basic sections are listed below:
+
+### ArgParse
+
+The _ArgParse_ file is based around the parsing arguments supplied from the
+command line. It uses a syntax similar to that of the python class of the same
+name. It allows for parsing of arguments to store data in a specified type, or
+to set a flag. _ArgParse_ will automatically generate a help display, listing
+all of the arguments in an ordered manner. The arguments are returned in a map
+with key values as strings referencing the destination for the argument, and
+the values being a `estl::Variable` holding the data value. More information
+can be found on the documentation for _ArgParse_.
+
+#### Planned
+
+-   [ ] Need to add sub parsers
+-   [ ] Auto generate usage
+-   [ ] Display argument usage in help entry.
+
+### Matrix ###
+
+The *Matrix* file is primarily to provide a mathematical matrix object. Using
+templated arguments, the matrix class provides all classical mathematical matrix
+operations, utilizing the templated types commands.
+
+### Stream ###
+
+The *Stream* file is to provide an extended implementation of printf that
+utilizes C++ streams. This allows for using the printf notation on any stream
+object. This new implementation makes use of variadic templates, so that any
+class or struct can be passed as an argument, using its respective `operator<<`
+to print it to the stream. There are some default bindings for the default
+streams.
+
+### Variable ###
+
+The *Variable* class is a class encapsulating a union of the fundamental types
+in C++ as well as vectors of the fundamental types. This includes all of the
+following types, and vectors of each of them:
+
+* `bool`
+* `char`
+* `signed char`
+* `unsigned char`
+* `signed short int`
+* `unsigned short int`
+* `signed int`
+* `unsigned int`
+* `signed long int`
+* `unsigned long int`
+* `signed long long int`
+* `unsigned long long int`
+* `float`
+* `double`
+* `long double`
+* `std::string`
+* `const char*`
+
+### Variadic ###
+
+The *Variadic* file implements utility functions for handling variadic packed
+template arguments. It provides functions for unpacking argument pack into
+`vector`, `tuple`, `vector<any>`. Using these functions allows a user to access
+all variables in the variadic template without requiring a recursive function.
+
+### Vector ###
+
+The *Vector* file is primarily to provide a mathematical vector object. Using
+templated arguments, the vector class provides all classical mathematical vector
+operations, utilizing the templated types commands.
