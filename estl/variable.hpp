@@ -50,6 +50,7 @@ class Variable {
   Variable(const Variable& copy)
       : is_valid_(copy.is_valid_), value_(copy.value_) {}
   Variable(const bool& val) : is_valid_(true), value_(val) {}
+  Variable(const char& val) : is_valid_(true), value_(val) {}
   Variable(const signed char& val) : is_valid_(true), value_(val) {}
   Variable(const unsigned char& val) : is_valid_(true), value_(val) {}
   Variable(const signed short int& val) : is_valid_(true), value_(val) {}
