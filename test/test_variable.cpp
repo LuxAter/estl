@@ -1,4 +1,4 @@
-// Copyright 2017 Arden Rasmussen
+// Copyright 2018 Arden Rasmussen
 
 #include "gtest/gtest.h"
 #include "variable.hpp"

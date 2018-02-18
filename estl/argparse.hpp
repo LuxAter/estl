@@ -132,7 +132,7 @@ class ArgumentParser {
           res += '\n' + std::string(indent, ' ');
         }
         res += usage_str + ' ';
-        len += usage_str.size();
+        len += usage_str.size() + 1;
       }
     }
     return res;
@@ -604,12 +604,12 @@ class ArgumentParser {
         len = 0;
         std::stringstream help_stream(help_);
         while (std::getline(help_stream, str, ' ')) {
-          if (len >= 50) {
-            out << "\n" << std::string(30, ' ');
-            len = 0;
+          if (len + str.size() >= 50) {
+            out << "\n" << std::string(32, ' ');
+            len = 2;
           }
           out << str << ' ';
-          len += str.size();
+          len += str.size() + 1;
         }
       }
       return out.str();
@@ -1128,7 +1128,7 @@ class ArgumentParser {
     std::string word;
     std::stringstream out(str);
     while (getline(out, word, ' ')) {
-      if (len >= 80) {
+      if (len + word.size() >= 80) {
         res += "\n";
         res += std::string(indent, ' ');
         len = indent;

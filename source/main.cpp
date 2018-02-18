@@ -12,7 +12,11 @@ int main(int argc, char const* argv[]) {
   parser.SetAddHelp(false);
   parser.SetAddVersion(false);
   parser.SetVersion("v0.4");
-  // parser.SetUsage("[options] [files...]");
+  parser.SetProlog(
+      "This is an example of the ability of the argument parser class "
+      "implemented in estl. It allows for practicaly anything that the python "
+      "insperation has the ability for, although it is limited to only base "
+      "types, and vectors of the base types.");
   parser.AddArgument({"-?", "--help"}, estl::ArgumentParser::HELP,
                      "show list of command-line options");
   parser.AddArgument({"-v", "--version"}, estl::ArgumentParser::VERSION,
@@ -40,7 +44,10 @@ int main(int argc, char const* argv[]) {
   parser.Group("testing options");
   parser.AddArgument({"-t", "--test"}, estl::ArgumentParser::N,
                      estl::ArgumentParser::ARG_N_ARGS, "3",
-                     "this argument requires three entries");
+                     "this argument requires three entries, and it has an "
+                     "obsurdly long help string. This help string will have to "
+                     "be wraped over multiple lines. Lets hope that it worked "
+                     "properly.");
   parser.AddArgument({"--name", "--names"}, estl::ArgumentParser::KLEENE_PLUS,
                      "this requires at least one argument");
   parser.AddArgument("ints", estl::ArgumentParser::KLEENE_PLUS,
