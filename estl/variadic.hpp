@@ -35,65 +35,67 @@
 #include <vector>
 
 namespace estl {
-/**
- * @brief Unpacks parameter pack to a tuple.
- *
- * Unpacks a parameter pack to a tuple containing the parameters.
- *
- * @tparam _Types Type pack.
- * @param data Parameter pack.
- *
- * @return Tuple of parameter pack.
- */
-template <typename... _Types>
-std::tuple<_Types...> unpack_tuple(_Types... data) {
-  return std::tuple<_Types...>(data...);
-}
+namespace variadic {
+  /**
+   * @brief Unpacks parameter pack to a tuple.
+   *
+   * Unpacks a parameter pack to a tuple containing the parameters.
+   *
+   * @tparam _Types Type pack.
+   * @param data Parameter pack.
+   *
+   * @return Tuple of parameter pack.
+   */
+  template <typename... _Types>
+  std::tuple<_Types...> unpack_tuple(_Types... data) {
+    return std::tuple<_Types...>(data...);
+  }
 
-/**
- * @brief Unpacks a single parameter to a vector.
- *
- * Unpacks a single parameter to a vector containing the parameter.
- *
- * @tparam _T Type of parameter.
- * @param first Parameter to place in vector.
- *
- * @return Vector containing parameter.
- */
-template <typename _T>
-std::vector<_T> unpack_vector(_T first) {
-  return std::vector<_T>{first};
-}
-/**
- * @brief Unpacks a parameter pack of the same type to a vector.
- *
- * Unpacks a parameter pack of the same type to a vector.
- *
- * @tparam _T Type of first parameter.
- * @tparam _Types Type pack.
- * @param first First parameter.
- * @param data Parameter pack.
- *
- * @return Vector containing parameter pack.
- */
-template <typename _T, typename... _Types>
-std::vector<_T> unpack_vector(_T first, _Types... data) {
-  std::vector<_T> vec = unpack_vector(data...);
-  vec.insert(vec.begin(), first);
-  return vec;
-}
+  /**
+   * @brief Unpacks a single parameter to a vector.
+   *
+   * Unpacks a single parameter to a vector containing the parameter.
+   *
+   * @tparam _T Type of parameter.
+   * @param first Parameter to place in vector.
+   *
+   * @return Vector containing parameter.
+   */
+  template <typename _T>
+  std::vector<_T> unpack_vector(_T first) {
+    return std::vector<_T>{first};
+  }
+  /**
+   * @brief Unpacks a parameter pack of the same type to a vector.
+   *
+   * Unpacks a parameter pack of the same type to a vector.
+   *
+   * @tparam _T Type of first parameter.
+   * @tparam _Types Type pack.
+   * @param first First parameter.
+   * @param data Parameter pack.
+   *
+   * @return Vector containing parameter pack.
+   */
+  template <typename _T, typename... _Types>
+  std::vector<_T> unpack_vector(_T first, _Types... data) {
+    std::vector<_T> vec = unpack_vector(data...);
+    vec.insert(vec.begin(), first);
+    return vec;
+  }
 
-template <typename _T>
-std::vector<std::any> unpack_any(_T first) {
-  return std::vector<std::any>{first};
-}
+  template <typename _T>
+  std::vector<std::any> unpack_any(_T first) {
+    return std::vector<std::any>{first};
+  }
 
-template <typename _T, typename... _Types>
-std::vector<std::any> unpack_any(_T first, _Types... data) {
-  std::vector<std::any> vec = unpack_any(data...);
-  vec.insert(vec.begin(), first);
-  return vec;
-}
+  template <typename _T, typename... _Types>
+  std::vector<std::any> unpack_any(_T first, _Types... data) {
+    std::vector<std::any> vec = unpack_any(data...);
+    vec.insert(vec.begin(), first);
+    return vec;
+  }
+}  // namespace variadic
 }  // namespace estl
 
 #endif  // ESTL_VARIADIC_HPP_

@@ -1,11 +1,11 @@
 Add templated functiones to reduce code size +Variable
 Add templated functions to reduce code size +ArgParse
 Convert argparse to just int, string, char, bool +ArgParse
-Move everything to seperate namespaces +global
-Remove variable? +Variable
-Test stream in multiple files +Stream
-Test matrix in multiple files +Matrix
-Test vector in multiple files +Vector
-Test variadic in multiple files +Variadic
 Create basic ConfigParser class +ConfigParser
 Implement TextAttribute class? +Attributes
+Remove variable? +Variable
+Test matrix in multiple files +Matrix
+Test stream in multiple files +Stream
+Test variadic in multiple files +Variadic
+Test vector in multiple files +Vector
+x 2018-02-19 Move everything to seperate namespaces +global

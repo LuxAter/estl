@@ -4,9 +4,9 @@
 #include "variable.hpp"
 
 TEST(VariableTest, Bool) {
-  estl::Variable var(false);
+  estl::variable::Variable var(false);
   EXPECT_EQ(false, var.GetBool());
-  EXPECT_EQ(estl::Variable::BOOL, var.Type());
+  EXPECT_EQ(estl::variable::Variable::BOOL, var.Type());
   bool test = var;
   EXPECT_EQ(false, test);
 }
@@ -14,19 +14,19 @@ TEST(VariableTest, Char) {
   char a = 'a';
   signed char b = 'b';
   unsigned char c = 'c';
-  estl::Variable vara(a);
+  estl::variable::Variable vara(a);
   EXPECT_EQ('a', vara.GetChar());
-  EXPECT_EQ(estl::Variable::CHAR, vara.Type());
+  EXPECT_EQ(estl::variable::Variable::CHAR, vara.Type());
   char testa = vara;
   EXPECT_EQ('a', testa);
-  estl::Variable varb(b);
+  estl::variable::Variable varb(b);
   EXPECT_EQ('b', varb.GetSignedChar());
-  EXPECT_EQ(estl::Variable::SIGNED_CHAR, varb.Type());
+  EXPECT_EQ(estl::variable::Variable::SIGNED_CHAR, varb.Type());
   signed char testb = varb;
   EXPECT_EQ('b', testb);
-  estl::Variable varc(c);
+  estl::variable::Variable varc(c);
   EXPECT_EQ('c', varc.GetUnsignedChar());
-  EXPECT_EQ(estl::Variable::UNSIGNED_CHAR, varc.Type());
+  EXPECT_EQ(estl::variable::Variable::UNSIGNED_CHAR, varc.Type());
   unsigned char testc = varc;
   EXPECT_EQ('c', testc);
 }
@@ -39,44 +39,44 @@ TEST(VariableTest, Integer) {
   unsigned long int f = 6;
   signed long long int g = 7;
   unsigned long long int h = 8;
-  estl::Variable vara(a);
+  estl::variable::Variable vara(a);
   EXPECT_EQ(1, vara.GetSignedShortInt());
-  EXPECT_EQ(estl::Variable::SIGNED_SHORT_INT, vara.Type());
+  EXPECT_EQ(estl::variable::Variable::SIGNED_SHORT_INT, vara.Type());
   signed short int testa = vara;
   EXPECT_EQ(1, testa);
-  estl::Variable varb(b);
+  estl::variable::Variable varb(b);
   EXPECT_EQ(2, varb.GetUnsignedShortInt());
-  EXPECT_EQ(estl::Variable::UNSIGNED_SHORT_INT, varb.Type());
+  EXPECT_EQ(estl::variable::Variable::UNSIGNED_SHORT_INT, varb.Type());
   unsigned short int testb = varb;
   EXPECT_EQ(2, testb);
-  estl::Variable varc(c);
+  estl::variable::Variable varc(c);
   EXPECT_EQ(3, varc.GetSignedInt());
-  EXPECT_EQ(estl::Variable::SIGNED_INT, varc.Type());
+  EXPECT_EQ(estl::variable::Variable::SIGNED_INT, varc.Type());
   signed int testc = varc;
   EXPECT_EQ(3, testc);
-  estl::Variable vard(d);
+  estl::variable::Variable vard(d);
   EXPECT_EQ(4, vard.GetUnsignedInt());
-  EXPECT_EQ(estl::Variable::UNSIGNED_INT, vard.Type());
+  EXPECT_EQ(estl::variable::Variable::UNSIGNED_INT, vard.Type());
   unsigned int testd = vard;
   EXPECT_EQ(4, testd);
-  estl::Variable vare(e);
+  estl::variable::Variable vare(e);
   EXPECT_EQ(5, vare.GetSignedLongInt());
-  EXPECT_EQ(estl::Variable::SIGNED_LONG_INT, vare.Type());
+  EXPECT_EQ(estl::variable::Variable::SIGNED_LONG_INT, vare.Type());
   signed long int teste = vare;
   EXPECT_EQ(5, teste);
-  estl::Variable varf(f);
+  estl::variable::Variable varf(f);
   EXPECT_EQ(6, varf.GetUnsignedLongInt());
-  EXPECT_EQ(estl::Variable::UNSIGNED_LONG_INT, varf.Type());
+  EXPECT_EQ(estl::variable::Variable::UNSIGNED_LONG_INT, varf.Type());
   unsigned long int testf = varf;
   EXPECT_EQ(6, testf);
-  estl::Variable varg(g);
+  estl::variable::Variable varg(g);
   EXPECT_EQ(7, varg.GetSignedLongLongInt());
-  EXPECT_EQ(estl::Variable::SIGNED_LONG_LONG_INT, varg.Type());
+  EXPECT_EQ(estl::variable::Variable::SIGNED_LONG_LONG_INT, varg.Type());
   signed long long int testg = varg;
   EXPECT_EQ(7, testg);
-  estl::Variable varh(h);
+  estl::variable::Variable varh(h);
   EXPECT_EQ(8, varh.GetUnsignedLongLongInt());
-  EXPECT_EQ(estl::Variable::UNSIGNED_LONG_LONG_INT, varh.Type());
+  EXPECT_EQ(estl::variable::Variable::UNSIGNED_LONG_LONG_INT, varh.Type());
   unsigned long long int testh = varh;
   EXPECT_EQ(8, testh);
 }
@@ -84,42 +84,42 @@ TEST(VariableTest, Float) {
   float a = 3.1415;
   double b = 2.7182;
   long double c = 1.4142;
-  estl::Variable vara(a);
+  estl::variable::Variable vara(a);
   EXPECT_EQ(float(3.1415), vara.GetFloat());
-  EXPECT_EQ(estl::Variable::FLOAT, vara.Type());
+  EXPECT_EQ(estl::variable::Variable::FLOAT, vara.Type());
   float testa = vara;
   EXPECT_EQ(float(3.1415), testa);
-  estl::Variable varb(b);
+  estl::variable::Variable varb(b);
   EXPECT_EQ(2.7182, varb.GetDouble());
-  EXPECT_EQ(estl::Variable::DOUBLE, varb.Type());
+  EXPECT_EQ(estl::variable::Variable::DOUBLE, varb.Type());
   double testb = varb;
   EXPECT_EQ(2.7182, testb);
-  estl::Variable varc(c);
+  estl::variable::Variable varc(c);
   EXPECT_EQ(1.4142, varc.GetLongDouble());
-  EXPECT_EQ(estl::Variable::LONG_DOUBLE, varc.Type());
+  EXPECT_EQ(estl::variable::Variable::LONG_DOUBLE, varc.Type());
   long double testc = varc;
   EXPECT_EQ(1.4142, testc);
 }
 TEST(VariableTest, String) {
   std::string a = "Hello World!";
   const char* b = "Good Bye World!";
-  estl::Variable vara(a);
+  estl::variable::Variable vara(a);
   EXPECT_EQ("Hello World!", vara.GetString());
-  EXPECT_EQ(estl::Variable::STRING, vara.Type());
+  EXPECT_EQ(estl::variable::Variable::STRING, vara.Type());
   std::string testa = vara;
   EXPECT_EQ("Hello World!", testa);
-  estl::Variable varb(b);
+  estl::variable::Variable varb(b);
   EXPECT_EQ("Good Bye World!", varb.GetCharArray());
-  EXPECT_EQ(estl::Variable::CHAR_ARRAY, varb.Type());
+  EXPECT_EQ(estl::variable::Variable::CHAR_ARRAY, varb.Type());
   const char* testb = varb;
   EXPECT_EQ("Good Bye World!", testb);
 }
 
 TEST(VariableTest, BoolVector) {
-  estl::Variable var({false, true});
+  estl::variable::Variable var({false, true});
   var.PushBack(true);
   EXPECT_EQ(std::vector<bool>({false, true, true}), var.GetBoolVector());
-  EXPECT_EQ(estl::Variable::BOOL_VECTOR, var.Type());
+  EXPECT_EQ(estl::variable::Variable::BOOL_VECTOR, var.Type());
   std::vector<bool> test = var;
   EXPECT_EQ(std::vector<bool>({false, true, true}), test);
 }
@@ -128,24 +128,24 @@ TEST(VariableTest, CharVector) {
   char a = 'a', b = 'b';
   signed char c = 'c', d = 'd';
   unsigned char e = 'e', f = 'f';
-  estl::Variable vara({a, b});
+  estl::variable::Variable vara({a, b});
   vara.PushBack(b);
   EXPECT_EQ(std::vector<char>({'a', 'b', 'b'}), vara.GetCharVector());
-  EXPECT_EQ(estl::Variable::CHAR_VECTOR, vara.Type());
+  EXPECT_EQ(estl::variable::Variable::CHAR_VECTOR, vara.Type());
   std::vector<char> testa = vara;
   EXPECT_EQ(std::vector<char>({'a', 'b', 'b'}), testa);
-  estl::Variable varb({c, d});
+  estl::variable::Variable varb({c, d});
   varb.PushBack(d);
   EXPECT_EQ(std::vector<signed char>({'c', 'd', 'd'}),
             varb.GetSignedCharVector());
-  EXPECT_EQ(estl::Variable::SIGNED_CHAR_VECTOR, varb.Type());
+  EXPECT_EQ(estl::variable::Variable::SIGNED_CHAR_VECTOR, varb.Type());
   std::vector<signed char> testb = varb;
   EXPECT_EQ(std::vector<signed char>({'c', 'd', 'd'}), testb);
-  estl::Variable varc({e, f});
+  estl::variable::Variable varc({e, f});
   varc.PushBack(f);
   EXPECT_EQ(std::vector<unsigned char>({'e', 'f', 'f'}),
             varc.GetUnsignedCharVector());
-  EXPECT_EQ(estl::Variable::UNSIGNED_CHAR_VECTOR, varc.Type());
+  EXPECT_EQ(estl::variable::Variable::UNSIGNED_CHAR_VECTOR, varc.Type());
   std::vector<unsigned char> testc = varc;
   EXPECT_EQ(std::vector<unsigned char>({'e', 'f', 'f'}), testc);
 }
@@ -159,58 +159,59 @@ TEST(VariableTest, IntegerVector) {
   unsigned long int fa = 11, fb = 12;
   signed long long int ga = 13, gb = 14;
   unsigned long long int ha = 15, hb = 16;
-  estl::Variable vara({aa, ab});
+  estl::variable::Variable vara({aa, ab});
   vara.PushBack(ab);
   EXPECT_EQ(std::vector<signed short int>({1, 2, 2}),
             vara.GetSignedShortIntVector());
-  EXPECT_EQ(estl::Variable::SIGNED_SHORT_INT_VECTOR, vara.Type());
+  EXPECT_EQ(estl::variable::Variable::SIGNED_SHORT_INT_VECTOR, vara.Type());
   std::vector<signed short int> testa = vara;
   EXPECT_EQ(std::vector<signed short int>({1, 2, 2}), testa);
-  estl::Variable varb({ba, bb});
+  estl::variable::Variable varb({ba, bb});
   varb.PushBack(bb);
   EXPECT_EQ(std::vector<unsigned short int>({3, 4, 4}),
             varb.GetUnsignedShortIntVector());
-  EXPECT_EQ(estl::Variable::UNSIGNED_SHORT_INT_VECTOR, varb.Type());
+  EXPECT_EQ(estl::variable::Variable::UNSIGNED_SHORT_INT_VECTOR, varb.Type());
   std::vector<unsigned short int> testb = varb;
   EXPECT_EQ(std::vector<unsigned short int>({3, 4, 4}), testb);
-  estl::Variable varc({ca, cb});
+  estl::variable::Variable varc({ca, cb});
   varc.PushBack(cb);
   EXPECT_EQ(std::vector<signed int>({5, 6, 6}), varc.GetSignedIntVector());
-  EXPECT_EQ(estl::Variable::SIGNED_INT_VECTOR, varc.Type());
+  EXPECT_EQ(estl::variable::Variable::SIGNED_INT_VECTOR, varc.Type());
   std::vector<signed int> testc = varc;
   EXPECT_EQ(std::vector<signed int>({5, 6, 6}), testc);
-  estl::Variable vard({da, db});
+  estl::variable::Variable vard({da, db});
   vard.PushBack(db);
   EXPECT_EQ(std::vector<unsigned int>({7, 8, 8}), vard.GetUnsignedIntVector());
-  EXPECT_EQ(estl::Variable::UNSIGNED_INT_VECTOR, vard.Type());
+  EXPECT_EQ(estl::variable::Variable::UNSIGNED_INT_VECTOR, vard.Type());
   std::vector<unsigned int> testd = vard;
   EXPECT_EQ(std::vector<unsigned int>({7, 8, 8}), testd);
-  estl::Variable vare({ea, eb});
+  estl::variable::Variable vare({ea, eb});
   vare.PushBack(eb);
   EXPECT_EQ(std::vector<signed long int>({9, 10, 10}),
             vare.GetSignedLongIntVector());
-  EXPECT_EQ(estl::Variable::SIGNED_LONG_INT_VECTOR, vare.Type());
+  EXPECT_EQ(estl::variable::Variable::SIGNED_LONG_INT_VECTOR, vare.Type());
   std::vector<signed long int> teste = vare;
   EXPECT_EQ(std::vector<signed long int>({9, 10, 10}), teste);
-  estl::Variable varf({fa, fb});
+  estl::variable::Variable varf({fa, fb});
   varf.PushBack(fb);
   EXPECT_EQ(std::vector<unsigned long int>({11, 12, 12}),
             varf.GetUnsignedLongIntVector());
-  EXPECT_EQ(estl::Variable::UNSIGNED_LONG_INT_VECTOR, varf.Type());
+  EXPECT_EQ(estl::variable::Variable::UNSIGNED_LONG_INT_VECTOR, varf.Type());
   std::vector<unsigned long int> testf = varf;
   EXPECT_EQ(std::vector<unsigned long int>({11, 12, 12}), testf);
-  estl::Variable varg({ga, gb});
+  estl::variable::Variable varg({ga, gb});
   varg.PushBack(gb);
   EXPECT_EQ(std::vector<signed long long int>({13, 14, 14}),
             varg.GetSignedLongLongIntVector());
-  EXPECT_EQ(estl::Variable::SIGNED_LONG_LONG_INT_VECTOR, varg.Type());
+  EXPECT_EQ(estl::variable::Variable::SIGNED_LONG_LONG_INT_VECTOR, varg.Type());
   std::vector<signed long long int> testg = varg;
   EXPECT_EQ(std::vector<signed long long int>({13, 14, 14}), testg);
-  estl::Variable varh({ha, hb});
+  estl::variable::Variable varh({ha, hb});
   varh.PushBack(hb);
   EXPECT_EQ(std::vector<unsigned long long int>({15, 16, 16}),
             varh.GetUnsignedLongLongIntVector());
-  EXPECT_EQ(estl::Variable::UNSIGNED_LONG_LONG_INT_VECTOR, varh.Type());
+  EXPECT_EQ(estl::variable::Variable::UNSIGNED_LONG_LONG_INT_VECTOR,
+            varh.Type());
   std::vector<unsigned long long int> testh = varh;
   EXPECT_EQ(std::vector<unsigned long long int>({15, 16, 16}), testh);
 }
@@ -219,23 +220,23 @@ TEST(VariableTest, FloatVector) {
   float a = 1.1, b = 1.2;
   double c = 2.1, d = 2.2;
   long double e = 3.1, f = 3.2;
-  estl::Variable vara({a, b});
+  estl::variable::Variable vara({a, b});
   vara.PushBack(b);
   EXPECT_EQ(std::vector<float>({1.1, 1.2, 1.2}), vara.GetFloatVector());
-  EXPECT_EQ(estl::Variable::FLOAT_VECTOR, vara.Type());
+  EXPECT_EQ(estl::variable::Variable::FLOAT_VECTOR, vara.Type());
   std::vector<float> testa = vara;
   EXPECT_EQ(std::vector<float>({1.1, 1.2, 1.2}), testa);
-  estl::Variable varb({c, d});
+  estl::variable::Variable varb({c, d});
   varb.PushBack(d);
   EXPECT_EQ(std::vector<double>({2.1, 2.2, 2.2}), varb.GetDoubleVector());
-  EXPECT_EQ(estl::Variable::DOUBLE_VECTOR, varb.Type());
+  EXPECT_EQ(estl::variable::Variable::DOUBLE_VECTOR, varb.Type());
   std::vector<double> testb = varb;
   EXPECT_EQ(std::vector<double>({2.1, 2.2, 2.2}), testb);
-  estl::Variable varc({e, f});
+  estl::variable::Variable varc({e, f});
   varc.PushBack(f);
   EXPECT_EQ(std::vector<long double>({3.1, 3.2, 3.2}),
             varc.GetLongDoubleVector());
-  EXPECT_EQ(estl::Variable::LONG_DOUBLE_VECTOR, varc.Type());
+  EXPECT_EQ(estl::variable::Variable::LONG_DOUBLE_VECTOR, varc.Type());
   std::vector<long double> testc = varc;
   EXPECT_EQ(std::vector<long double>({3.1, 3.2, 3.2}), testc);
 }
@@ -243,24 +244,24 @@ TEST(VariableTest, FloatVector) {
 TEST(VariableTest, StringVector) {
   std::string a = "Hello", b = "Bye";
   const char *c = "World", *d = "Day";
-  estl::Variable vara({a, b});
+  estl::variable::Variable vara({a, b});
   vara.PushBack(b);
   EXPECT_EQ(std::vector<std::string>({"Hello", "Bye", "Bye"}),
             vara.GetStringVector());
-  EXPECT_EQ(estl::Variable::STRING_VECTOR, vara.Type());
+  EXPECT_EQ(estl::variable::Variable::STRING_VECTOR, vara.Type());
   std::vector<std::string> testa = vara;
   EXPECT_EQ(std::vector<std::string>({"Hello", "Bye", "Bye"}), testa);
-  estl::Variable varb({c, d});
+  estl::variable::Variable varb({c, d});
   varb.PushBack(d);
   EXPECT_EQ(std::vector<const char*>({"World", "Day", "Day"}),
             varb.GetCharArrayVector());
-  EXPECT_EQ(estl::Variable::CHAR_ARRAY_VECTOR, varb.Type());
+  EXPECT_EQ(estl::variable::Variable::CHAR_ARRAY_VECTOR, varb.Type());
   std::vector<const char*> testb = varb;
   EXPECT_EQ(std::vector<const char*>({"World", "Day", "Day"}), testb);
 }
 
 TEST(VariableTest, BooleanOperators) {
-  estl::Variable a(15), b(3.1415), c(std::string("Hello World!"));
+  estl::variable::Variable a(15), b(3.1415), c(std::string("Hello World!"));
   EXPECT_EQ(a == a, true);
   EXPECT_EQ(a != a, false);
   EXPECT_EQ(a != b, true);
@@ -289,7 +290,7 @@ TEST(VariableTest, StreamOperator) {
   std::string p = "Hello World!";
   const char* q = "Goodbye World!";
   std::stringstream out;
-  estl::Variable var;
+  estl::variable::Variable var;
   var = a;
   out << var;
   EXPECT_EQ("1", out.str());
@@ -379,7 +380,7 @@ TEST(VariableTest, StreamVectorOperator) {
   std::vector<std::string> p{"Hello", "World!"};
   std::vector<const char*> q{"Goodbye", "World!"};
   std::stringstream out;
-  estl::Variable var;
+  estl::variable::Variable var;
   var = a;
   out << var;
   EXPECT_EQ("1, 0, 1", out.str());
