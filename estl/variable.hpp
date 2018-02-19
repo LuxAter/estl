@@ -1188,26 +1188,26 @@ class Variable {
       value_;
 };
 
-bool operator==(const Variable& lhs, const Variable& rhs) {
+inline bool operator==(const Variable& lhs, const Variable& rhs) {
   return lhs.GetValue() == rhs.GetValue();
 }
-bool operator!=(const Variable& lhs, const Variable& rhs) {
+inline bool operator!=(const Variable& lhs, const Variable& rhs) {
   return lhs.GetValue() != rhs.GetValue();
 }
-bool operator<(const Variable& lhs, const Variable& rhs) {
+inline bool operator<(const Variable& lhs, const Variable& rhs) {
   return lhs.GetValue() < rhs.GetValue();
 }
-bool operator>(const Variable& lhs, const Variable& rhs) {
+inline bool operator>(const Variable& lhs, const Variable& rhs) {
   return lhs.GetValue() > rhs.GetValue();
 }
-bool operator<=(const Variable& lhs, const Variable& rhs) {
+inline bool operator<=(const Variable& lhs, const Variable& rhs) {
   return lhs.GetValue() <= rhs.GetValue();
 }
-bool operator>=(const Variable& lhs, const Variable& rhs) {
+inline bool operator>=(const Variable& lhs, const Variable& rhs) {
   return lhs.GetValue() >= rhs.GetValue();
 }
 
-std::ostream& operator<<(std::ostream& out, const Variable& lhs) {
+inline std::ostream& operator<<(std::ostream& out, const Variable& lhs) {
   std::variant<
       bool, char, signed char, unsigned char, signed short int,
       unsigned short int, signed int, unsigned int, signed long int,
