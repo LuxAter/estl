@@ -30,33 +30,37 @@ namespace argparse {
   class Variable {
    public:
     Variable() {}
-    explicit Variable(const bool& val) : type_(BOOL), bool_(val) {}
-    explicit Variable(const char& val) : type_(CHAR), char_(val) {}
-    explicit Variable(const int& val) : type_(INT), int_(val) {}
-    explicit Variable(const double& val) : type_(DOUBLE), double_(val) {}
-    explicit Variable(const char* val) : type_(STRING), string_(val) {}
-    explicit Variable(const std::string& val) : type_(STRING), string_(val) {}
-    explicit Variable(const std::vector<bool>& val)
+    Variable(const bool& val) : type_(BOOL), bool_(val) {}
+    Variable(const char& val) : type_(CHAR), char_(val) {}
+    Variable(const int& val) : type_(INT), int_(val) {}
+    Variable(const double& val) : type_(DOUBLE), double_(val) {}
+    Variable(const char* val) : type_(STRING), string_(val) {}
+    Variable(const std::string& val) : type_(STRING), string_(val) {}
+    Variable(const std::vector<bool>& val)
         : type_(BOOL_VECTOR), bool_vec_(val) {}
-    explicit Variable(const std::vector<char>& val)
+    Variable(const std::vector<char>& val)
         : type_(CHAR_VECTOR), char_vec_(val) {}
-    explicit Variable(const std::vector<int>& val)
-        : type_(INT_VECTOR), int_vec_(val) {}
-    explicit Variable(const std::vector<double>& val)
+    Variable(const std::vector<int>& val) : type_(INT_VECTOR), int_vec_(val) {}
+    Variable(const std::vector<double>& val)
         : type_(DOUBLE_VECTOR), double_vec_(val) {}
-    explicit Variable(const std::vector<std::string>& val)
+    Variable(const std::vector<std::string>& val)
         : type_(STRING_VECTOR), string_vec_(val) {}
-    explicit Variable(const std::initializer_list<bool>& val)
+    Variable(const std::initializer_list<bool>& val)
         : type_(BOOL_VECTOR), bool_vec_(val) {}
-    explicit Variable(const std::initializer_list<char>& val)
+    Variable(const std::initializer_list<char>& val)
         : type_(CHAR_VECTOR), char_vec_(val) {}
-    explicit Variable(const std::initializer_list<int>& val)
+    Variable(const std::initializer_list<int>& val)
         : type_(INT_VECTOR), int_vec_(val) {}
-    explicit Variable(const std::initializer_list<double>& val)
+    Variable(const std::initializer_list<double>& val)
         : type_(DOUBLE_VECTOR), double_vec_(val) {}
-    explicit Variable(const std::initializer_list<std::string>& val)
+    Variable(const std::initializer_list<const char*>& val)
+        : type_(STRING_VECTOR) {
+      std::transform(val.begin(), val.end(), std::back_inserter(string_vec_),
+                     char_to_string);
+    }
+    Variable(const std::initializer_list<std::string>& val)
         : type_(STRING_VECTOR), string_vec_(val) {}
-    explicit Variable(const Variable& copy) : type_(copy.type_) {
+    Variable(const Variable& copy) : type_(copy.type_) {
       switch (type_) {
         case BOOL: {
           bool_ = copy.bool_;
@@ -137,6 +141,72 @@ namespace argparse {
                                       : std::vector<std::string>();
     }
 
+    void PushBack(Variable val) {
+      switch (val.Type()) {
+        case BOOL: {
+          PushBack(val.GetBool());
+          break;
+        }
+        case CHAR: {
+          PushBack(val.GetChar());
+          break;
+        }
+        case INT: {
+          PushBack(val.GetInt());
+          break;
+        }
+        case DOUBLE: {
+          PushBack(val.GetDouble());
+          break;
+        }
+        case STRING: {
+          PushBack(val.GetString());
+          break;
+        }
+      }
+    }
+
+    void PushBack(bool val) {
+      if (type_ == BOOL_VECTOR) {
+        bool_vec_.push_back(val);
+      } else {
+        type_ = BOOL_VECTOR;
+        bool_vec_ = std::vector<bool>{val};
+      }
+    }
+    void PushBack(char val) {
+      if (type_ == CHAR_VECTOR) {
+        char_vec_.push_back(val);
+      } else {
+        type_ = CHAR_VECTOR;
+        char_vec_ = std::vector<char>{val};
+      }
+    }
+    void PushBack(int val) {
+      if (type_ == INT_VECTOR) {
+        int_vec_.push_back(val);
+      } else {
+        type_ = INT_VECTOR;
+        int_vec_ = std::vector<int>{val};
+      }
+    }
+    void PushBack(double val) {
+      if (type_ == DOUBLE_VECTOR) {
+        double_vec_.push_back(val);
+      } else {
+        type_ = DOUBLE_VECTOR;
+        double_vec_ = std::vector<double>{val};
+      }
+    }
+    void PushBack(std::string val) {
+      if (type_ == STRING_VECTOR) {
+        string_vec_.push_back(val);
+      } else {
+        type_ = STRING_VECTOR;
+        string_vec_ = std::vector<std::string>{val};
+      }
+    }
+
     Variable& operator=(const Variable& copy) {
       type_ = copy.type_;
       switch (type_) {
@@ -184,7 +254,6 @@ namespace argparse {
       return *this;
     }
     Variable& operator=(const bool& val) {
-      std::cout << "A\n";
       type_ = BOOL;
       bool_ = val;
       return *this;

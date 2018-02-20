@@ -8,7 +8,7 @@ class ArgParseTest : public testing::Test {
   virtual void SetUp() {
     parser.AddArgument("-a");
     parser.AddArgument({"-b", "--test_b"}, "Argument with help");
-    parser.AddArgument("pos", estl::variable::Variable::CHAR);
+    parser.AddArgument("pos", estl::argparse::CHAR);
   }
   virtual void TearDown() {}
   estl::argparse::ArgumentParser parser;

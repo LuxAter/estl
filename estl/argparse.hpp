@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "argparse/argument.hpp"
-#include "variable.hpp"
+#include "argparse/variable.hpp"
 
 namespace estl {
 namespace argparse {
@@ -120,60 +120,37 @@ namespace argparse {
     }
 
     void AddArgument(std::initializer_list<std::string> names,
-                     estl::variable::Variable a = estl::variable::Variable(),
-                     estl::variable::Variable b = estl::variable::Variable(),
-                     estl::variable::Variable c = estl::variable::Variable(),
-                     estl::variable::Variable d = estl::variable::Variable(),
-                     estl::variable::Variable e = estl::variable::Variable(),
-                     estl::variable::Variable f = estl::variable::Variable(),
-                     estl::variable::Variable g = estl::variable::Variable(),
-                     estl::variable::Variable h = estl::variable::Variable(),
-                     estl::variable::Variable i = estl::variable::Variable(),
-                     estl::variable::Variable j = estl::variable::Variable(),
-                     estl::variable::Variable k = estl::variable::Variable(),
-                     estl::variable::Variable l = estl::variable::Variable(),
-                     estl::variable::Variable m = estl::variable::Variable(),
-                     estl::variable::Variable n = estl::variable::Variable(),
-                     estl::variable::Variable o = estl::variable::Variable(),
-                     estl::variable::Variable p = estl::variable::Variable(),
-                     estl::variable::Variable q = estl::variable::Variable(),
-                     estl::variable::Variable r = estl::variable::Variable(),
-                     estl::variable::Variable s = estl::variable::Variable(),
-                     estl::variable::Variable t = estl::variable::Variable(),
-                     estl::variable::Variable u = estl::variable::Variable(),
-                     estl::variable::Variable v = estl::variable::Variable()) {
+                     Variable a = Variable(), Variable b = Variable(),
+                     Variable c = Variable(), Variable d = Variable(),
+                     Variable e = Variable(), Variable f = Variable(),
+                     Variable g = Variable(), Variable h = Variable(),
+                     Variable i = Variable(), Variable j = Variable(),
+                     Variable k = Variable(), Variable l = Variable(),
+                     Variable m = Variable(), Variable n = Variable(),
+                     Variable o = Variable(), Variable p = Variable(),
+                     Variable q = Variable(), Variable r = Variable(),
+                     Variable s = Variable(), Variable t = Variable(),
+                     Variable u = Variable(), Variable v = Variable()) {
       AddArgumentVector(names, {a, b, c, d, e, f, g, h, i, j, k,
                                 l, m, n, o, p, q, r, s, t, u, v});
     }
-    void AddArgument(std::string names,
-                     estl::variable::Variable a = estl::variable::Variable(),
-                     estl::variable::Variable b = estl::variable::Variable(),
-                     estl::variable::Variable c = estl::variable::Variable(),
-                     estl::variable::Variable d = estl::variable::Variable(),
-                     estl::variable::Variable e = estl::variable::Variable(),
-                     estl::variable::Variable f = estl::variable::Variable(),
-                     estl::variable::Variable g = estl::variable::Variable(),
-                     estl::variable::Variable h = estl::variable::Variable(),
-                     estl::variable::Variable i = estl::variable::Variable(),
-                     estl::variable::Variable j = estl::variable::Variable(),
-                     estl::variable::Variable k = estl::variable::Variable(),
-                     estl::variable::Variable l = estl::variable::Variable(),
-                     estl::variable::Variable m = estl::variable::Variable(),
-                     estl::variable::Variable n = estl::variable::Variable(),
-                     estl::variable::Variable o = estl::variable::Variable(),
-                     estl::variable::Variable p = estl::variable::Variable(),
-                     estl::variable::Variable q = estl::variable::Variable(),
-                     estl::variable::Variable r = estl::variable::Variable(),
-                     estl::variable::Variable s = estl::variable::Variable(),
-                     estl::variable::Variable t = estl::variable::Variable(),
-                     estl::variable::Variable u = estl::variable::Variable(),
-                     estl::variable::Variable v = estl::variable::Variable()) {
+    void AddArgument(std::string names, Variable a = Variable(),
+                     Variable b = Variable(), Variable c = Variable(),
+                     Variable d = Variable(), Variable e = Variable(),
+                     Variable f = Variable(), Variable g = Variable(),
+                     Variable h = Variable(), Variable i = Variable(),
+                     Variable j = Variable(), Variable k = Variable(),
+                     Variable l = Variable(), Variable m = Variable(),
+                     Variable n = Variable(), Variable o = Variable(),
+                     Variable p = Variable(), Variable q = Variable(),
+                     Variable r = Variable(), Variable s = Variable(),
+                     Variable t = Variable(), Variable u = Variable(),
+                     Variable v = Variable()) {
       AddArgumentVector(names, {a, b, c, d, e, f, g, h, i, j, k,
                                 l, m, n, o, p, q, r, s, t, u, v});
     }
 
-    std::map<std::string, estl::variable::Variable> ParseArgs(
-        int argc, const char* argv[]) {
+    std::map<std::string, Variable> ParseArgs(int argc, const char* argv[]) {
       if (add_help_ == true) {
         AddArgumentVector(std::initializer_list<std::string>{"-h", "--help"},
                           {HELP, "show this help message and exit"});
@@ -183,7 +160,7 @@ namespace argparse {
                           {VERSION, "show program's version number and exit"});
       }
       std::vector<std::string> args = PrepArguments(argc, argv);
-      std::map<std::string, estl::variable::Variable> data;
+      std::map<std::string, Variable> data;
       int flag = 0;
       std::string last;
       while (args.size() > 0) {
@@ -238,8 +215,8 @@ namespace argparse {
       for (auto& it : arguments_) {
         if (it.Satisfied() == true) {
           if (it.HasValue() == true) {
-            data.insert(std::pair<std::string, estl::variable::Variable>(
-                it.GetDest(), it.GetValue()));
+            data.insert(
+                std::pair<std::string, Variable>(it.GetDest(), it.GetValue()));
           }
         } else {
           std::cerr << "ERROR: Argument \"" << it.GetNamesStr()
@@ -287,7 +264,7 @@ namespace argparse {
         std::variant<std::initializer_list<std::string>,
                      std::variant<std::string, std::set<std::string>>>
             name,
-        std::vector<estl::variable::Variable> args) {
+        std::vector<Variable> args) {
       Argument new_arg(name, args);
       if (current_group_ == std::string()) {
         bool flag = false;
