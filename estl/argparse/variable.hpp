@@ -1,0 +1,449 @@
+#ifndef ESTL_ARGPARSE_VARIABLE_HPP_
+#define ESTL_ARGPARSE_VARIABLE_HPP_
+
+#include <algorithm>
+#include <iostream>
+#include <iterator>
+#include <string>
+#include <vector>
+
+namespace estl {
+namespace argparse {
+  namespace {
+    inline std::string char_to_string(const char* val) {
+      return std::string(val);
+    }
+  }  // namespace
+  enum Types {
+    NONE = 0,
+    BOOL = 1,
+    CHAR = 2,
+    INT = 3,
+    DOUBLE = 4,
+    STRING = 5,
+    BOOL_VECTOR = 6,
+    CHAR_VECTOR = 7,
+    INT_VECTOR = 8,
+    DOUBLE_VECTOR = 9,
+    STRING_VECTOR = 10
+  };
+  class Variable {
+   public:
+    Variable() {}
+    explicit Variable(const bool& val) : type_(BOOL), bool_(val) {}
+    explicit Variable(const char& val) : type_(CHAR), char_(val) {}
+    explicit Variable(const int& val) : type_(INT), int_(val) {}
+    explicit Variable(const double& val) : type_(DOUBLE), double_(val) {}
+    explicit Variable(const char* val) : type_(STRING), string_(val) {}
+    explicit Variable(const std::string& val) : type_(STRING), string_(val) {}
+    explicit Variable(const std::vector<bool>& val)
+        : type_(BOOL_VECTOR), bool_vec_(val) {}
+    explicit Variable(const std::vector<char>& val)
+        : type_(CHAR_VECTOR), char_vec_(val) {}
+    explicit Variable(const std::vector<int>& val)
+        : type_(INT_VECTOR), int_vec_(val) {}
+    explicit Variable(const std::vector<double>& val)
+        : type_(DOUBLE_VECTOR), double_vec_(val) {}
+    explicit Variable(const std::vector<std::string>& val)
+        : type_(STRING_VECTOR), string_vec_(val) {}
+    explicit Variable(const std::initializer_list<bool>& val)
+        : type_(BOOL_VECTOR), bool_vec_(val) {}
+    explicit Variable(const std::initializer_list<char>& val)
+        : type_(CHAR_VECTOR), char_vec_(val) {}
+    explicit Variable(const std::initializer_list<int>& val)
+        : type_(INT_VECTOR), int_vec_(val) {}
+    explicit Variable(const std::initializer_list<double>& val)
+        : type_(DOUBLE_VECTOR), double_vec_(val) {}
+    explicit Variable(const std::initializer_list<std::string>& val)
+        : type_(STRING_VECTOR), string_vec_(val) {}
+    explicit Variable(const Variable& copy) : type_(copy.type_) {
+      switch (type_) {
+        case BOOL: {
+          bool_ = copy.bool_;
+          break;
+        }
+        case CHAR: {
+          char_ = copy.char_;
+          break;
+        }
+        case INT: {
+          int_ = copy.int_;
+          break;
+        }
+        case DOUBLE: {
+          double_ = copy.double_;
+          break;
+        }
+        case STRING: {
+          string_ = copy.string_;
+          break;
+        }
+        case BOOL_VECTOR: {
+          bool_vec_ = copy.bool_vec_;
+          break;
+        }
+        case CHAR_VECTOR: {
+          char_vec_ = copy.char_vec_;
+          break;
+        }
+        case INT_VECTOR: {
+          int_vec_ = copy.int_vec_;
+          break;
+        }
+        case DOUBLE_VECTOR: {
+          double_vec_ = copy.double_vec_;
+          break;
+        }
+        case STRING_VECTOR: {
+          string_vec_ = copy.string_vec_;
+          break;
+        }
+      }
+    }
+    ~Variable() {}
+
+    bool IsValid() const { return type_ != NONE; }
+    bool IsVector() const {
+      return (type_ == BOOL_VECTOR || type_ == CHAR_VECTOR ||
+              type_ == INT_VECTOR || type_ == DOUBLE_VECTOR ||
+              type_ == STRING_VECTOR);
+    }
+
+    Types Type() const { return type_; }
+
+    inline bool GetBool() const { return (type_ == BOOL) ? bool_ : bool(); }
+    inline char GetChar() const { return (type_ == CHAR) ? char_ : char(); }
+    inline int GetInt() const { return (type_ == INT) ? int_ : int(); }
+    inline double GetDouble() const {
+      return (type_ == DOUBLE) ? double_ : double();
+    }
+    inline std::string GetString() const {
+      return (type_ == STRING) ? string_ : std::string();
+    }
+    inline std::vector<bool> GetBoolVector() const {
+      return (type_ == BOOL_VECTOR) ? bool_vec_ : std::vector<bool>();
+    }
+    inline std::vector<char> GetCharVector() const {
+      return (type_ == CHAR_VECTOR) ? char_vec_ : std::vector<char>();
+    }
+    inline std::vector<int> GetIntVector() const {
+      return (type_ == INT_VECTOR) ? int_vec_ : std::vector<int>();
+    }
+    inline std::vector<double> GetDoubleVector() const {
+      return (type_ == DOUBLE_VECTOR) ? double_vec_ : std::vector<double>();
+    }
+    inline std::vector<std::string> GetStringVector() const {
+      return (type_ == STRING_VECTOR) ? string_vec_
+                                      : std::vector<std::string>();
+    }
+
+    Variable& operator=(const Variable& copy) {
+      type_ = copy.type_;
+      switch (type_) {
+        case BOOL: {
+          bool_ = copy.bool_;
+          break;
+        }
+        case CHAR: {
+          char_ = copy.char_;
+          break;
+        }
+        case INT: {
+          int_ = copy.int_;
+          break;
+        }
+        case DOUBLE: {
+          double_ = copy.double_;
+          break;
+        }
+        case STRING: {
+          string_ = copy.string_;
+          break;
+        }
+        case BOOL_VECTOR: {
+          bool_vec_ = copy.bool_vec_;
+          break;
+        }
+        case CHAR_VECTOR: {
+          char_vec_ = copy.char_vec_;
+          break;
+        }
+        case INT_VECTOR: {
+          int_vec_ = copy.int_vec_;
+          break;
+        }
+        case DOUBLE_VECTOR: {
+          double_vec_ = copy.double_vec_;
+          break;
+        }
+        case STRING_VECTOR: {
+          string_vec_ = copy.string_vec_;
+          break;
+        }
+      }
+      return *this;
+    }
+    Variable& operator=(const bool& val) {
+      std::cout << "A\n";
+      type_ = BOOL;
+      bool_ = val;
+      return *this;
+    }
+    Variable& operator=(const char& val) {
+      type_ = CHAR;
+      char_ = val;
+      return *this;
+    }
+    Variable& operator=(const int& val) {
+      type_ = INT;
+      int_ = val;
+      return *this;
+    }
+    Variable& operator=(const double& val) {
+      type_ = DOUBLE;
+      double_ = val;
+      return *this;
+    }
+    Variable& operator=(const char* val) {
+      type_ = STRING;
+      string_ = std::string(val);
+      return *this;
+    }
+    Variable& operator=(const std::string& val) {
+      type_ = STRING;
+      string_ = val;
+      return *this;
+    }
+    Variable& operator=(const std::vector<bool>& val) {
+      type_ = BOOL_VECTOR;
+      bool_vec_ = val;
+      return *this;
+    }
+    Variable& operator=(const std::vector<char>& val) {
+      type_ = CHAR_VECTOR;
+      char_vec_ = val;
+      return *this;
+    }
+    Variable& operator=(const std::vector<int>& val) {
+      type_ = INT_VECTOR;
+      int_vec_ = val;
+      return *this;
+    }
+    Variable& operator=(const std::vector<double>& val) {
+      type_ = DOUBLE_VECTOR;
+      double_vec_ = val;
+      return *this;
+    }
+    Variable& operator=(const std::vector<std::string>& val) {
+      type_ = STRING_VECTOR;
+      string_vec_ = val;
+      return *this;
+    }
+    Variable& operator=(const std::initializer_list<bool>& val) {
+      type_ = BOOL_VECTOR;
+      bool_vec_ = std::vector<bool>(val);
+      return *this;
+    }
+    Variable& operator=(const std::initializer_list<char>& val) {
+      type_ = CHAR_VECTOR;
+      char_vec_ = std::vector<char>(val);
+      return *this;
+    }
+    Variable& operator=(const std::initializer_list<int>& val) {
+      type_ = INT_VECTOR;
+      int_vec_ = std::vector<int>(val);
+      return *this;
+    }
+    Variable& operator=(const std::initializer_list<double>& val) {
+      type_ = DOUBLE_VECTOR;
+      double_vec_ = std::vector<double>(val);
+      return *this;
+    }
+    Variable& operator=(const std::initializer_list<const char*>& val) {
+      type_ = STRING_VECTOR;
+      std::transform(val.begin(), val.end(), std::back_inserter(string_vec_),
+                     char_to_string);
+      return *this;
+    }
+    Variable& operator=(const std::initializer_list<std::string>& val) {
+      type_ = STRING_VECTOR;
+      string_vec_ = std::vector<std::string>(val);
+      return *this;
+    }
+
+    inline operator bool() const { return GetBool(); }
+    inline operator char() const { return GetChar(); }
+    inline operator int() const { return GetInt(); }
+    inline operator double() const { return GetDouble(); }
+    inline operator std::string() const { return GetString(); }
+    inline operator std::vector<bool>() const { return GetBoolVector(); }
+    inline operator std::vector<char>() const { return GetCharVector(); }
+    inline operator std::vector<int>() const { return GetIntVector(); }
+    inline operator std::vector<double>() const { return GetDoubleVector(); }
+    inline operator std::vector<std::string>() const {
+      return GetStringVector();
+    }
+
+   private:
+    Types type_ = NONE;
+    union {
+      bool bool_;
+      char char_;
+      int int_;
+      double double_;
+    };
+    std::string string_;
+    std::vector<bool> bool_vec_;
+    std::vector<char> char_vec_;
+    std::vector<int> int_vec_;
+    std::vector<double> double_vec_;
+    std::vector<std::string> string_vec_;
+  };
+
+  inline bool operator==(const Variable& lhs, const Variable& rhs) {
+    if (lhs.Type() == rhs.Type()) {
+      switch (lhs.Type()) {
+        case BOOL: {
+          return lhs.GetBool() == rhs.GetBool();
+        }
+        case CHAR: {
+          return lhs.GetChar() == rhs.GetChar();
+        }
+        case INT: {
+          return lhs.GetInt() == rhs.GetInt();
+        }
+        case DOUBLE: {
+          return lhs.GetDouble() == rhs.GetDouble();
+        }
+        case STRING: {
+          return lhs.GetString() == rhs.GetString();
+        }
+        case BOOL_VECTOR: {
+          return lhs.GetBoolVector() == rhs.GetBoolVector();
+        }
+        case CHAR_VECTOR: {
+          return lhs.GetCharVector() == rhs.GetCharVector();
+        }
+        case INT_VECTOR: {
+          return lhs.GetIntVector() == rhs.GetIntVector();
+        }
+        case DOUBLE_VECTOR: {
+          return lhs.GetDoubleVector() == rhs.GetDoubleVector();
+        }
+        case STRING_VECTOR: {
+          return lhs.GetStringVector() == rhs.GetStringVector();
+        }
+        default: { return false; }
+      }
+    }
+    return false;
+  }
+  inline bool operator!=(const Variable& lhs, const Variable& rhs) {
+    return !(lhs == rhs);
+  }
+  inline bool operator<(const Variable& lhs, const Variable& rhs) {
+    if (lhs.Type() == rhs.Type()) {
+      switch (lhs.Type()) {
+        case BOOL: {
+          return lhs.GetBool() < rhs.GetBool();
+        }
+        case CHAR: {
+          return lhs.GetChar() < rhs.GetChar();
+        }
+        case INT: {
+          return lhs.GetInt() < rhs.GetInt();
+        }
+        case DOUBLE: {
+          return lhs.GetDouble() < rhs.GetDouble();
+        }
+        case STRING: {
+          return lhs.GetString() < rhs.GetString();
+        }
+        case BOOL_VECTOR: {
+          return lhs.GetBoolVector() < rhs.GetBoolVector();
+        }
+        case CHAR_VECTOR: {
+          return lhs.GetCharVector() < rhs.GetCharVector();
+        }
+        case INT_VECTOR: {
+          return lhs.GetIntVector() < rhs.GetIntVector();
+        }
+        case DOUBLE_VECTOR: {
+          return lhs.GetDoubleVector() < rhs.GetDoubleVector();
+        }
+        case STRING_VECTOR: {
+          return lhs.GetStringVector() < rhs.GetStringVector();
+        }
+        default: { return false; }
+      }
+    }
+    return lhs.Type() < rhs.Type();
+  }
+  inline bool operator>(const Variable& lhs, const Variable& rhs) {
+    return rhs < lhs;
+  }
+  inline bool operator<=(const Variable& lhs, const Variable& rhs) {
+    return !(rhs < lhs);
+  }
+  inline bool operator>=(const Variable& lhs, const Variable& rhs) {
+    return !(lhs < rhs);
+  }
+  inline std::ostream& operator<<(std::ostream& out, const Variable& lhs) {
+    switch (lhs.Type()) {
+      case BOOL: {
+        out << lhs.GetBool();
+        break;
+      }
+      case CHAR: {
+        out << lhs.GetChar();
+        break;
+      }
+      case INT: {
+        out << lhs.GetInt();
+        break;
+      }
+      case DOUBLE: {
+        out << lhs.GetDouble();
+        break;
+      }
+      case STRING: {
+        out << lhs.GetString();
+        break;
+      }
+      case BOOL_VECTOR: {
+        std::vector<bool> vec = lhs.GetBoolVector();
+        std::copy(vec.begin(), vec.end(),
+                  std::ostream_iterator<bool>(out, " "));
+        break;
+      }
+      case CHAR_VECTOR: {
+        std::vector<char> vec = lhs.GetCharVector();
+        std::copy(vec.begin(), vec.end(),
+                  std::ostream_iterator<char>(out, " "));
+        break;
+      }
+      case INT_VECTOR: {
+        std::vector<int> vec = lhs.GetIntVector();
+        std::copy(vec.begin(), vec.end(), std::ostream_iterator<int>(out, " "));
+        break;
+      }
+      case DOUBLE_VECTOR: {
+        std::vector<double> vec = lhs.GetDoubleVector();
+        std::copy(vec.begin(), vec.end(),
+                  std::ostream_iterator<double>(out, " "));
+        break;
+      }
+      case STRING_VECTOR: {
+        std::vector<std::string> vec = lhs.GetStringVector();
+        std::copy(vec.begin(), vec.end(),
+                  std::ostream_iterator<std::string>(out, " "));
+        break;
+      }
+      default: { out << "(null)"; }
+    }
+    return out;
+  }
+}  // namespace argparse
+}  // namespace estl
+
+#endif  // ESTL_ARGPARSE_VARIABLE_HPP_

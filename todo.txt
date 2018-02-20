@@ -2,6 +2,8 @@ Add templated functiones to reduce code size +Variable
 Add templated functions to reduce code size +ArgParse
 Convert argparse to just int, string, char, bool +ArgParse
 Create basic ConfigParser class +ConfigParser
+Create math namespace? +Vector +Matrix
+End header only? +global
 Implement TextAttribute class? +Attributes
 Remove variable? +Variable
 Test matrix in multiple files +Matrix
