@@ -131,10 +131,27 @@ namespace argparse {
                      Variable q = Variable(), Variable r = Variable(),
                      Variable s = Variable(), Variable t = Variable(),
                      Variable u = Variable(), Variable v = Variable()) {
-      AddArgumentVector(names, {a, b, c, d, e, f, g, h, i, j, k,
-                                l, m, n, o, p, q, r, s, t, u, v});
+      AddArgumentVector(
+          std::set<std::string>(names),
+          {a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v});
     }
     void AddArgument(std::string names, Variable a = Variable(),
+                     Variable b = Variable(), Variable c = Variable(),
+                     Variable d = Variable(), Variable e = Variable(),
+                     Variable f = Variable(), Variable g = Variable(),
+                     Variable h = Variable(), Variable i = Variable(),
+                     Variable j = Variable(), Variable k = Variable(),
+                     Variable l = Variable(), Variable m = Variable(),
+                     Variable n = Variable(), Variable o = Variable(),
+                     Variable p = Variable(), Variable q = Variable(),
+                     Variable r = Variable(), Variable s = Variable(),
+                     Variable t = Variable(), Variable u = Variable(),
+                     Variable v = Variable()) {
+      AddArgumentVector(
+          std::set<std::string>{names},
+          {a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v});
+    }
+    void AddArgument(std::set<std::string> names, Variable a = Variable(),
                      Variable b = Variable(), Variable c = Variable(),
                      Variable d = Variable(), Variable e = Variable(),
                      Variable f = Variable(), Variable g = Variable(),
@@ -158,6 +175,9 @@ namespace argparse {
       if (add_version_ == true) {
         AddArgumentVector({"--version"},
                           {VERSION, "show program's version number and exit"});
+      }
+      if (argc == 0) {
+        return std::map<std::string, Variable>();
       }
       std::vector<std::string> args = PrepArguments(argc, argv);
       std::map<std::string, Variable> data;
@@ -260,40 +280,15 @@ namespace argparse {
       return args;
     }
 
-    void AddArgumentVector(
-        std::variant<std::initializer_list<std::string>,
-                     std::variant<std::string, std::set<std::string>>>
-            name,
-        std::vector<Variable> args) {
+    void AddArgumentVector(std::set<std::string> name,
+                           std::vector<Variable> args) {
       Argument new_arg(name, args);
       if (current_group_ == std::string()) {
         bool flag = false;
-        if (std::holds_alternative<std::initializer_list<std::string>>(name) ==
-            true) {
-          std::vector<std::string> vec(
-              std::get<std::initializer_list<std::string>>(name));
-          for (auto& it : vec) {
-            if (it[0] == '-') {
-              flag = true;
-              break;
-            }
-          }
-        } else {
-          std::variant<std::string, std::set<std::string>> var =
-              std::get<std::variant<std::string, std::set<std::string>>>(name);
-          if (std::holds_alternative<std::string>(var) == true) {
-            std::string str = std::get<std::string>(var);
-            if (str[0] == '-') {
-              flag = true;
-            }
-          } else {
-            std::set<std::string> st = std::get<std::set<std::string>>(var);
-            for (auto& it : st) {
-              if (it[0] == '-') {
-                flag = true;
-                break;
-              }
-            }
+        for (auto& it : name) {
+          if (it[0] == '-') {
+            flag = true;
+            break;
           }
         }
         if (flag == false) {

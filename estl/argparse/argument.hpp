@@ -7,7 +7,6 @@
 #include <set>
 #include <sstream>
 #include <string>
-#include <variant>
 
 #include "variable.hpp"
 
@@ -47,10 +46,7 @@ namespace argparse {
   class Argument {
    public:
     Argument() {}
-    Argument(std::variant<std::initializer_list<std::string>,
-                          std::variant<std::string, std::set<std::string>>>
-                 names,
-             std::vector<Variable> args) {
+    Argument(std::set<std::string> names, std::vector<Variable> args) {
       SetName(names);
       ArgOpt opt = ARG_NONE;
       for (auto it : args) {
@@ -76,24 +72,7 @@ namespace argparse {
           type_(copy.type_),
           choices_(copy.choices_) {}
 
-    void SetName(std::variant<std::initializer_list<std::string>,
-                              std::variant<std::string, std::set<std::string>>>
-                     names) {
-      if (std::holds_alternative<std::initializer_list<std::string>>(names)) {
-        names_ = std::set<std::string>(
-            std::get<std::initializer_list<std::string>>(names));
-      } else if (std::holds_alternative<
-                     std::variant<std::string, std::set<std::string>>>(names)) {
-        std::variant<std::string, std::set<std::string>> sub_names =
-            std::get<std::variant<std::string, std::set<std::string>>>(names);
-        if (std::holds_alternative<std::string>(sub_names)) {
-          names_ = std::set<std::string>{std::get<std::string>(sub_names)};
-        } else {
-          names_ = std::get<std::set<std::string>>(sub_names);
-        }
-      }
-    }
-
+    void SetName(std::set<std::string> names) { names_ = names; }
     ArgOpt SetVariable(Variable val, ArgOpt opt) {
       if (opt == ARG_NONE) {
         if (val.Type() == INT) {

@@ -1,6 +1,6 @@
 Add templated functiones to reduce code size +Variable
 Add templated functions to reduce code size +ArgParse
-Convert argparse to just int, string, char, bool +ArgParse
+x 2018-02-22 Convert argparse to just int, string, char, bool +ArgParse
 Create basic ConfigParser class +ConfigParser
 Create math namespace? +Vector +Matrix
 End header only? +global

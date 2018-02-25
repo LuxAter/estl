@@ -4,25 +4,14 @@
             "c++", 
             "-c", 
             "-I/home/arden/Programming/cpp/estl/estl", 
-            "-I/home/arden/Programming/cpp/estl/external/googletest/googletest/include", 
             "-std=c++17", 
             "-w", 
             "-fPIC", 
-            "-o", 
-            "/home/arden/Programming/cpp/estl/build/test/./test_matrix.o", 
-            "test_matrix.cpp"
-        ], 
-        "directory": "/home/arden/Programming/cpp/estl/test", 
-        "file": "test_matrix.cpp"
-    }, 
-    {
-        "arguments": [
-            "c++", 
-            "-c", 
-            "-I/home/arden/Programming/cpp/estl/estl", 
-            "-std=c++17", 
-            "-w", 
-            "-fPIC", 
+            "-fprofile-arcs", 
+            "-ftest-coverage", 
+            "-fno-inline", 
+            "-fno-inline-small-functions", 
+            "-fno-default-inline", 
             "-o", 
             "/home/arden/Programming/cpp/estl/build/source/./main.o", 
             "main.cpp"
@@ -39,27 +28,16 @@
             "-std=c++17", 
             "-w", 
             "-fPIC", 
+            "-fprofile-arcs", 
+            "-ftest-coverage", 
+            "-fno-inline", 
+            "-fno-inline-small-functions", 
+            "-fno-default-inline", 
             "-o", 
-            "/home/arden/Programming/cpp/estl/build/test/./test_stream.o", 
-            "test_stream.cpp"
+            "/home/arden/Programming/cpp/estl/build/test/./test_argparse.o", 
+            "test_argparse.cpp"
         ], 
         "directory": "/home/arden/Programming/cpp/estl/test", 
-        "file": "test_stream.cpp"
-    }, 
-    {
-        "arguments": [
-            "c++", 
-            "-c", 
-            "-I/home/arden/Programming/cpp/estl/estl", 
-            "-I/home/arden/Programming/cpp/estl/external/googletest/googletest/include", 
-            "-std=c++17", 
-            "-w", 
-            "-fPIC", 
-            "-o", 
-            "/home/arden/Programming/cpp/estl/build/test/./test_vector.o", 
-            "test_vector.cpp"
-        ], 
-        "directory": "/home/arden/Programming/cpp/estl/test", 
-        "file": "test_vector.cpp"
+        "file": "test_argparse.cpp"
     }
 ]
