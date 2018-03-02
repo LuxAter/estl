@@ -122,4 +122,30 @@ TEST_F(ArgParseArgumentTest, SetType){
   EXPECT_EQ(arg1.GetType(), estl::argparse::DOUBLE_VECTOR);
   arg1.SetType("string_vector");
   EXPECT_EQ(arg1.GetType(), estl::argparse::STRING_VECTOR);
+  arg2.SetVariable(estl::argparse::INT, estl::argparse::ARG_TYPE);
+  EXPECT_EQ(arg2.GetType(), estl::argparse::INT);
+
+}
+
+TEST_F(ArgParseArgumentTest, SetRequired){
+  arg1.SetRequired(true);
+  EXPECT_EQ(arg1.GetUsage(), "1");
+  arg2.SetVariable(true, estl::argparse::ARG_NONE);
+  EXPECT_EQ(arg2.GetUsage(), "2");
+  arg3.SetVariable(true, estl::argparse::ARG_REQUIRED);
+  EXPECT_EQ(arg3.GetUsage(), "3");
+}
+
+TEST_F(ArgParseArgumentTest, SetChoices){
+  arg1.SetChoices({"a", "b"});
+  EXPECT_EQ(arg1.GetChoicesStr(), "{a, b}");
+  arg2.SetVariable({1, 2, 3}, estl::argparse::ARG_NONE);
+  EXPECT_EQ(arg2.GetChoicesStr(), "{1, 2, 3}");
+  arg3.SetVariable({'a', 'b', 'c'}, estl::argparse::ARG_CHOICES);
+  EXPECT_EQ(arg3.GetChoicesStr(), "{a, b, c}");
+}
+
+TEST_F(ArgParseArgumentTest, SetDefault){
+  arg1.SetDefault(17);
+  EXPECT_EQ(arg1.GetValue(), 17);
 }

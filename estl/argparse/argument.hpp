@@ -110,7 +110,7 @@ namespace argparse {
       } else if (opt == ARG_N_ARGS) {
         SetNArgs(val);
       } else if (opt == ARG_REQUIRED) {
-        SetNArgs(val);
+        SetRequired(val);
       } else if (opt == ARG_TYPE) {
         SetType(val);
       } else {
@@ -242,14 +242,25 @@ namespace argparse {
           type_ = BOOL;
         } else if (type_str == "int") {
           type_ = INT;
+        }else if(type_str == "double"){
+          type_ = DOUBLE;
+        }else if(type_str == "string"){
+          type_ = STRING;
+        }else if(type_str == "bool_vector"){
+          type_ = BOOL_VECTOR;
+        }else if(type_str == "int_vector"){
+          type_ = INT_VECTOR;
+        }else if(type_str == "double_vector"){
+          type_ = DOUBLE_VECTOR;
+        }else if(type_str == "string_vector"){
+          type_ = STRING_VECTOR;
         }
-        // TODO(Arden): Add more string variants.
       }
     }
     void SetRequired(Variable val) {
       usr_required_ = true;
       if (val.Type() == BOOL) {
-        required_ = val;
+        required_ = bool(val);
       }
     }
     void SetChoices(Variable val) { choices_ = val; }
@@ -569,8 +580,10 @@ namespace argparse {
     }
 
     bool InChoices(Variable argument) const {
-      if (choices_.IsValid() == false || choices_.IsVector() == false) {
+      if (choices_.IsValid() == false ) {
         return true;
+      }else if(choices_.IsVector() == false){
+        return argument == choices_;
       }
       unsigned int choices_type = choices_.Type(), arg_type = argument.Type();
       if (choices_type == BOOL_VECTOR && arg_type == BOOL) {

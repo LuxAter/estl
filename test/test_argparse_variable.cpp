@@ -147,16 +147,16 @@ TEST_F(ArgParseVariableTest, PushBack) {
 }
 
 TEST_F(ArgParseVariableTest, Conversion){
-  bool b = b_;
-  char c = c_;
-  int i = i_;
-  double d = d_;
-  std::string s = s_;
-  std::vector<bool> vb= vb_;
-  std::vector<char> vc= vc_;
-  std::vector<int> vi= vi_;
-  std::vector<double> vd= vd_;
-  std::vector<std::string> vs= vs_;
+  bool b(b_);
+  char c( c_);
+  int i ( i_);
+  double d ( d_);
+  std::string s ( s_);
+  std::vector<bool> vb( vb_);
+  std::vector<char> vc( vc_);
+  std::vector<int> vi( vi_);
+  std::vector<double> vd( vd_);
+  std::vector<std::string> vs( vs_);
   EXPECT_EQ(b, true);
   EXPECT_EQ(c, 'a');
   EXPECT_EQ(i, 1);

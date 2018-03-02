@@ -348,16 +348,16 @@ namespace argparse {
       return *this;
     }
 
-    inline operator bool() const { return GetBool(); }
-    inline operator char() const { return GetChar(); }
-    inline operator int() const { return GetInt(); }
-    inline operator double() const { return GetDouble(); }
-    inline operator std::string() const { return GetString(); }
-    inline operator std::vector<bool>() const { return GetBoolVector(); }
-    inline operator std::vector<char>() const { return GetCharVector(); }
-    inline operator std::vector<int>() const { return GetIntVector(); }
-    inline operator std::vector<double>() const { return GetDoubleVector(); }
-    inline operator std::vector<std::string>() const {
+    explicit inline operator bool() const { return GetBool(); }
+    explicit inline operator char() const { return GetChar(); }
+    explicit inline operator int() const { return GetInt(); }
+    explicit inline operator double() const { return GetDouble(); }
+    explicit inline operator std::string() const { return GetString(); }
+    explicit inline operator std::vector<bool>() const { return GetBoolVector(); }
+    explicit inline operator std::vector<char>() const { return GetCharVector(); }
+    explicit inline operator std::vector<int>() const { return GetIntVector(); }
+    explicit inline operator std::vector<double>() const { return GetDoubleVector(); }
+    explicit inline operator std::vector<std::string>() const {
       return GetStringVector();
     }
 
