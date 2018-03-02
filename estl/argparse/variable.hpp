@@ -198,6 +198,14 @@ namespace argparse {
         double_vec_ = std::vector<double>{val};
       }
     }
+    void PushBack(const char* val){
+      if(type_ == STRING_VECTOR){
+        string_vec_.push_back(std::string(val));
+      }else{
+        type_ = STRING_VECTOR;
+        string_vec_ = std::vector<std::string>{std::string(val)};
+      }
+    }
     void PushBack(std::string val) {
       if (type_ == STRING_VECTOR) {
         string_vec_.push_back(val);
@@ -353,6 +361,17 @@ namespace argparse {
       return GetStringVector();
     }
 
+    template<class T>
+      std::ostream& GetVectorString(std::ostream& out, std::vector<T> lhs) const{
+        for(typename std::vector<T>::const_iterator it = lhs.begin(); it != lhs.end(); ++it){
+          out << *it;
+          if (it != --lhs.end()){
+            out << ", ";
+          }
+        }
+        return out;
+      }
+
    private:
     Types type_ = NONE;
     union {
@@ -480,32 +499,23 @@ namespace argparse {
         break;
       }
       case BOOL_VECTOR: {
-        std::vector<bool> vec = lhs.GetBoolVector();
-        std::copy(vec.begin(), vec.end(),
-                  std::ostream_iterator<bool>(out, " "));
+        lhs.GetVectorString(out, lhs.GetBoolVector());
         break;
       }
       case CHAR_VECTOR: {
-        std::vector<char> vec = lhs.GetCharVector();
-        std::copy(vec.begin(), vec.end(),
-                  std::ostream_iterator<char>(out, " "));
+        lhs.GetVectorString(out, lhs.GetCharVector());
         break;
       }
       case INT_VECTOR: {
-        std::vector<int> vec = lhs.GetIntVector();
-        std::copy(vec.begin(), vec.end(), std::ostream_iterator<int>(out, " "));
+        lhs.GetVectorString(out, lhs.GetIntVector());
         break;
       }
       case DOUBLE_VECTOR: {
-        std::vector<double> vec = lhs.GetDoubleVector();
-        std::copy(vec.begin(), vec.end(),
-                  std::ostream_iterator<double>(out, " "));
+        lhs.GetVectorString(out, lhs.GetDoubleVector());
         break;
       }
       case STRING_VECTOR: {
-        std::vector<std::string> vec = lhs.GetStringVector();
-        std::copy(vec.begin(), vec.end(),
-                  std::ostream_iterator<std::string>(out, " "));
+        lhs.GetVectorString(out, lhs.GetStringVector());
         break;
       }
       default: { out << "(null)"; }
