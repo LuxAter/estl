@@ -12,6 +12,7 @@
 
 namespace estl {
 namespace argparse {
+  // TODO (Arden): Shift enum values to new bases from argparse varaible types.
   enum Action {
     STORE = 40,
     STORE_CONST = 41,
@@ -188,6 +189,7 @@ namespace argparse {
           }
         }
       }
+      UpdateRequired();
     }
     void SetAction(Variable val) {
       if (val.Type() == INT) {
@@ -258,6 +260,7 @@ namespace argparse {
 
     std::set<std::string> GetNames() const { return names_; }
     Action GetAction() const { return action_; }
+    Types GetType() const { return type_;}
     std::string GetDest() const {
       if (dest_ == std::string()) {
         std::string longest = std::string();
