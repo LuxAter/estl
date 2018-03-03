@@ -71,6 +71,7 @@ namespace argparse {
           value_(copy.value_),
           default_(copy.default_),
           type_(copy.type_),
+          const_(copy.const_),
           choices_(copy.choices_) {}
 
     void SetName(std::set<std::string> names) { names_ = names; }
@@ -242,17 +243,17 @@ namespace argparse {
           type_ = BOOL;
         } else if (type_str == "int") {
           type_ = INT;
-        }else if(type_str == "double"){
+        } else if (type_str == "double") {
           type_ = DOUBLE;
-        }else if(type_str == "string"){
+        } else if (type_str == "string") {
           type_ = STRING;
-        }else if(type_str == "bool_vector"){
+        } else if (type_str == "bool_vector") {
           type_ = BOOL_VECTOR;
-        }else if(type_str == "int_vector"){
+        } else if (type_str == "int_vector") {
           type_ = INT_VECTOR;
-        }else if(type_str == "double_vector"){
+        } else if (type_str == "double_vector") {
           type_ = DOUBLE_VECTOR;
-        }else if(type_str == "string_vector"){
+        } else if (type_str == "string_vector") {
           type_ = STRING_VECTOR;
         }
       }
@@ -271,7 +272,7 @@ namespace argparse {
 
     std::set<std::string> GetNames() const { return names_; }
     Action GetAction() const { return action_; }
-    Types GetType() const { return type_;}
+    Types GetType() const { return type_; }
     std::string GetDest() const {
       if (dest_ == std::string()) {
         std::string longest = std::string();
@@ -529,6 +530,13 @@ namespace argparse {
           value_.PushBack(const_);
           break;
         }
+        case COUNT: {
+          if (value_.IsValid() == false) {
+            value_ = 1;
+          } else {
+            value_ = value_.GetInt() + 1;
+          }
+        }
         default: { break; }
       }
     }
@@ -580,9 +588,9 @@ namespace argparse {
     }
 
     bool InChoices(Variable argument) const {
-      if (choices_.IsValid() == false ) {
+      if (choices_.IsValid() == false) {
         return true;
-      }else if(choices_.IsVector() == false){
+      } else if (choices_.IsVector() == false) {
         return argument == choices_;
       }
       unsigned int choices_type = choices_.Type(), arg_type = argument.Type();
@@ -626,9 +634,13 @@ namespace argparse {
 
     Variable ConvertToType(std::string arg_str) const {
       switch (type_) {
-        case NONE:
-        case STRING: {
-          return Variable(arg_str);
+        case BOOL: {
+          if (arg_str == "true" || arg_str == "True" || arg_str == "1" ||
+              arg_str == "t" || arg_str == "T") {
+            return Variable(true);
+          } else {
+            return Variable(false);
+          }
         }
         case CHAR: {
           return Variable(arg_str[0]);
@@ -638,6 +650,12 @@ namespace argparse {
         }
         case DOUBLE: {
           return Variable(std::stod(arg_str));
+        }
+        case STRING: {
+          return Variable(arg_str);
+        }
+        case NONE: {
+          return Variable(arg_str);
         }
         default: { return Variable(); }
       }

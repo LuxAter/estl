@@ -57,3 +57,46 @@ TEST_F(ArgParseTest, Options) {
       "ever end??? lets \nfind out! \n",
       parser.GetHelp());
 }
+
+TEST_F(ArgParseTest, ParseArgs) {
+  std::vector<const char*> in_args = {
+      "unit-tests", "--test-a", "hello", "-gbc", "-gd", "7",  "-gd", "8",
+      "-eff",       "-h",       "2.0",   "1.5",  "1.0", "-i", "a",   "c",
+      "-j",         "false",    "-k",     "2",    "-l",   "Bye"};
+  int argc = in_args.size();
+  const char** argv = &in_args[0];
+  parser.SetAddHelp(false);
+  parser.SetAddVersion(false);
+  parser.AddArgument({"-a", "--test-a"}, estl::argparse::STORE);
+  parser.AddArgument({"-b", "--test-b"}, estl::argparse::STORE_TRUE);
+  parser.AddArgument({"-c", "--test-c"}, estl::argparse::STORE_CONST,
+                     estl::argparse::ARG_CONST, 2018);
+  parser.AddArgument({"-d", "--test-d"}, estl::argparse::APPEND,
+                     estl::argparse::INT);
+  parser.AddArgument({"-e", "--test-e"}, estl::argparse::STORE_FALSE);
+  parser.AddArgument({"-f", "--test-f"}, estl::argparse::APPEND_CONST,
+                     estl::argparse::ARG_CONST, 3.14);
+  parser.AddArgument({"-g", "--test-g"}, estl::argparse::COUNT);
+  parser.AddArgument({"-h", "--test-h"}, estl::argparse::KLEENE_PLUS,
+                     estl::argparse::DOUBLE, {1.0, 1.5, 2.0, 2.5});
+  parser.AddArgument({"-i", "--test-i"}, estl::argparse::KLEENE_STAR,
+                     estl::argparse::CHAR, {'a', 'b', 'c'});
+  parser.AddArgument({"-j", "--test-j"}, estl::argparse::BOOL, {true, false});
+  parser.AddArgument({"-k", "--test-k"}, estl::argparse::INT, {2, 4, 6, 8});
+  parser.AddArgument({"-l", "--test-l"}, estl::argparse::STRING,
+                     {"Hello", "Bye"});
+  std::map<std::string, estl::argparse::Variable> args =
+      parser.ParseArgs(argc, argv);
+  EXPECT_EQ(args["test-a"], "hello");
+  EXPECT_EQ(args["test-b"], true);
+  EXPECT_EQ(args["test-c"], 2018);
+  EXPECT_EQ(args["test-d"], std::vector<int>({7, 8}));
+  EXPECT_EQ(args["test-e"], false);
+  EXPECT_EQ(args["test-f"], std::vector<double>({3.14, 3.14}));
+  EXPECT_EQ(args["test-g"], 3);
+  EXPECT_EQ(args["test-h"], std::vector<double>({2.0, 1.5, 1.0}));
+  EXPECT_EQ(args["test-i"], std::vector<char>({'a', 'c'}));
+  EXPECT_EQ(args["test-j"], false);
+  EXPECT_EQ(args["test-k"], 2);
+  EXPECT_EQ(args["test-l"], "Bye");
+}
