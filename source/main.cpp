@@ -20,7 +20,8 @@ class Tester{
 int main(int argc, char const* argv[]) {
   Tester t;
   t.value = 17;
-  std::string fmt = estl::format::Format("Hello}{2:17}! This is a {}", "World", "Test", 3.1415);
+  // std::string fmt = estl::format::Format("Hello}{2:17}! This is a {}", "World", "Test", 3.1415);
+  std::string fmt = estl::format::Format("Hello {} This is more text |{:=>20.5}| after each replacement", "HI", 3.1415);
   std::cout << "RES \"" << fmt << "\"\n";
   return 0;
 }
