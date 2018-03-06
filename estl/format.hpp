@@ -35,6 +35,37 @@ namespace format {
      public:
       static constexpr bool value = decltype(check<S, T>(0))::value;
     };
+    // template <typename T, typename I>
+    // struct is_subscriptable {
+    //  private:
+    //   template <typename TT, typename II>
+    //   static auto check(int)
+    //       -> decltype(std::declval<TT>()[std::declval<II>()], std::true_type());
+    //   template <typename>
+    //   static auto check(...) -> std::false_type;
+    //
+    //  public:
+    //   static constexpr bool value = decltype(check<T>(0))::value;
+    // };
+
+    template <class T, class Index>
+    struct has_subscript_impl {
+      template <class T1, class IndexDeduced = Index,
+                class Reference = decltype(
+                    (*std::declval<T*>())[std::declval<IndexDeduced>()]),
+                class = typename std::enable_if<
+                    !std::is_void<Reference>::value>::type>
+      static std::true_type test(int);
+
+      template <class>
+      static std::false_type test(...);
+
+      using type = decltype(test<T>(0));
+    };
+
+    template <class T, class Index>
+    using has_subscript = typename has_subscript_impl<T, Index>::type;
+
     template <typename, typename T>
     struct has_format {
       static_assert(std::integral_constant<T, false>::value,
@@ -81,12 +112,13 @@ namespace format {
       if (data[3] == 2) fmt += ' ';
       if (data[1] == int('0')) fmt += '0';
       if (data[4] != -1 && (data[1] == int('0') || data[1] == -1) &&
-          data[1] == -1 && data[2] == -1)
+          data[2] == -1)
         fmt += std::to_string(data[4]);
       if (data[5] != -1) fmt += '.' + std::to_string(data[5]);
       fmt += std::string(type);
       fmt = to_xstring<std::string>(n, fmt.c_str(), args);
       if (data[4] != -1 && data[4] > fmt.size()) {
+        printf("ENTER %d\n", data[2]);
         if (data[1] == -1) {
           data[1] = int(' ');
         }
@@ -95,7 +127,13 @@ namespace format {
         } else if (data[2] == 1) {
           fmt = std::string(data[4] - fmt.size(), data[1]) + fmt;
         } else if (data[2] == 2) {
-          fmt = std::string(data[4] - fmt.size(), data[1]) + fmt;  // TODO
+          printf("HERE\n");
+          if (fmt[0] == '-' || fmt[0] == '+') {
+            fmt = fmt[0] + std::string(data[4] - fmt.size(), data[1]) +
+                  fmt.substr(1);
+          } else {
+            fmt = std::string(data[4] - fmt.size(), data[1]) + fmt;  // TODO
+          }
         } else if (data[2] == 3) {
           fmt = std::string(std::floor((data[4] - fmt.size()) / 2.0), data[1]) +
                 fmt +
@@ -147,7 +185,8 @@ namespace format {
         const int n = std::numeric_limits<long double>::max_exponent10 + 20;
         res = to_xstring<std::string>(n, "%Lf", argument);
       } else if (std::is_same<T, const char*>::value) {
-        res = to_xstring<std::string>(0, "%s", argument);
+        res = data_fmt(data, 255, "s", argument);
+        // res = to_xstring<std::string>(0, "%s", argument);
       }
       return res;
     }
@@ -259,6 +298,7 @@ namespace format {
         std::cout << i % 10;
       }
       std::cout << "\n";
+
       while (true) {
         std::string_view arg_fmt, rem_fmt;
         std::size_t pos = fmt_text.find_first_of('{');
@@ -272,6 +312,7 @@ namespace format {
         fmt_text = rem_fmt.substr(rem_fmt.find_first_of('}') + 1);
         int data[7];
         parse_argument(data, arg_fmt);
+        printf("Item: %d\n", data[0]);
         if (data[0] != -1) {
           res += aiformat(std::size_t(data[0]), data, args);
         } else {
