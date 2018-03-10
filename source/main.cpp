@@ -12,7 +12,12 @@
 class Tester {
  public:
   int value;
-  std::string Format() { return "Tester: " + std::to_string(value); }
+  std::string Format(char fill, unsigned align, unsigned sign, int width,
+                     int percision) {
+    return "Tester: (" + std::string(1,fill) + "," + std::to_string(align) + "," +
+           std::to_string(sign) + "," + std::to_string(width) + "," +
+           std::to_string(percision) + ")";
+  }
 };
 
 int main(int argc, char const* argv[]) {
@@ -21,8 +26,8 @@ int main(int argc, char const* argv[]) {
   // std::string fmt = estl::format::Format("Hello}{2:17}! This is a {}",
   // "World", "Test", 3.1415);
   std::string fmt = estl::format::Format(
-      "Hello {2[3]:-^10} This is more text |{1[2]:^ 020.5}| after each replacement",
-      "HI", 3.1415, std::string("HELLO"));
+      "Hello {^+10.5} This is more text |{0[2]:^ 020.5}| after each "
+      "replacement");
   std::cout << "RES \"" << fmt << "\"\n";
   return 0;
 }

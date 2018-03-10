@@ -4,11 +4,13 @@
 #include <stdio.h>
 #include <iostream>
 
+#include <cxxabi.h>
 #include <stdarg.h>
 
 #include <algorithm>
 #include <cmath>
 #include <cstring>
+#include <iomanip>
 #include <limits>
 #include <sstream>
 #include <string>
@@ -17,9 +19,6 @@
 #include <utility>
 
 #include "variadic.hpp"
-
-// TODO(Arden): Add compile time breaks for invalid format strings, attempting
-// to subscript a non subscriptable object, ect.
 
 namespace estl {
 namespace format {
@@ -75,6 +74,25 @@ namespace format {
      public:
       static constexpr bool value = type::value;
     };
+    template <class T>
+    std::string type_name() {
+      typedef typename std::remove_reference<T>::type TR;
+      std::unique_ptr<char, void (*)(void*)> own(
+#ifndef _MSC_VER
+          abi::__cxa_demangle(typeid(TR).name(), nullptr, nullptr, nullptr),
+#else
+          nullptr,
+#endif
+          std::free);
+      std::string r = own != nullptr ? own.get() : typeid(TR).name();
+      if (std::is_const<TR>::value) r += " const";
+      if (std::is_volatile<TR>::value) r += " volatile";
+      if (std::is_lvalue_reference<T>::value)
+        r += "&";
+      else if (std::is_rvalue_reference<T>::value)
+        r += "&&";
+      return r;
+    }
 
     template <typename TString, typename TChar = typename TString::value_type>
     inline TString to_xstring(std::size_t n, const TChar* fmt, ...) {
@@ -131,12 +149,17 @@ namespace format {
     }
 
     template <typename T>
-    inline typename std::enable_if<has_format<T, std::string()>::value,
-                                   std::string>::type
+    inline typename std::enable_if<
+        has_format<T, std::string(char, unsigned, unsigned, int, int)>::value,
+        std::string>::type
     aformat(int data[8], T argument) {
-      // TODO(Arden): Implement class format tremplate, and provide requirements
-      // and data.
-      return argument.Format();
+      if (data[1] == -1) {
+        data[1] = int(' ');
+      }
+      // XXX: Format function template of the form:
+      // std::string Format(char fill_char, unsigned align, unsigned sign, int
+      // width, int percision)
+      return argument.Format(data[1], data[2], data[3], data[4], data[5]);
     }
 
     template <typename T>
@@ -199,9 +222,31 @@ namespace format {
         std::string>::type
     aformat(int data[8], T argument) {
       std::stringstream out;
-      // TODO(Arden): Add add flags to stream, such that formatting requirements
-      // are met.
+      int print_width = data[4];
+      if (data[1] == -1) {
+        data[1] = int(' ');
+      }
+      out << std::setfill(char(data[1]));
+      if (data[2] == 1) {
+        out << std::left;
+      } else if (data[2] == 2) {
+        out << std::internal;
+      }
+      if (print_width > -1 && data[2] != 3) {
+        out << std::setw(print_width);
+      }
+      if (data[5] != -1) {
+        out << std::setprecision(data[5]);
+      }
       out << argument;
+      if (data[2] == 3) {
+        std::string out_str = out.str();
+        return std::string(std::floor((print_width - out_str.size()) / 2.0),
+                           data[1]) +
+               out_str +
+               std::string(std::ceil((print_width - out_str.size()) / 2.0),
+                           data[1]);
+      }
       return out.str();
     }
 
@@ -219,12 +264,22 @@ namespace format {
     inline typename std::enable_if<!(has_subscript<T, int>::value),
                                    std::string>::type
     asformat(int data[8], T argument) {
+      if (data[7] != -1) {
+        throw std::invalid_argument(
+            "argument index (which is " + std::to_string(data[0]) +
+            ") of type " + type_name<decltype(argument)>() +
+            " is not subscriptable, but format string requested subscript");
+      }
       return aformat(data, argument);
     }
 
     template <std::size_t I = 0, typename... Args>
     inline typename std::enable_if<I == sizeof...(Args), std::string>::type
     aiformat(std::size_t index, int data[8], std::tuple<Args...> args) {
+      throw std::out_of_range("argument index (which is " +
+                              std::to_string(index) +
+                              ") >= argument count (which is " +
+                              std::to_string(sizeof...(Args)) + ")");
       return std::string();
     }
     template <std::size_t I = 0, typename... Args>
@@ -322,17 +377,20 @@ namespace format {
       return true;
     }
 
-    template <std::size_t I = 0, typename... Args>
-    inline typename std::enable_if<I == sizeof...(Args), std::string>::type
-    vsformat(std::string_view fmt, std::tuple<Args...> args) {
-      return std::string();
-    }
-    template <std::size_t I = 0, typename... Args>
-        inline typename std::enable_if <
-        I<sizeof...(Args), std::string>::type vsformat(
-            std::string_view fmt, std::tuple<Args...> args) {
+    // template <std::size_t I = 0, typename... Args>
+    // inline typename std::enable_if<I == sizeof...(Args), std::string>::type
+    // vsformat(std::string_view fmt, std::tuple<Args...> args) {
+    //   return std::string();
+    // }
+    // template <std::size_t I = 0, typename... Args>
+    //     inline typename std::enable_if <
+    //     I<sizeof...(Args), std::string>::type vsformat(
+    template <typename... Args>
+    inline std::string vsformat(std::string_view fmt,
+                                std::tuple<Args...> args) {
       std::size_t arg_index = 0;
-      std::size_t tuple_length = std::tuple_size<std::tuple<Args...>>::value;
+      const std::size_t tuple_length =
+          std::tuple_size<std::tuple<Args...>>::value;
       std::string res;
       std::string_view fmt_text = fmt;
       while (true) {
