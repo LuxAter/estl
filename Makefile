@@ -154,3 +154,7 @@ clean-docs:
 	if [ -d "$(DOC_DIR)/latex" ]; then rm "$(DOC_DIR)/latex" -r; fi
 	if [ -d "$(DOC_DIR)/xml" ]; then rm "$(DOC_DIR)/xml" -r; fi
 	$(call print,Cleaned Documentation,$(CLEAN_COLOR))
+
+.PHONY: runtest
+runtest: test
+	./unit-test --gtest_color=yes

@@ -20,6 +20,8 @@
 
 #include "variadic.hpp"
 
+// TODO(Arden): Add type conversion checks, and type conversion.
+
 namespace estl {
 namespace format {
 
@@ -156,9 +158,6 @@ namespace format {
       if (data[1] == -1) {
         data[1] = int(' ');
       }
-      // XXX: Format function template of the form:
-      // std::string Format(char fill_char, unsigned align, unsigned sign, int
-      // width, int percision)
       return argument.Format(data[1], data[2], data[3], data[4], data[5]);
     }
 
@@ -177,7 +176,8 @@ namespace format {
         std::string>::type
     aformat(int data[8], T argument) {
       if (std::is_same<T, bool>::value) {
-        return data_fmt(data, 4 * sizeof(bool), "b", argument);
+        return data_fmt(data, 4 * 5 * sizeof(char), "s",
+                        argument ? "true" : "false");
       } else if (std::is_same<T, char>::value) {
         return data_fmt(data, 4 * sizeof(char), "c", argument);
       } else if (std::is_same<T, int>::value) {
@@ -316,6 +316,18 @@ namespace format {
         fmt = fmt.substr(fmt.find_first_of(':') + 1);
       } else if (fmt.size() != 0) {
         data[0] = atoi(fmt.begin());
+        if (fmt.find_first_of('[') == std::string_view::npos) {
+          data[0] = atoi(fmt.begin());
+        } else {
+          std::string_view subscript =
+              fmt.substr(fmt.find_first_of('[') + 1,
+                         fmt.size() - fmt.find_first_of('[') - 2);
+          fmt = fmt.substr(0, fmt.find_first_of('['));
+          if (fmt.size() != 0) {
+            data[0] = atoi(fmt.begin());
+          }
+          data[7] = atoi(subscript.begin());
+        }
         return true;
       } else {
         return true;
@@ -371,7 +383,7 @@ namespace format {
           return true;
         }
       }
-      if (fmt_index < fmt.size() - 1) {
+      if (fmt_index < fmt.size()) {
         return false;
       }
       return true;
@@ -405,7 +417,12 @@ namespace format {
         arg_fmt = fmt_text.substr(pos + 1, rem_fmt.find_first_of('}'));
         fmt_text = rem_fmt.substr(rem_fmt.find_first_of('}') + 1);
         int data[8];
-        parse_argument(data, arg_fmt);
+        bool parse_res = parse_argument(data, arg_fmt);
+        if (parse_res == false) {
+          throw std::invalid_argument("Format string specifier (which is \"" +
+                                      std::string(arg_fmt) +
+                                      "\") is of an invalid format");
+        }
         if (data[0] != -1) {
           res += aiformat(std::size_t(data[0]), data, args);
         } else {
