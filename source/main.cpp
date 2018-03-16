@@ -14,8 +14,8 @@ class Tester {
   int value;
   std::string Format(char fill, unsigned align, unsigned sign, int width,
                      int percision) {
-    return "Tester: (" + std::string(1,fill) + "," + std::to_string(align) + "," +
-           std::to_string(sign) + "," + std::to_string(width) + "," +
+    return "Tester: (" + std::string(1, fill) + "," + std::to_string(align) +
+           "," + std::to_string(sign) + "," + std::to_string(width) + "," +
            std::to_string(percision) + ")";
   }
 };
@@ -23,11 +23,7 @@ class Tester {
 int main(int argc, char const* argv[]) {
   Tester t;
   t.value = 17;
-  // std::string fmt = estl::format::Format("Hello}{2:17}! This is a {}",
-  // "World", "Test", 3.1415);
-  std::string fmt = estl::format::Format(
-      "Hello {^+10.5} This is more text |{0[2]:^ 020.5}| after each "
-      "replacement");
+  std::string fmt = estl::format::Format("Double: {0} Int: {0:x} Default: {0:o}", -1998);
   std::cout << "RES \"" << fmt << "\"\n";
   return 0;
 }

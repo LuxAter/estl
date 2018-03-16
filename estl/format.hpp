@@ -16,6 +16,7 @@
 #include <string>
 #include <string_view>
 #include <tuple>
+#include <type_traits>
 #include <utility>
 
 #include "variadic.hpp"
@@ -94,6 +95,19 @@ namespace format {
       else if (std::is_rvalue_reference<T>::value)
         r += "&&";
       return r;
+    }
+
+    template <typename T>
+    inline
+        typename std::enable_if<std::is_convertible<T, int>::value, bool>::type
+        negetive_int(T argument) {
+      return int(argument) < 0;
+    }
+    template <typename T>
+    inline
+        typename std::enable_if<!std::is_convertible<T, int>::value, bool>::type
+        negetive_int(T argument) {
+      return false;
     }
 
     template <typename TString, typename TChar = typename TString::value_type>
@@ -175,32 +189,175 @@ namespace format {
              std::is_same<T, const char*>::value),
         std::string>::type
     aformat(int data[8], T argument) {
+      // TODO(Arden): Enable support for negetive hex, and oct.
+      // TODO(Arden): Enable binary format.
       if (std::is_same<T, bool>::value) {
         return data_fmt(data, 4 * 5 * sizeof(char), "s",
                         argument ? "true" : "false");
       } else if (std::is_same<T, char>::value) {
         return data_fmt(data, 4 * sizeof(char), "c", argument);
       } else if (std::is_same<T, int>::value) {
-        return data_fmt(data, 4 * sizeof(int), "d", argument);
+        if (data[6] == -1) {
+          return data_fmt(data, 4 * sizeof(int), "d", argument);
+        } else if (data[6] == 88) {
+          return data_fmt(data, 4 * sizeof(int), "X", argument);
+        } else if (data[6] == 98) {
+          // Binary
+        } else if (data[6] == 100) {
+          return data_fmt(data, 4 * sizeof(int), "d", argument);
+        } else if (data[6] == 111) {
+          return data_fmt(data, 4 * sizeof(int), "o", argument);
+        } else if (data[6] == 120) {
+          return data_fmt(data, 4 * sizeof(int), "x", argument);
+        } else {
+          return data_fmt(data, 4 * sizeof(int), "d", argument);
+        }
       } else if (std::is_same<T, unsigned>::value) {
-        return data_fmt(data, 4 * sizeof(unsigned), "u", argument);
+        if (data[6] == -1) {
+          return data_fmt(data, 4 * sizeof(unsigned), "u", argument);
+        } else if (data[6] == 88) {
+          return data_fmt(data, 4 * sizeof(unsigned), "X", argument);
+        } else if (data[6] == 98) {
+          // Binary
+        } else if (data[6] == 100) {
+          return data_fmt(data, 4 * sizeof(unsigned), "u", argument);
+        } else if (data[6] == 111) {
+          return data_fmt(data, 4 * sizeof(unsigned), "o", argument);
+        } else if (data[6] == 120) {
+          return data_fmt(data, 4 * sizeof(unsigned), "x", argument);
+        } else {
+          return data_fmt(data, 4 * sizeof(unsigned), "u", argument);
+        }
       } else if (std::is_same<T, long>::value) {
         return data_fmt(data, 4 * sizeof(long), "ld", argument);
+        if (data[6] == -1) {
+          // Default
+        } else if (data[6] == 88) {
+          // HEX
+        } else if (data[6] == 98) {
+          // Binary
+        } else if (data[6] == 100) {
+          // Decminal
+        } else if (data[6] == 111) {
+          // Octal
+        } else if (data[6] == 120) {
+          // Hex
+        } else {
+          // Defualt
+        }
       } else if (std::is_same<T, unsigned long>::value) {
-        return data_fmt(data, 4 * sizeof(unsigned long), "lu", argument);
+        if (data[6] == -1) {
+          return data_fmt(data, 4 * sizeof(unsigned long), "lu", argument);
+        } else if (data[6] == 88) {
+          return data_fmt(data, 4 * sizeof(unsigned long), "lX", argument);
+        } else if (data[6] == 98) {
+          // Binary
+        } else if (data[6] == 100) {
+          return data_fmt(data, 4 * sizeof(unsigned long), "lu", argument);
+        } else if (data[6] == 111) {
+          return data_fmt(data, 4 * sizeof(unsigned long), "lo", argument);
+        } else if (data[6] == 120) {
+          return data_fmt(data, 4 * sizeof(unsigned long), "lx", argument);
+        } else {
+          return data_fmt(data, 4 * sizeof(unsigned long), "lu", argument);
+        }
       } else if (std::is_same<T, long long>::value) {
         return data_fmt(data, 4 * sizeof(long long), "lld", argument);
+        if (data[6] == -1) {
+          // Default
+        } else if (data[6] == 88) {
+          // HEX
+        } else if (data[6] == 98) {
+          // Binary
+        } else if (data[6] == 100) {
+          // Decminal
+        } else if (data[6] == 111) {
+          // Octal
+        } else if (data[6] == 120) {
+          // Hex
+        } else {
+          // Defualt
+        }
       } else if (std::is_same<T, unsigned long long>::value) {
         return data_fmt(data, 4 * sizeof(unsigned long long), "llu", argument);
+        if (data[6] == -1) {
+          return data_fmt(data, 4 * sizeof(unsigned long long), "llu",
+                          argument);
+        } else if (data[6] == 88) {
+          return data_fmt(data, 4 * sizeof(unsigned long long), "llX",
+                          argument);
+        } else if (data[6] == 98) {
+          // Binary
+        } else if (data[6] == 100) {
+          return data_fmt(data, 4 * sizeof(unsigned long long), "llu",
+                          argument);
+        } else if (data[6] == 111) {
+          return data_fmt(data, 4 * sizeof(unsigned long long), "llo",
+                          argument);
+        } else if (data[6] == 120) {
+          return data_fmt(data, 4 * sizeof(unsigned long long), "llx",
+                          argument);
+        } else {
+          return data_fmt(data, 4 * sizeof(unsigned long long), "llu",
+                          argument);
+        }
       } else if (std::is_same<T, float>::value) {
         const int n = std::numeric_limits<float>::max_exponent10 + 20;
-        return data_fmt(data, n, "f", argument);
+        if (data[6] == -1) {
+          return data_fmt(data, n, "g", argument);
+        } else if (data[6] == 69) {
+          return data_fmt(data, n, "E", argument);
+        } else if (data[6] == 70) {
+          return data_fmt(data, n, "F", argument);
+        } else if (data[6] == 71) {
+          return data_fmt(data, n, "G", argument);
+        } else if (data[6] == 101) {
+          return data_fmt(data, n, "e", argument);
+        } else if (data[6] == 102) {
+          return data_fmt(data, n, "f", argument);
+        } else if (data[6] == 103) {
+          return data_fmt(data, n, "g", argument);
+        } else {
+          return data_fmt(data, n, "g", argument);
+        }
       } else if (std::is_same<T, double>::value) {
         const int n = std::numeric_limits<double>::max_exponent10 + 20;
-        return data_fmt(data, n, "f", argument);
+        if (data[6] == -1) {
+          return data_fmt(data, n, "g", argument);
+        } else if (data[6] == 69) {
+          return data_fmt(data, n, "E", argument);
+        } else if (data[6] == 70) {
+          return data_fmt(data, n, "F", argument);
+        } else if (data[6] == 71) {
+          return data_fmt(data, n, "G", argument);
+        } else if (data[6] == 101) {
+          return data_fmt(data, n, "e", argument);
+        } else if (data[6] == 102) {
+          return data_fmt(data, n, "f", argument);
+        } else if (data[6] == 103) {
+          return data_fmt(data, n, "g", argument);
+        } else {
+          return data_fmt(data, n, "g", argument);
+        }
       } else if (std::is_same<T, long double>::value) {
         const int n = std::numeric_limits<long double>::max_exponent10 + 20;
-        return data_fmt(data, n, "lf", argument);
+        if (data[6] == -1) {
+          return data_fmt(data, n, "lg", argument);
+        } else if (data[6] == 69) {
+          return data_fmt(data, n, "lE", argument);
+        } else if (data[6] == 70) {
+          return data_fmt(data, n, "lF", argument);
+        } else if (data[6] == 71) {
+          return data_fmt(data, n, "lG", argument);
+        } else if (data[6] == 101) {
+          return data_fmt(data, n, "le", argument);
+        } else if (data[6] == 102) {
+          return data_fmt(data, n, "lf", argument);
+        } else if (data[6] == 103) {
+          return data_fmt(data, n, "lg", argument);
+        } else {
+          return data_fmt(data, n, "lg", argument);
+        }
       } else if (std::is_same<T, const char*>::value) {
         return data_fmt(data, 255, "s", argument);
       }
@@ -250,14 +407,73 @@ namespace format {
       return out.str();
     }
 
+    template <typename T, typename U>
+    inline typename std::enable_if<std::is_convertible<T, U>::value,
+                                   std::string>::type
+    acformat(int data[8], T argument) {
+      return aformat(data, U(argument));
+    }
+    template <typename T, typename U>
+    inline typename std::enable_if<!std::is_convertible<T, U>::value,
+                                   std::string>::type
+    acformat(int data[8], T argument) {
+      throw std::invalid_argument(
+          "argument index (which is " + std::to_string(data[0]) + ") of type " +
+          type_name<T>() + " is not convertable to type of " + type_name<U>());
+    }
+
+    template <typename T>
+    std::string acdformat(int data[8], T argument) {
+      if (data[6] == -1 || data[6] == 115) {
+        return aformat(data, argument);
+      } else if (data[6] == 37 || data[6] == 69 || data[6] == 70 ||
+                 data[6] == 71 || data[6] == 101 || data[6] == 102 ||
+                 data[6] == 103) {
+        if (std::is_same<T, float>::value == true) {
+          return aformat(data, argument);
+        } else if (std::is_same<T, double>::value == true) {
+          return aformat(data, argument);
+        } else if (std::is_same<T, long double>::value == true) {
+          return aformat(data, argument);
+        } else {
+          return acformat<T, double>(data, argument);
+        }
+      } else if (data[6] == 88 || data[6] == 98 || data[6] == 100 ||
+                 data[6] == 111 || data[6] == 120) {
+        if (std::is_same<T, int>::value == true) {
+          return aformat(data, argument);
+        } else if (std::is_same<T, unsigned>::value == true) {
+          return aformat(data, argument);
+        } else if (std::is_same<T, long>::value == true) {
+          return aformat(data, argument);
+        } else if (std::is_same<T, unsigned long>::value == true) {
+          return aformat(data, argument);
+        } else if (std::is_same<T, long long>::value == true) {
+          return aformat(data, argument);
+        } else if (std::is_same<T, unsigned long long>::value == true) {
+          return aformat(data, argument);
+        } else {
+          return acformat<T, int>(data, argument);
+        }
+      } else if (data[6] == 99) {
+        if (std::is_same<T, char>::value == true) {
+          return aformat(data, argument);
+        } else {
+          return acformat<T, char>(data, argument);
+        }
+      } else {
+        return std::string();
+      }
+    }
+
     template <typename T>
     inline
         typename std::enable_if<has_subscript<T, int>::value, std::string>::type
         asformat(int data[8], T argument) {
       if (data[7] == -1) {
-        return aformat(data, argument);
+        return acdformat(data, argument);
       } else {
-        return aformat(data, argument[data[7]]);
+        return acdformat(data, argument[data[7]]);
       }
     }
     template <typename T>
@@ -267,10 +483,10 @@ namespace format {
       if (data[7] != -1) {
         throw std::invalid_argument(
             "argument index (which is " + std::to_string(data[0]) +
-            ") of type " + type_name<decltype(argument)>() +
+            ") of type " + type_name<T>() +
             " is not subscriptable, but format string requested subscript");
       }
-      return aformat(data, argument);
+      return acdformat(data, argument);
     }
 
     template <std::size_t I = 0, typename... Args>
@@ -382,6 +598,18 @@ namespace format {
         if (fmt_index >= fmt.size()) {
           return true;
         }
+      }
+      if (fmt_index >= fmt.size()) {
+        return true;
+      }
+      if ((fmt[fmt_index] == 37) ||
+          (fmt[fmt_index] >= 69 && fmt[fmt_index] <= 71) ||
+          (fmt[fmt_index] == 88) ||
+          (fmt[fmt_index] >= 98 && fmt[fmt_index] <= 103) ||
+          (fmt[fmt_index] == 111) || (fmt[fmt_index] == 115) ||
+          (fmt[fmt_index] == 120)) {
+        data[6] = fmt[fmt_index];
+        fmt_index++;
       }
       if (fmt_index < fmt.size()) {
         return false;
