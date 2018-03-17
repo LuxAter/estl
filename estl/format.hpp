@@ -8,6 +8,7 @@
 #include <stdarg.h>
 
 #include <algorithm>
+#include <bitset>
 #include <cmath>
 #include <cstring>
 #include <iomanip>
@@ -98,23 +99,58 @@ namespace format {
     }
 
     template <typename T>
-    inline
-        typename std::enable_if<std::is_convertible<T, int>::value, bool>::type
-        negetive_int(T argument) {
-      return int(argument) < 0;
+    inline typename std::enable_if<std::is_convertible<T, long long>::value,
+                                   bool>::type
+    negetive_int(T argument) {
+      return static_cast<long long>(argument) < 0;
     }
     template <typename T>
-    inline
-        typename std::enable_if<!std::is_convertible<T, int>::value, bool>::type
-        negetive_int(T argument) {
+    inline typename std::enable_if<!std::is_convertible<T, long long>::value,
+                                   bool>::type
+    negetive_int(T argument) {
       return false;
+    }
+    template <typename T>
+    inline typename std::enable_if<std::is_same<T, int>::value, T>::type
+    make_positive(T argument) {
+      if (negetive_int(argument) == true) {
+        return (-1 * argument);
+      } else {
+        return argument;
+      }
+    }
+    template <typename T>
+    inline typename std::enable_if<std::is_same<T, long>::value, T>::type
+    make_positive(T argument) {
+      if (negetive_int(argument) == true) {
+        return (-1 * argument);
+      } else {
+        return argument;
+      }
+    }
+    template <typename T>
+    inline typename std::enable_if<std::is_same<T, long long>::value, T>::type
+    make_positive(T argument) {
+      if (negetive_int(argument) == true) {
+        return (-1 * argument);
+      } else {
+        return argument;
+      }
+    }
+    template <typename T>
+    inline typename std::enable_if<!(std::is_same<T, long long>::value ||
+                                     std::is_same<T, long>::value ||
+                                     std::is_same<T, int>::value),
+                                   T>::type
+    make_positive(T argument) {
+      return argument;
     }
 
     template <typename TString, typename TChar = typename TString::value_type>
     inline TString to_xstring(std::size_t n, const TChar* fmt, ...) {
       TChar* res;
       if (n != 0) {
-        res = static_cast<TChar*>(malloc(sizeof(TChar) * n));
+        res = static_cast<TChar*>(malloc(sizeof(TChar) * (n + 255)));
       } else {
         res = static_cast<TChar*>(malloc(sizeof(TChar) * 255));
         n = 255;
@@ -126,10 +162,35 @@ namespace format {
       return TString(res, len);
     }
 
+    template <typename TString, typename T,
+              typename TChar = typename TString::value_type>
+    inline typename std::enable_if<
+        std::is_convertible<T, unsigned long long>::value, TString>::type
+    to_binary(std::size_t n, const TChar* fmt, T argument) {
+      std::bitset<sizeof(T) * 8> bits(make_positive(argument));
+      if (negetive_int(argument) == true) {
+        bits.set((sizeof(T) * 8) - 1);
+      }
+      std::cout << "FMT: " << fmt << "\n";
+      return to_xstring<TString, TChar>((sizeof(T) * 8) + n, fmt,
+                                        bits.to_string().c_str());
+    }
+    template <typename TString, typename T,
+              typename TChar = typename TString::value_type>
+    inline typename std::enable_if<
+        !std::is_convertible<T, unsigned long long>::value, TString>::type
+    to_binary(std::size_t n, const TChar* fmt, T argument) {
+      return TString();
+    }
+
     template <typename T>
     inline std::string data_fmt(int data[8], std::size_t n,
                                 std::string_view type, T args) {
       std::string fmt = "%";
+      if (type[0] == '-') {
+        fmt = '-' + fmt;
+        type = type.substr(1);
+      }
       if (data[3] == 0) fmt += '+';
       if (data[3] == 1) fmt += '-';
       if (data[3] == 2) fmt += ' ';
@@ -139,7 +200,12 @@ namespace format {
         fmt += std::to_string(data[4]);
       if (data[5] != -1) fmt += '.' + std::to_string(data[5]);
       fmt += std::string(type);
-      fmt = to_xstring<std::string>(n, fmt.c_str(), args);
+      if (fmt.back() == 'b') {
+        fmt.back() = 's';
+        fmt = to_binary<std::string>(n, fmt.c_str(), args);
+      } else {
+        fmt = to_xstring<std::string>(n, fmt.c_str(), args);
+      }
       if (data[4] != -1 && data[4] > fmt.size()) {
         if (data[1] == -1) {
           data[1] = int(' ');
@@ -200,15 +266,30 @@ namespace format {
         if (data[6] == -1) {
           return data_fmt(data, 4 * sizeof(int), "d", argument);
         } else if (data[6] == 88) {
-          return data_fmt(data, 4 * sizeof(int), "X", argument);
+          if (negetive_int(argument) == true) {
+            return data_fmt(data, 4 * sizeof(int), "-X",
+                            make_positive(argument));
+          } else {
+            return data_fmt(data, 4 * sizeof(int), "X", argument);
+          }
         } else if (data[6] == 98) {
-          // Binary
+          return data_fmt(data, 4 * sizeof(int), "b", argument);
         } else if (data[6] == 100) {
           return data_fmt(data, 4 * sizeof(int), "d", argument);
         } else if (data[6] == 111) {
-          return data_fmt(data, 4 * sizeof(int), "o", argument);
+          if (negetive_int(argument) == true) {
+            return data_fmt(data, 4 * sizeof(int), "-o",
+                            make_positive(argument));
+          } else {
+            return data_fmt(data, 4 * sizeof(int), "o", argument);
+          }
         } else if (data[6] == 120) {
-          return data_fmt(data, 4 * sizeof(int), "x", argument);
+          if (negetive_int(argument) == true) {
+            return data_fmt(data, 4 * sizeof(int), "-x",
+                            make_positive(argument));
+          } else {
+            return data_fmt(data, 4 * sizeof(int), "x", argument);
+          }
         } else {
           return data_fmt(data, 4 * sizeof(int), "d", argument);
         }
@@ -218,7 +299,7 @@ namespace format {
         } else if (data[6] == 88) {
           return data_fmt(data, 4 * sizeof(unsigned), "X", argument);
         } else if (data[6] == 98) {
-          // Binary
+          return data_fmt(data, 4 * sizeof(unsigned), "b", argument);
         } else if (data[6] == 100) {
           return data_fmt(data, 4 * sizeof(unsigned), "u", argument);
         } else if (data[6] == 111) {
@@ -229,21 +310,35 @@ namespace format {
           return data_fmt(data, 4 * sizeof(unsigned), "u", argument);
         }
       } else if (std::is_same<T, long>::value) {
-        return data_fmt(data, 4 * sizeof(long), "ld", argument);
         if (data[6] == -1) {
-          // Default
+          return data_fmt(data, 4 * sizeof(long), "ld", argument);
         } else if (data[6] == 88) {
-          // HEX
+          if (negetive_int(argument) == true) {
+            return data_fmt(data, 4 * sizeof(long), "-lH",
+                            make_positive(argument));
+          } else {
+            return data_fmt(data, 4 * sizeof(long), "lH", argument);
+          }
         } else if (data[6] == 98) {
-          // Binary
+          return data_fmt(data, 4 * sizeof(long), "b", argument);
         } else if (data[6] == 100) {
-          // Decminal
+          return data_fmt(data, 4 * sizeof(long), "ld", argument);
         } else if (data[6] == 111) {
-          // Octal
+          if (negetive_int(argument) == true) {
+            return data_fmt(data, 4 * sizeof(long), "-lo",
+                            make_positive(argument));
+          } else {
+            return data_fmt(data, 4 * sizeof(long), "lo", argument);
+          }
         } else if (data[6] == 120) {
-          // Hex
+          if (negetive_int(argument) == true) {
+            return data_fmt(data, 4 * sizeof(long), "-lh",
+                            make_positive(argument));
+          } else {
+            return data_fmt(data, 4 * sizeof(long), "lh", argument);
+          }
         } else {
-          // Defualt
+          return data_fmt(data, 4 * sizeof(long), "ld", argument);
         }
       } else if (std::is_same<T, unsigned long>::value) {
         if (data[6] == -1) {
@@ -251,7 +346,7 @@ namespace format {
         } else if (data[6] == 88) {
           return data_fmt(data, 4 * sizeof(unsigned long), "lX", argument);
         } else if (data[6] == 98) {
-          // Binary
+          return data_fmt(data, 4 * sizeof(unsigned long), "b", argument);
         } else if (data[6] == 100) {
           return data_fmt(data, 4 * sizeof(unsigned long), "lu", argument);
         } else if (data[6] == 111) {
@@ -264,22 +359,36 @@ namespace format {
       } else if (std::is_same<T, long long>::value) {
         return data_fmt(data, 4 * sizeof(long long), "lld", argument);
         if (data[6] == -1) {
-          // Default
+          return data_fmt(data, 4 * sizeof(long long), "lld", argument);
         } else if (data[6] == 88) {
-          // HEX
+          if (negetive_int(argument) == true) {
+            return data_fmt(data, 4 * sizeof(long long), "-llH",
+                            make_positive(argument));
+          } else {
+            return data_fmt(data, 4 * sizeof(long long), "llH", argument);
+          }
         } else if (data[6] == 98) {
-          // Binary
+          return data_fmt(data, 4 * sizeof(long long), "b", argument);
         } else if (data[6] == 100) {
-          // Decminal
+          return data_fmt(data, 4 * sizeof(long long), "lld", argument);
         } else if (data[6] == 111) {
-          // Octal
+          if (negetive_int(argument) == true) {
+            return data_fmt(data, 4 * sizeof(long long), "-llo",
+                            make_positive(argument));
+          } else {
+            return data_fmt(data, 4 * sizeof(long long), "llo", argument);
+          }
         } else if (data[6] == 120) {
-          // Hex
+          if (negetive_int(argument) == true) {
+            return data_fmt(data, 4 * sizeof(long long), "-llh",
+                            make_positive(argument));
+          } else {
+            return data_fmt(data, 4 * sizeof(long long), "llh", argument);
+          }
         } else {
-          // Defualt
+          return data_fmt(data, 4 * sizeof(long long), "lld", argument);
         }
       } else if (std::is_same<T, unsigned long long>::value) {
-        return data_fmt(data, 4 * sizeof(unsigned long long), "llu", argument);
         if (data[6] == -1) {
           return data_fmt(data, 4 * sizeof(unsigned long long), "llu",
                           argument);
@@ -287,7 +396,7 @@ namespace format {
           return data_fmt(data, 4 * sizeof(unsigned long long), "llX",
                           argument);
         } else if (data[6] == 98) {
-          // Binary
+          return data_fmt(data, 4 * sizeof(unsigned long long), "b", argument);
         } else if (data[6] == 100) {
           return data_fmt(data, 4 * sizeof(unsigned long long), "llu",
                           argument);
