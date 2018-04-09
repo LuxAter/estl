@@ -1254,33 +1254,42 @@ namespace matrix {
     return mat;
   }
   /**
-   * @brief Preforms matrix arithmetic on a matrix and another matrix.
+   * @brief Multiplies two matricies together.
    *
-   * Implements the binary operators for matrix arithmetic. Lexicographically
-   * multiplies every element of `lhs` with the element from `rhs` with the same
-   * position.
+   * Multiples two matricies together, in a simple method of iteration. It is
+   * well
+   * suited for matricies with on order less than \f$2^{10}\f$, matricies larger
+   * than this size should use an implementation of Strassen's algorithm.
    *
-   * @tparam _TpA Value type of `lhs`.
-   * @tparam _TpB Value type of `rhs`.
-   * @tparam _Nr Number of rows in the matrix.
-   * @tparam _Nc Number of columns in the matrix.
-   * @param lhs The first matrix.
-   * @param rhs The second matrix.
+   * @note This is not an efficient algorithm for matrix multiplication, it has
+   * a
+   * complexity of \f$O(n^2)\f$. If an efficient algorithm is needed for larger
+   * matricies, use a different algorithm, or implement your own.
    *
-   * @return The matrix after the arithmetic operation.
+   * @tparam _Tp Value type of the first matrix and the returned matrix.
+   * @tparam _Nr Number of rows in the first matrix, and in the returned matrix.
+   * @tparam _N Number of columns in the first matrix, and the number of rows in
+   * the second matrix.
+   * @tparam _Nc Number of columns in the second matrix and the returned matrix.
+   * @param lhs First matrix to multiply.
+   * @param rhs Second matrix to multiply.
+   *
+   * @return A matrix of `_Tp` that is `_Nr` by `_Nc`.
    */
-  template <typename _TpA, typename _TpB, std::size_t _Nr, std::size_t _Nc>
-  inline estl::matrix::Matrix<_TpA, _Nr, _Nc> operator*(
-      const estl::matrix::Matrix<_TpA, _Nr, _Nc>& lhs,
-      const estl::matrix::Matrix<_TpB, _Nr, _Nc>& rhs) {
-    estl::matrix::Matrix<_TpA, _Nr, _Nc> mat;
-    typename estl::matrix::Matrix<_TpA, _Nr, _Nc>::iterator it;
-    typename estl::matrix::Matrix<_TpA, _Nr, _Nc>::const_iterator lhs_it;
-    typename estl::matrix::Matrix<_TpB, _Nr, _Nc>::const_iterator rhs_it;
-    for (it = mat.begin(), lhs_it = lhs.begin(), rhs_it = rhs.begin();
-         it != mat.end() && lhs_it != lhs.end() && rhs_it != rhs.end();
-         ++it, ++lhs_it, ++rhs_it) {
-      *it = *lhs_it * *rhs_it;
+  template <typename _Tp, std::size_t _Nr, std::size_t _N, std::size_t _Nc>
+  estl::matrix::Matrix<_Tp, _Nr, _Nc> operator*(
+      const estl::matrix::Matrix<_Tp, _Nr, _N>& lhs,
+      const estl::matrix::Matrix<_Tp, _N, _Nc>& rhs) {
+    estl::matrix::Matrix<_Tp, _Nr, _Nc> mat;
+    for (typename estl::matrix::Matrix<_Tp, _Nr, _Nc>::size_type row = 0;
+         row != mat.rows(); row++) {
+      for (typename estl::matrix::Matrix<_Tp, _Nr, _Nc>::size_type column = 0;
+           column != mat.columns(); column++) {
+        for (typename estl::matrix::Matrix<_Tp, _Nr, _Nc>::size_type k = 0;
+             k < lhs.columns() && k < rhs.rows(); k++) {
+          mat.at(row, column) += (lhs.at(row, k) * rhs.at(k, column));
+        }
+      }
     }
     return mat;
   }
@@ -1505,42 +1514,33 @@ namespace matrix {
   }
 
   /**
-   * @brief Multiplies two matricies together.
+   * @brief Preforms matrix arithmetic on a matrix and another matrix.
    *
-   * Multiples two matricies together, in a simple method of iteration. It is
-   * well
-   * suited for matricies with on order less than \f$2^{10}\f$, matricies larger
-   * than this size should use an implementation of Strassen's algorithm.
+   * Implements the binary operators for matrix arithmetic. Lexicographically
+   * multiplies every element of `lhs` with the element from `rhs` with the same
+   * position.
    *
-   * @note This is not an efficient algorithm for matrix multiplication, it has
-   * a
-   * complexity of \f$O(n^2)\f$. If an efficient algorithm is needed for larger
-   * matricies, use a different algorithm, or implement your own.
+   * @tparam _TpA Value type of `lhs`.
+   * @tparam _TpB Value type of `rhs`.
+   * @tparam _Nr Number of rows in the matrix.
+   * @tparam _Nc Number of columns in the matrix.
+   * @param lhs The first matrix.
+   * @param rhs The second matrix.
    *
-   * @tparam _Tp Value type of the first matrix and the returned matrix.
-   * @tparam _Nr Number of rows in the first matrix, and in the returned matrix.
-   * @tparam _N Number of columns in the first matrix, and the number of rows in
-   * the second matrix.
-   * @tparam _Nc Number of columns in the second matrix and the returned matrix.
-   * @param lhs First matrix to multiply.
-   * @param rhs Second matrix to multiply.
-   *
-   * @return A matrix of `_Tp` that is `_Nr` by `_Nc`.
+   * @return The matrix after the arithmetic operation.
    */
-  template <typename _Tp, std::size_t _Nr, std::size_t _N, std::size_t _Nc>
-  estl::matrix::Matrix<_Tp, _Nr, _Nc> multiplication(
-      const estl::matrix::Matrix<_Tp, _Nr, _N>& lhs,
-      const estl::matrix::Matrix<_Tp, _N, _Nc>& rhs) {
+  template <typename _Tp, std::size_t _Nr, std::size_t _Nc>
+  inline estl::matrix::Matrix<_Tp, _Nr, _Nc> multiplication(
+      const estl::matrix::Matrix<_Tp, _Nr, _Nc>& lhs,
+      const estl::matrix::Matrix<_Tp, _Nr, _Nc>& rhs) {
     estl::matrix::Matrix<_Tp, _Nr, _Nc> mat;
-    for (typename estl::matrix::Matrix<_Tp, _Nr, _Nc>::size_type row = 0;
-         row != mat.rows(); row++) {
-      for (typename estl::matrix::Matrix<_Tp, _Nr, _Nc>::size_type column = 0;
-           column != mat.columns(); column++) {
-        for (typename estl::matrix::Matrix<_Tp, _Nr, _Nc>::size_type k = 0;
-             k < lhs.columns() && k < rhs.rows(); k++) {
-          mat.at(row, column) += (lhs.at(row, k) * rhs.at(k, column));
-        }
-      }
+    typename estl::matrix::Matrix<_Tp, _Nr, _Nc>::iterator it;
+    typename estl::matrix::Matrix<_Tp, _Nr, _Nc>::const_iterator lhs_it;
+    typename estl::matrix::Matrix<_Tp, _Nr, _Nc>::const_iterator rhs_it;
+    for (it = mat.begin(), lhs_it = lhs.begin(), rhs_it = rhs.begin();
+         it != mat.end() && lhs_it != lhs.end() && rhs_it != rhs.end();
+         ++it, ++lhs_it, ++rhs_it) {
+      *it = *lhs_it * *rhs_it;
     }
     return mat;
   }

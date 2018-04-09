@@ -12,7 +12,7 @@ TEST(FormatTest, BaseType) {
   EXPECT_EQ(Format("Hello, {}!", false), "Hello, false!");
   EXPECT_EQ(Format("Hello, {}!", 'a'), "Hello, a!");
   EXPECT_EQ(Format("Hello, {}!", 2018), "Hello, 2018!");
-  EXPECT_EQ(Format("Hello, {}!", 3.1415), "Hello, 3.141500!");
+  EXPECT_EQ(Format("Hello, {}!", 3.1415), "Hello, 3.1415!");
 }
 
 TEST(FormatTest, ArgumentIndex) {
@@ -25,7 +25,7 @@ TEST(FormatTest, ArgumentSubscript) {
 }
 
 TEST(FormatTest, IntegerFormat) {
-  EXPECT_EQ(Format("Value: {: 010.5}", 15.0), "Value:  015.00000");
+  EXPECT_EQ(Format("Value: {: 010.5}", 15.0), "Value:  000000015");
 }
 
 TEST(FormatTest, StringFormat) {

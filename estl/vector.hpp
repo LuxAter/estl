@@ -362,6 +362,19 @@ namespace vector {
      */
     const_pointer data() const { return data_; }
 
+    /**
+     * @brief Converts vector into matrix.
+     *
+     * Returns a matrix representation of the vector, with a single column, and
+     * `N` rows. This can be useful for multiplying the vector by a matrix.
+     *
+     * @return `Matrix` of `N` rows and `1` column, containing a copy of the
+     * entries in the vector.
+     */
+    estl::matrix::Matrix<_Tp, _N, 1> as_matrix() const {
+      return estl::matrix::Matrix<_Tp, _N, 1>(begin(), end());
+    }
+
     /**  @} */
 
     /**
@@ -1056,6 +1069,29 @@ namespace vector {
       *it = *it * *rhs_it;
     }
     return vec;
+  }
+
+  /**
+   * @brief Multiples matrix by vector, results in a vector.
+   *
+   * Multiplies a matrix by a vector. The columns in the matrix must equal the
+   * elements in the vector, otherwise there will be compilation errors. The
+   * result is a vector with the number of elements of the rows in the matrix.
+   *
+   * @tparam _Tp Value type of `lhs`
+   * @tparam _N Number of elements in the vector, and columns in the matrix.
+   * @tparam _Nr Number of rows in the matrix.
+   * @param lhs Matrix to multiply vector against.
+   * @param rhs Vector to multiply against matrix.
+   *
+   * @return Vector resulting from the multiplication.
+   */
+  template <typename _Tp, std::size_t _N, std::size_t _Nr>
+  inline estl::vector::Vector<_Tp, _Nr> operator*(
+      const estl::matrix::Matrix<_Tp, _Nr, _N>& lhs,
+      const estl::vector::Vector<_Tp, _N>& rhs) {
+    estl::matrix::Matrix<_Tp, _N, 1> mat = lhs * rhs.as_matrix();
+    return estl::vector::Vector<_Tp, _N>(mat.begin(), mat.end());
   }
   /**
    * @brief Preforms vector arithmetics on a vector and a scalar.

@@ -22,8 +22,6 @@
 
 #include "variadic.hpp"
 
-// TODO(Arden): Add type conversion checks, and type conversion.
-
 namespace estl {
 namespace format {
 
@@ -171,7 +169,6 @@ namespace format {
       if (negetive_int(argument) == true) {
         bits.set((sizeof(T) * 8) - 1);
       }
-      std::cout << "FMT: " << fmt << "\n";
       return to_xstring<TString, TChar>((sizeof(T) * 8) + n, fmt,
                                         bits.to_string().c_str());
     }
@@ -255,8 +252,6 @@ namespace format {
              std::is_same<T, const char*>::value),
         std::string>::type
     aformat(int data[8], T argument) {
-      // TODO(Arden): Enable support for negetive hex, and oct.
-      // TODO(Arden): Enable binary format.
       if (std::is_same<T, bool>::value) {
         return data_fmt(data, 4 * 5 * sizeof(char), "s",
                         argument ? "true" : "false");

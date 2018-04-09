@@ -75,7 +75,7 @@ install: source root-access install-source
 	if [ $(TYPE) == "lib" ] && ! [ -d "$(INSTALL_PATH)/include/$(NAME)" ]; then \
 	  $(call print,Installing include directory,$(INSTALL_COLOR));\
 	  sudo mkdir $(INSTALL_PATH)/include/ -p;\
-	  sudo cp $(INCLUDE_DIR)/ $(INSTALL_PATH)/include/$(NAME)/ -r;\
+	  sudo cp $(INCLUDE_DIR)/ $(INSTALL_PATH)/include/estl/ -r;\
 	fi
 
 .PHONY : uninstall

@@ -1,31 +1,20 @@
 #include <iostream>
 
 // #include "argparse/variable.hpp"
-#include "argparse.hpp"
-#include "format.hpp"
+// #include "argparse.hpp"
+// #include "format.hpp"
 
 #include <climits>
-// #include "matrix.hpp"
+#include "matrix.hpp"
 // #include "stream.hpp"
 // #include "variable.hpp"
 // #include "variadic.hpp"
-// #include "vector.hpp"
-
-class Tester {
- public:
-  int value;
-  std::string Format(char fill, unsigned align, unsigned sign, int width,
-                     int percision) {
-    return "Tester: (" + std::string(1, fill) + "," + std::to_string(align) +
-           "," + std::to_string(sign) + "," + std::to_string(width) + "," +
-           std::to_string(percision) + ")";
-  }
-};
+#include "vector.hpp"
 
 int main(int argc, char const* argv[]) {
-  Tester t;
-  t.value = 17;
-  std::string fmt = estl::format::Format("MAX: {:100b} MIN: {:b} UINT: {} UINT: {}", ULLONG_MAX);
-  std::cout << "RES \"" << fmt << "\"\n";
+  estl::matrix::Matrix<double, 3, 3> mat{1, 2, 3, 4, 5, 6, 7, 8, 9};
+  estl::vector::Vector<double, 3> vec{2, 1, 3};
+  estl::vector::Vector<double, 3> res = mat * vec;
+  std::cout << mat << "*" << vec << "=" << res << '\n';
   return 0;
 }
