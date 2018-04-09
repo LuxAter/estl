@@ -185,6 +185,27 @@ namespace vector {
       data_ = al.allocate(size());
       std::copy(vec.begin(), vec.end(), data_);
     }
+    /**
+     * @brief Copy constructor
+     *
+     * Allocates the memory required for the vector, and copies the maximum
+     * number of elements from `vec` to the elements of the vector. If `vec` is
+     * smaller then the vector, then all the elements from `vec` are copied,
+     * then the remaining values are filled with `val`. If `vec` is larger then
+     * the vector, then only the first `_N` values from `vec` are copied into
+     * the vector.
+     *
+     * @tparam _Nc Number of elements in copy vector.
+     * @param vec Vector to copy.
+     * @param val Value to pad remaining elements with.
+     */
+    template <std::size_t _Nc>
+    Vector(const Vector<_Tp, _Nc> vec, _Tp val) {
+      _Al al;
+      data_ = al.allocate(size());
+      fill(val);
+      std::copy(vec.begin(), vec.begin() + std::min(vec.size(), size()), data_);
+    }
 
     /**  @} */
 
