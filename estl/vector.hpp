@@ -396,6 +396,10 @@ namespace vector {
       return estl::matrix::Matrix<_Tp, _N, 1>(begin(), end());
     }
 
+    std::vector<_Tp> as_vector() const {
+      return std::vector<_Tp>(begin(), end());
+    }
+
     /**  @} */
 
     /**
@@ -1059,6 +1063,30 @@ namespace vector {
     for (typename estl::vector::Vector<_Tp, _N>::iterator it = vec.begin();
          it != vec.end(); ++it) {
       *it = *it * rhs;
+    }
+    return vec;
+  }
+  /**
+   * @brief Preforms vector arithmetics on a scalar and a vector.
+   *
+   * Implements the binary operators for vector arithmetic. Multiples the scalar
+   * with every element of the vector.
+   *
+   * @tparam _Tp Value type of the vector.
+   * @tparam _N Number of elements in the vector.
+   * @tparam _T Value type of the scalar.
+   * @param lhs The vector.
+   * @param rhs The scalar.
+   *
+   * @return The vector after the arithmetic operation.
+   */
+  template <typename _Tp, std::size_t _N, typename _T>
+  inline estl::vector::Vector<_Tp, _N> operator*(
+      const _T& lhs, const estl::vector::Vector<_Tp, _N>& rhs) {
+    estl::vector::Vector<_Tp, _N> vec(rhs);
+    for (typename estl::vector::Vector<_Tp, _N>::iterator it = vec.begin();
+         it != vec.end(); ++it) {
+      *it = *it * lhs;
     }
     return vec;
   }

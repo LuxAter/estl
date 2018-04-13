@@ -12,9 +12,7 @@
 #include "vector.hpp"
 
 int main(int argc, char const* argv[]) {
-  estl::matrix::Matrix<double, 3, 3> mat{1, 2, 3, 4, 5, 6, 7, 8, 9};
   estl::vector::Vector<double, 3> vec{2, 1, 3};
-  estl::vector::Vector<double, 3> res = mat * vec;
-  std::cout << mat << "*" << vec << "=" << res << '\n';
+  std::cout << 2 * vec << "\n";
   return 0;
 }
