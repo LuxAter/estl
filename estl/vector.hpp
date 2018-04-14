@@ -185,6 +185,27 @@ namespace vector {
       data_ = al.allocate(size());
       std::copy(vec.begin(), vec.end(), data_);
     }
+    /**
+     * @brief Copy constructor
+     *
+     * Allocates the memory required for the vector, and copies the maximum
+     * number of elements from `vec` to the elements of the vector. If `vec` is
+     * smaller then the vector, then all the elements from `vec` are copied,
+     * then the remaining values are filled with `val`. If `vec` is larger then
+     * the vector, then only the first `_N` values from `vec` are copied into
+     * the vector.
+     *
+     * @tparam _Nc Number of elements in copy vector.
+     * @param vec Vector to copy.
+     * @param val Value to pad remaining elements with.
+     */
+    template <std::size_t _Nc>
+    Vector(const Vector<_Tp, _Nc> vec, _Tp val) {
+      _Al al;
+      data_ = al.allocate(size());
+      fill(val);
+      std::copy(vec.begin(), vec.begin() + std::min(vec.size(), size()), data_);
+    }
 
     /**  @} */
 
@@ -361,6 +382,23 @@ namespace vector {
      * element.
      */
     const_pointer data() const { return data_; }
+
+    /**
+     * @brief Converts vector into matrix.
+     *
+     * Returns a matrix representation of the vector, with a single column, and
+     * `N` rows. This can be useful for multiplying the vector by a matrix.
+     *
+     * @return `Matrix` of `N` rows and `1` column, containing a copy of the
+     * entries in the vector.
+     */
+    estl::matrix::Matrix<_Tp, _N, 1> as_matrix() const {
+      return estl::matrix::Matrix<_Tp, _N, 1>(begin(), end());
+    }
+
+    std::vector<_Tp> as_vector() const {
+      return std::vector<_Tp>(begin(), end());
+    }
 
     /**  @} */
 
@@ -1029,6 +1067,30 @@ namespace vector {
     return vec;
   }
   /**
+   * @brief Preforms vector arithmetics on a scalar and a vector.
+   *
+   * Implements the binary operators for vector arithmetic. Multiples the scalar
+   * with every element of the vector.
+   *
+   * @tparam _Tp Value type of the vector.
+   * @tparam _N Number of elements in the vector.
+   * @tparam _T Value type of the scalar.
+   * @param lhs The vector.
+   * @param rhs The scalar.
+   *
+   * @return The vector after the arithmetic operation.
+   */
+  template <typename _Tp, std::size_t _N, typename _T>
+  inline estl::vector::Vector<_Tp, _N> operator*(
+      const _T& lhs, const estl::vector::Vector<_Tp, _N>& rhs) {
+    estl::vector::Vector<_Tp, _N> vec(rhs);
+    for (typename estl::vector::Vector<_Tp, _N>::iterator it = vec.begin();
+         it != vec.end(); ++it) {
+      *it = *it * lhs;
+    }
+    return vec;
+  }
+  /**
    * @brief Preforms vector arithmetics on a vector and another vector.
    *
    * Implements the binary operators for vector arithmetic. Lexicographically
@@ -1056,6 +1118,29 @@ namespace vector {
       *it = *it * *rhs_it;
     }
     return vec;
+  }
+
+  /**
+   * @brief Multiples matrix by vector, results in a vector.
+   *
+   * Multiplies a matrix by a vector. The columns in the matrix must equal the
+   * elements in the vector, otherwise there will be compilation errors. The
+   * result is a vector with the number of elements of the rows in the matrix.
+   *
+   * @tparam _Tp Value type of `lhs`
+   * @tparam _N Number of elements in the vector, and columns in the matrix.
+   * @tparam _Nr Number of rows in the matrix.
+   * @param lhs Matrix to multiply vector against.
+   * @param rhs Vector to multiply against matrix.
+   *
+   * @return Vector resulting from the multiplication.
+   */
+  template <typename _Tp, std::size_t _N, std::size_t _Nr>
+  inline estl::vector::Vector<_Tp, _Nr> operator*(
+      const estl::matrix::Matrix<_Tp, _Nr, _N>& lhs,
+      const estl::vector::Vector<_Tp, _N>& rhs) {
+    estl::matrix::Matrix<_Tp, _N, 1> mat = lhs * rhs.as_matrix();
+    return estl::vector::Vector<_Tp, _N>(mat.begin(), mat.end());
   }
   /**
    * @brief Preforms vector arithmetics on a vector and a scalar.
