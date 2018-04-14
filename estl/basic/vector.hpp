@@ -1,6 +1,7 @@
 #ifndef ESTL_BASIC_VECTOR_HPP_
 #define ESTL_BASIC_VECTOR_HPP_
 
+#include <array>
 #include <iostream>
 
 namespace estl {
@@ -9,9 +10,10 @@ namespace base {
   template <typename T>
   class Vec2 {
    public:
-    Vec2() {}
+    Vec2() : x(T()), y(T()) {}
     Vec2(const T& a) : x(a), y(a) {}
     Vec2(const T& a, const T& b, const T& c) : x(a), y(b) {}
+    Vec2(const std::array<T, 2>& vec) : x(vec[0]), y(vec[1]) {}
     Vec2(const Vec2<T>& vec) : x(vec.x), y(vec.y) {}
     ~Vec2() {}
 
@@ -24,6 +26,17 @@ namespace base {
       x = val;
       y = val;
       return *this;
+    }
+
+    inline T operator[](unsigned val) {
+      if (val == 0) {
+        return x;
+      } else if (val == 1) {
+        return y;
+      } else {
+        throw std::out_of_range("subscript (which is " + std::to_string(val) +
+                                ") is >= 2");
+      }
     }
 
     template <typename U>
@@ -52,9 +65,10 @@ namespace base {
   template <typename T>
   class Vec3 {
    public:
-    Vec3() {}
+    Vec3() : x(T()), y(T()), z(T()) {}
     Vec3(const T& a) : x(a), y(a), z(a) {}
     Vec3(const T& a, const T& b, const T& c) : x(a), y(b), z(c) {}
+    Vec3(const std::array<T, 3>& vec) : x(vec[0]), y(vec[1]), z(vec[2]) {}
     Vec3(const Vec3<T>& vec) : x(vec.x), y(vec.y), z(vec.z) {}
     ~Vec3() {}
 
@@ -69,6 +83,18 @@ namespace base {
       y = val;
       z = val;
       return *this;
+    }
+    inline T operator[](unsigned val) {
+      if (val == 0) {
+        return x;
+      } else if (val == 1) {
+        return y;
+      } else if (val == 2) {
+        return z;
+      } else {
+        throw std::out_of_range("subscript (which is " + std::to_string(val) +
+                                ") is >= 3");
+      }
     }
 
     template <typename U>
@@ -97,10 +123,12 @@ namespace base {
   template <typename T>
   class Vec4 {
    public:
-    Vec4() {}
+    Vec4() : x(T()), y(T()), z(T()), w(T()) {}
     Vec4(const T& a) : x(a), y(a), z(a), w(a) {}
     Vec4(const T& a, const T& b, const T& c, const T& d)
         : x(a), y(b), z(c), w(d) {}
+    Vec4(const std::array<T, 4>& vec)
+        : x(vec[0]), y(vec[1]), z(vec[2]), w(vec[3]) {}
     Vec4(const Vec4<T>& vec) : x(vec.x), y(vec.y), z(vec.z), w(vec.w) {}
     ~Vec4() {}
 
@@ -117,6 +145,21 @@ namespace base {
       z = val;
       w = val;
       return *this;
+    }
+
+    inline T operator[](unsigned val) {
+      if (val == 0) {
+        return x;
+      } else if (val == 1) {
+        return y;
+      } else if (val == 2) {
+        return z;
+      } else if (val == 3) {
+        return w;
+      } else {
+        throw std::out_of_range("subscript (which is " + std::to_string(val) +
+                                ") is >= 4");
+      }
     }
 
     template <typename U>
