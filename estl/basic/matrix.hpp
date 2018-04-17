@@ -13,22 +13,39 @@ namespace base {
    public:
     Mat() { data_.fill(T()); }
     Mat(const T& val) { data_.fill(val); }
-    Mat(std::initializer_list<T> vals) : data_(vals) {}
-    Mat(const Mat<T, N>& mat) : data_(mat.data_) {}
+    Mat(std::initializer_list<T> vals) {
+      std::copy(vals.begin(), vals.end(), data_.data());
+    }
+    Mat(const Mat<T, N>& mat) {
+      std::copy(mat.data_.begin(), mat.data_.end(), data_.data());
+    }
     ~Mat() {}
 
-    inline Mat<T, N> operator=(const Mat<T, N>& mat) { data_ = mat.data_; }
-    inline Mat<T, N> operator=(const T& val) { data_.fill(val); }
+    inline void Fill(const T& val) { data_.fill(val); }
+    inline void Diagonal(const T& val) {
+      for (std::size_t i = 0; i < N * N; i += N + 1) {
+        data_[i] = val;
+      }
+    }
 
-    inline std::array<T, N> operator[](unsigned val) {
+    inline Mat<T, N> operator=(const Mat<T, N>& mat) {
+      std::copy(mat.data_.begin(), mat.data_.end(), data_.data());
+      return *this;
+    }
+    inline Mat<T, N> operator=(const T& val) {
+      data_.fill(val);
+      return *this;
+    }
+
+    inline std::array<T, N>& operator[](unsigned val) {
       std::array<T, N> arr;
-      for (std::size_t i = 0; i < N; ++i) {
-        arr[i] = data_[val + (i * N)];
+      for (std::size_t i = val; i < N; ++i) {
+        arr[i] = data_[i];
       }
       return arr;
     }
-    inline T operator()(unsigned col, unsigned row) {
-      return data_[col + (row * 3)];
+    inline T& operator()(unsigned row, unsigned col) {
+      return data_[col + (row * N)];
     }
 
     template <typename U>
@@ -52,7 +69,7 @@ namespace base {
       return *this;
     }
 
-    std::array<T, N*N> data_;
+    std::array<T, N * N> data_;
   };
   template <typename T, std::size_t N>
   inline std::ostream& operator<<(std::ostream& out, const Mat<T, N>& mat) {
@@ -223,11 +240,11 @@ namespace base {
     Mat<T, N> mat;
     for (std::size_t i = 0; i < N; ++i) {
       for (std::size_t j = 0; j < N; ++j) {
-        T sum;
+        T sum = T();
         for (std::size_t k = 0; k < N; ++k) {
           sum += lhs.data_[(i * N) + k] * rhs.data_[(k * N) + j];
         }
-        mat[(i * N) + j] = sum;
+        mat.data_[(i * N) + j] = sum;
       }
     }
     return mat;

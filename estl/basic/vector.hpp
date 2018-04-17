@@ -3,6 +3,7 @@
 
 #include <array>
 #include <iostream>
+#include <cmath>
 
 namespace estl {
 namespace base {
@@ -13,8 +14,8 @@ namespace base {
     Vec2() : x(T()), y(T()) {}
     Vec2(const T& a) : x(a), y(a) {}
     Vec2(const T& a, const T& b, const T& c) : x(a), y(b) {}
-    Vec2(const std::array<T, 2>& vec) : x(vec[0]), y(vec[1]) {}
-    Vec2(const Vec2<T>& vec) : x(vec.x), y(vec.y) {}
+    explicit Vec2(const std::array<T, 2>& vec) : x(vec[0]), y(vec[1]) {}
+    explicit Vec2(const Vec2<T>& vec) : x(vec.x), y(vec.y) {}
     ~Vec2() {}
 
     inline Vec2<T>& operator=(const Vec2<T>& vec) {
@@ -471,7 +472,7 @@ namespace base {
   }
   template <typename T>
   inline T Length(const Vec4<T>& lhs) {
-    return sqrt(Dot(lhs, lhs));
+    return std::sqrt(Dot(lhs, lhs));
   }
 
   typedef Vec2<bool> Vec2b;
