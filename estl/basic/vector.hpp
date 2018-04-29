@@ -2,8 +2,8 @@
 #define ESTL_BASIC_VECTOR_HPP_
 
 #include <array>
-#include <iostream>
 #include <cmath>
+#include <iostream>
 
 namespace estl {
 namespace base {
@@ -433,6 +433,10 @@ namespace base {
     return sqrt(Dot(lhs, lhs));
   }
   template <typename T>
+  inline T Sum(const Vec2<T>& lhs) {
+    return lhs.x + lhs.y;
+  }
+  template <typename T>
   inline Vec3<T> Cross(const Vec3<T>& lhs, const Vec3<T>& rhs) {
     return Vec3<T>(lhs.y * rhs.z - lhs.z * rhs.y, lhs.z * rhs.x - lhs.x * rhs.z,
                    lhs.x * rhs.y - lhs.y * rhs.x);
@@ -448,6 +452,10 @@ namespace base {
   template <typename T>
   inline T Length(const Vec3<T>& lhs) {
     return sqrt(Dot(lhs, lhs));
+  }
+  template <typename T>
+  inline T Sum(const Vec3<T>& lhs) {
+    return lhs.x + lhs.y + lhs.z;
   }
   template <typename T>
   inline Vec4<T> Cross(const Vec4<T>& v0, const Vec4<T>& v1,
@@ -473,6 +481,10 @@ namespace base {
   template <typename T>
   inline T Length(const Vec4<T>& lhs) {
     return std::sqrt(Dot(lhs, lhs));
+  }
+  template <typename T>
+  inline T Sum(const Vec4<T>& lhs) {
+    return lhs.x + lhs.y + lhs.z + lhs.w;
   }
 
   typedef Vec2<bool> Vec2b;
