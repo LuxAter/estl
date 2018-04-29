@@ -437,6 +437,10 @@ namespace base {
     return lhs.x + lhs.y;
   }
   template <typename T>
+  inline Vec2<T> Pow(const Vec2<T>& lhs, const double rhs) {
+    return Vec2<T>(std::pow(lhs.x, rhs), std::pow(lhs.y, rhs));
+  }
+  template <typename T>
   inline Vec3<T> Cross(const Vec3<T>& lhs, const Vec3<T>& rhs) {
     return Vec3<T>(lhs.y * rhs.z - lhs.z * rhs.y, lhs.z * rhs.x - lhs.x * rhs.z,
                    lhs.x * rhs.y - lhs.y * rhs.x);
@@ -456,6 +460,11 @@ namespace base {
   template <typename T>
   inline T Sum(const Vec3<T>& lhs) {
     return lhs.x + lhs.y + lhs.z;
+  }
+  template <typename T>
+  inline Vec3<T> Pow(const Vec3<T>& lhs, const double rhs) {
+    return Vec3<T>(std::pow(lhs.x, rhs), std::pow(lhs.y, rhs),
+                   std::pow(lhs.z, rhs));
   }
   template <typename T>
   inline Vec4<T> Cross(const Vec4<T>& v0, const Vec4<T>& v1,
@@ -485,6 +494,11 @@ namespace base {
   template <typename T>
   inline T Sum(const Vec4<T>& lhs) {
     return lhs.x + lhs.y + lhs.z + lhs.w;
+  }
+  template <typename T>
+  inline Vec4<T> Pow(const Vec4<T>& lhs, const double rhs) {
+    return Vec4<T>(std::pow(lhs.x, rhs), std::pow(lhs.y, rhs),
+                   std::pow(lhs.z, rhs), std::pow(lhs.w, rhs));
   }
 
   typedef Vec2<bool> Vec2b;
