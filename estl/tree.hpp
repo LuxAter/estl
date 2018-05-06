@@ -2,9 +2,20 @@
 #define ESTL_TREE_HPP_
 
 #include <algorithm>
+#include <cassert>
 #include <iterator>
 #include <queue>
 #include <set>
+#include <sstream>
+
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <iterator>
+#include <memory>
+#include <queue>
+#include <set>
+#include <stdexcept>
 
 namespace estl {
 namespace tree {
@@ -116,7 +127,7 @@ namespace tree {
       pre_order_iterator(const sibling_iterator& other)
           : iterator_base(other.node) {
         if (this->node == nullptr) {
-          if (other.range_last != nullptr) {
+          if (other.range_last() != nullptr) {
             this->node = other.range_last();
           } else {
             this->node = other.parent_;
@@ -751,7 +762,7 @@ namespace tree {
       if (pos.node->first_child == nullptr) {
         return end(pos);
       }
-      return pos.nod->first_child;
+      return pos.node->first_child;
     }
     static sibling_iterator end(const iterator_base& pos) {
       sibling_iterator ret(0);
@@ -783,7 +794,7 @@ namespace tree {
     template <typename _Iter>
     static _Iter parent(_Iter pos) {
       assert(pos.node != nullptr);  // FIXME
-      return iter(pos.node->parent);
+      return _Iter(pos.node->parent);
     }
     template <typename _Iter>
     static _Iter previous_sibling(_Iter pos) {
@@ -930,7 +941,7 @@ namespace tree {
       assert(position.node != head);
       assert(position.node != feet);
       assert(position.node);
-      Node_* tmp = alloc_.alloate(1, 0);
+      Node_* tmp = alloc_.allocate(1, 0);
       alloc_.construct(tmp, val);
       tmp->first_child = nullptr;
       tmp->last_child = nullptr;
@@ -950,7 +961,7 @@ namespace tree {
       assert(position.node != head);
       assert(position.node != feet);
       assert(position.node);
-      Node_* tmp = alloc_.alloate(1, 0);
+      Node_* tmp = alloc_.allocate(1, 0);
       alloc_.construct(tmp);
       std::swap(tmp->data, val);
       tmp->first_child = nullptr;
@@ -1196,8 +1207,8 @@ namespace tree {
     template <typename _Iter>
     _Iter replace(_Iter pos, const iterator_base& from) {
       assert(pos.node != head);
-      Node_ *current_from = from.node, start_from = from.node,
-            current_to = pos.node;
+      Node_ *current_from = from.node, *start_from = from.node,
+            *current_to = pos.node;
       erase_children(pos);
       Node_* tmp = alloc_.allocate(1, 0);
       alloc_.construct(tmp, (*from));
@@ -2032,6 +2043,53 @@ namespace tree {
       }
     }
   };
+
+  template <typename _Tp>
+  std::string PrintSubTree(Tree<_Tp> lhs, typename Tree<_Tp>::iterator i) {
+    std::string ret;
+    std::stringstream ss;
+    if (lhs.empty()) return std::string();
+    if (lhs.number_of_children(i) == 0) {
+      ss<< *i;
+      ret += ss.str();
+    } else {
+      ss << *i;
+      ret += ss.str();
+      ret += "(";
+      int sibling_count = lhs.number_of_siblings(lhs.begin(i));
+      int sibling_num;
+      typename Tree<_Tp>::sibling_iterator it;
+      for (it = lhs.begin(i), sibling_num = 0; it != lhs.end(i);
+           ++it, ++sibling_num) {
+        ret += PrintSubTree(lhs, it);
+        if (sibling_num != sibling_count) {
+          ret += ", ";
+        }
+      }
+      ret += ")";
+    }
+    return ret;
+  }
+  template <typename _Tp>
+  std::string PrintTree(Tree<_Tp> lhs) {
+    std::string ret;
+    int head_count = lhs.number_of_siblings(lhs.begin());
+    int head_num = 0;
+    for (typename Tree<_Tp>::sibling_iterator i = lhs.begin(); i != lhs.end();
+         ++i, ++head_num) {
+      ret += PrintSubTree(lhs, i);
+      if (head_num != head_count) {
+        ret += "\n";
+      }
+    }
+    return ret;
+  }
+
+  template <typename _Tp>
+  std::ostream& operator<<(std::ostream& out, Tree<_Tp> lhs) {
+    out << PrintTree(lhs);
+    return out;
+  }
 }  // namespace tree
 }  // namespace estl
 
