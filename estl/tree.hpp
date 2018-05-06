@@ -1,8 +1,10 @@
 #ifndef ESTL_TREE_HPP_
 #define ESTL_TREE_HPP_
 
+#include <algorithm>
 #include <iterator>
 #include <queue>
+#include <set>
 
 namespace estl {
 namespace tree {
@@ -65,131 +67,555 @@ namespace tree {
       typedef typename _AlTp::const_pointer const_iterator;
       typedef std::bidirectional_iterator_tag iterator_category;
 
-      iterator_base() {}
-      iterator_base(Node_*) {}
-      reference operator*() const;
-      pointer operator->() const;
+      iterator_base() : node(0), skip_children_(false) {}
+      iterator_base(Node_* tn) : node(tn), skip_children_(false) {}
+      reference operator*() const { return node->data; }
+      pointer operator->() const { return &(node->data); }
 
-      void skip_children() {}
-      void skip_children(bool skip) {}
-      std::size_t number_of_children() const;
+      void skip_children() { skip_children_ = true; }
+      void skip_children(bool skip) { skip_children_ = skip; }
+      std::size_t number_of_children() const {
+        Node_* pos = node->first_child;
+        if (pos == nullptr) {
+          return 0;
+        }
+        std::size_t ret = 1;
+        while (pos != node->last_child) {
+          ++ret;
+          pos = pos->next_sibling;
+        }
+        return ret;
+      }
 
-      sibling_iterator begin() const;
-      sibling_iterator end() const;
+      sibling_iterator begin() const {
+        if (node->first_child == nullptr) {
+          return end();
+        } else {
+          sibling_iterator ret(node->first_child);
+          ret.parent_ = this->node;
+          return ret;
+        }
+      }
+      sibling_iterator end() const {
+        sibling_iterator ret(nullptr);
+        ret.parent_ = node;
+        return ret;
+      }
 
       Node_* node;
 
      protected:
-      bool skip_current_children_;
+      bool skip_children_;
     };
     class pre_order_iterator : public iterator_base {
      public:
-      pre_order_iterator() {}
-      pre_order_iterator(Node_*) {}
-      pre_order_iterator(const iterator_base&) {}
-      pre_order_iterator(const sibling_iterator&) {}
+      pre_order_iterator() : iterator_base(nullptr) {}
+      pre_order_iterator(Node_* tn) : iterator_base(tn) {}
+      pre_order_iterator(const iterator_base& other)
+          : iterator_base(other.node) {}
+      pre_order_iterator(const sibling_iterator& other)
+          : iterator_base(other.node) {
+        if (this->node == nullptr) {
+          if (other.range_last != nullptr) {
+            this->node = other.range_last();
+          } else {
+            this->node = other.parent_;
+          }
+          this->skip_children();
+          ++(*this);
+        }
+      }
 
-      bool operator==(const pre_order_iterator&) const;
-      bool operator!=(const pre_order_iterator&) const;
-      pre_order_iterator& operator++();
-      pre_order_iterator& operator--();
-      pre_order_iterator operator++(int);
-      pre_order_iterator operator--(int);
-      pre_order_iterator& operator+=(unsigned);
-      pre_order_iterator& operator-=(unsigned);
+      bool operator==(const pre_order_iterator& other) const {
+        if (other.node == this->node) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      bool operator!=(const pre_order_iterator& other) const {
+        if (other.node != this->node) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      pre_order_iterator& operator++() {
+        assert(this->node != nullptr);
+        if (!this->skip_children_ && this->node->first_child != nullptr) {
+          this->node = this->node->first_child;
+        } else {
+          this->skip_children_ = false;
+          while (this->node->next_sibling == nullptr) {
+            this->node = this->node->parent;
+            if (this->node == nullptr) return *this;
+          }
+          this->node = this->node->next_sibling;
+        }
+        return *this;
+      }
+      pre_order_iterator& operator--() {
+        assert(this->node != nullptr);
+        if (this->node->prev_sibling) {
+          this->node = this->node->prev_sibling;
+          while (this->node->last_child) this->node = this->node->last_child;
+        } else {
+          this->node = this->node->parent;
+          if (this->node == nullptr) return *this;
+        }
+        return *this;
+      }
+      pre_order_iterator operator++(int) {
+        pre_order_iterator copy = *this;
+        ++(*this);
+        return copy;
+      }
+      pre_order_iterator operator--(int) {
+        pre_order_iterator copy = *this;
+        --(*this);
+        return copy;
+      }
+      pre_order_iterator& operator+=(unsigned num) {
+        while (num > 0) {
+          ++(*this);
+          --num;
+        }
+        return (*this);
+      }
+      pre_order_iterator& operator-=(unsigned num) {
+        while (num > 0) {
+          --(*this);
+          --num;
+        }
+        return (*this);
+      }
 
-      pre_order_iterator& next_skip_children();
+      pre_order_iterator& next_skip_children() {
+        (*this).skip_children();
+        (*this)++;
+        return *this;
+      }
     };
     class post_order_iterator : public iterator_base {
      public:
-      post_order_iterator() {}
-      post_order_iterator(Node_*) {}
-      post_order_iterator(const iterator_base&) {}
-      post_order_iterator(const sibling_iterator&) {}
+      post_order_iterator() : iterator_base(nullptr) {}
+      post_order_iterator(Node_* tn) : iterator_base(tn) {}
+      post_order_iterator(const iterator_base& other)
+          : iterator_base(other.node) {}
+      post_order_iterator(const sibling_iterator& other)
+          : iterator_base(other.node) {
+        if (this->node == nullptr) {
+          if (other.range_last() != nullptr) {
+            this->node = other.range_last();
+          } else {
+            this->node = other.parent_;
+          }
+          this->skip_children();
+          ++(*this);
+        }
+      }
 
-      bool operator==(const post_order_iterator&) const;
-      bool operator!=(const post_order_iterator&) const;
-      post_order_iterator& operator++();
-      post_order_iterator& operator--();
-      post_order_iterator operator++(int);
-      post_order_iterator operator--(int);
-      post_order_iterator& operator+=(unsigned);
-      post_order_iterator& operator-=(unsigned);
+      bool operator==(const post_order_iterator& other) const {
+        if (other.node == this->node) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      bool operator!=(const post_order_iterator& other) const {
+        if (other.node != this->node) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      post_order_iterator& operator++() {
+        assert(this->node != nullptr);
+        if (this->node->next_sibling == nullptr) {
+          this->node = this->node->parent;
+          this->skip_children_ = false;
+        } else {
+          this->node = this->node->next_sibling;
+          if (this->skip_children_) {
+            this->skip_children_ = false;
+          } else {
+            while (this->node->first_child)
+              this->node = this->node->first_child;
+          }
+        }
+        return *this;
+      }
+      post_order_iterator& operator--() {
+        assert(this->node != nullptr);
+        if (this->skip_children_ || this->node->last_child == nullptr) {
+          this->skip_children_ = false;
+          while (this->node->prev_sibling == nullptr)
+            this->wnode = this->node->parent;
+          this->node = this->node->prev_sibling;
+        } else {
+          this->node = this->node->last_child;
+        }
+        return *this;
+      }
+      post_order_iterator operator++(int) {
+        post_order_iterator copy = *this;
+        ++(*this);
+        return copy;
+      }
+      post_order_iterator operator--(int) {
+        post_order_iterator copy = *this;
+        --(*this);
+        return copy;
+      }
+      post_order_iterator& operator+=(unsigned num) {
+        while (num > 0) {
+          ++(*this);
+          --num;
+        }
+        return (*this);
+      }
+      post_order_iterator& operator-=(unsigned num) {
+        while (num > 0) {
+          --(*this);
+          --num;
+        }
+        return (*this);
+      }
 
-      void descend_all();
+      void descend_all() {
+        assert(this->node != nullptr);
+        while (this->node->first_child) this->node = this->node->first_child;
+      }
     };
     class breadth_first_queued_iterator : public iterator_base {
      public:
-      breadth_first_queued_iterator() {}
-      breadth_first_queued_iterator(Node_*) {}
-      breadth_first_queued_iterator(const iterator_base&) {}
+      breadth_first_queued_iterator() : iterator_base() {}
+      breadth_first_queued_iterator(Node_* tn) : iterator_base(tn) {
+        traversal_queue_.push(tn);
+      }
+      breadth_first_queued_iterator(const iterator_base& other)
+          : iterator_base(other.node) {
+        traversal_queue_.push(other.node);
+      }
 
-      bool operator==(const breadth_first_queued_iterator&) const;
-      bool operator!=(const breadth_first_queued_iterator&) const;
-      breadth_first_queued_iterator& operator++();
-      breadth_first_queued_iterator operator++(int);
-      breadth_first_queued_iterator& operator+=(unsigned);
+      bool operator==(const breadth_first_queued_iterator& other) const {
+        if (other.node == this->node) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      bool operator!=(const breadth_first_queued_iterator& other) const {
+        if (other.node != this->node) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      breadth_first_queued_iterator& operator++() {
+        assert(this->node != nullptr);
+        sibling_iterator sib = this->begin();
+        while (sib != this->end()) {
+          traversal_queue_.push(sib.node);
+          ++sib;
+        }
+        traversal_queue_.pop();
+        if (traversal_queue_.size() > 0) {
+          this->node = traversal_queue_.front();
+        } else {
+          this->node = nullptr;
+        }
+        return (*this);
+      }
+      breadth_first_queued_iterator operator++(int) {
+        breadth_first_queued_iterator copy = *this;
+        ++(*this);
+        return copy;
+      }
+      breadth_first_queued_iterator& operator+=(unsigned num) {
+        while (num > 0) {
+          ++(*this);
+          --num;
+        }
+        return (*this);
+      }
 
      private:
       std::queue<Node_*> traversal_queue_;
     };
     class fixed_depth_iterator : public iterator_base {
      public:
-      fixed_depth_iterator() {}
-      fixed_depth_iterator(Node_*) {}
-      fixed_depth_iterator(const iterator_base&) {}
-      fixed_depth_iterator(const sibling_iterator&) {}
-      fixed_depth_iterator(const fixed_depth_iterator&) {}
+      fixed_depth_iterator() : iterator_base() {}
+      fixed_depth_iterator(Node_* tn) : iterator_base(tn), top_node(nullptr) {}
+      fixed_depth_iterator(const iterator_base& other)
+          : iterator_base(other.node), top_node(nullptr) {}
+      fixed_depth_iterator(const sibling_iterator& other)
+          : iterator_base(other.node), top_node(nullptr) {}
+      fixed_depth_iterator(const fixed_depth_iterator& other)
+          : iterator_base(other.node), top_node(other.top_node) {}
 
-      bool operator==(const fixed_depth_iterator&) const;
-      bool operator!=(const fixed_depth_iterator&) const;
-      fixed_depth_iterator& operator++();
-      fixed_depth_iterator& operator--();
-      fixed_depth_iterator operator++(int);
-      fixed_depth_iterator operator--(int);
-      fixed_depth_iterator& operator+=(unsigned);
-      fixed_depth_iterator& operator-=(unsigned);
+      bool operator==(const fixed_depth_iterator& other) const {
+        if (other.node == this->node && other.top_node == top_node) {
+          return false;
+        } else {
+          return true;
+        }
+      }
+      bool operator!=(const fixed_depth_iterator& other) const {
+        if (other.node != this->node || other.top_node != top_node) {
+          return false;
+        } else {
+          return true;
+        }
+      }
+      fixed_depth_iterator& operator++() {
+        assert(this->node != nullptr);
+        if (this->node->next_sibling) {
+          this->node = this->node->next_sibling;
+        } else {
+          int rel_depth = 0;
+        upper:
+          do {
+            if (this->node == this->top_node) {
+              this->node = nullptr;
+              return *this;
+            }
+            this->node = this->node->parent;
+            if (this->node == nullptr) return *this;
+            --rel_depth;
+          } while (this->node->next_sibling == nullptr);
+        lower:
+          this->node = this->node->next_sibling;
+          while (this->node->first_child == nullptr) {
+            if (this->node->next_sibling == nullptr) goto upper;
+            this->node = this->node->next_sibling;
+            if (this->node == nullptr) return *this;
+          }
+          while (rel_depth < 0 && this->node->first_child != nullptr) {
+            this->node = this->node->first_child;
+            ++rel_depth;
+          }
+          if (rel_depth < 0) {
+            if (this->node->next_sibling == nullptr) {
+              goto upper;
+            } else {
+              goto lower;
+            }
+          }
+        }
+        return *this;
+      }
+      fixed_depth_iterator& operator--() {
+        assert(this->node != 0);
+
+        if (this->node->prev_sibling) {
+          this->node = this->node->prev_sibling;
+        } else {
+          int relative_depth = 0;
+        upper:
+          do {
+            if (this->node == this->top_node) {
+              this->node = 0;
+              return *this;
+            }
+            this->node = this->node->parent;
+            if (this->node == 0) return *this;
+            --relative_depth;
+          } while (this->node->prev_sibling == 0);
+        lower:
+          this->node = this->node->prev_sibling;
+          while (this->node->last_child == 0) {
+            if (this->node->prev_sibling == 0) goto upper;
+            this->node = this->node->prev_sibling;
+            if (this->node == 0) return *this;
+          }
+          while (relative_depth < 0 && this->node->last_child != 0) {
+            this->node = this->node->last_child;
+            ++relative_depth;
+          }
+          if (relative_depth < 0) {
+            if (this->node->prev_sibling == 0)
+              goto upper;
+            else
+              goto lower;
+          }
+        }
+        return *this;
+      }
+      fixed_depth_iterator operator++(int) {
+        fixed_depth_iterator copy = *this;
+        ++(*this);
+        return copy;
+      }
+      fixed_depth_iterator operator--(int) {
+        fixed_depth_iterator copy = *this;
+        --(*this);
+        return copy;
+      }
+      fixed_depth_iterator& operator+=(unsigned num) {
+        while (num > 0) {
+          ++(*this);
+          --num;
+        }
+        return *this;
+      }
+      fixed_depth_iterator& operator-=(unsigned num) {
+        while (num > 0) {
+          --(*this);
+          --num;
+        }
+        return *this;
+      }
 
       Node_* top_node;
     };
     class sibling_iterator : public iterator_base {
      public:
-      sibling_iterator() {}
-      sibling_iterator(Node_*) {}
-      sibling_iterator(const iterator_base&) {}
-      sibling_iterator(const sibling_iterator&) {}
+      sibling_iterator() : iterator_base() { set_parent(); }
+      sibling_iterator(Node_* tn) : iterator_base(tn) { set_parent(); }
+      sibling_iterator(const iterator_base& other) : iterator_base(other.node) {
+        set_parent();
+      }
+      sibling_iterator(const sibling_iterator& other)
+          : iterator_base(other), parent_(other.parent_) {}
 
-      bool operator==(const sibling_iterator&) const;
-      bool operator!=(const sibling_iterator&) const;
-      sibling_iterator& operator++();
-      sibling_iterator& operator--();
-      sibling_iterator operator++(int);
-      sibling_iterator operator--(int);
-      sibling_iterator& operator+=(unsigned);
-      sibling_iterator& operator-=(unsigned);
+      bool operator==(const sibling_iterator& other) const {
+        if (other.node == this->node) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      bool operator!=(const sibling_iterator& other) const {
+        if (other.node != this->node) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      sibling_iterator& operator++() {
+        if (this->node) this->node = this->node->next_sibling;
+        return *this;
+      }
+      sibling_iterator& operator--() {
+        if (this->node) {
+          this->node = this->node->prev_sibling;
+        } else {
+          assert(parent_);
+          this->node = parent_->last_child;
+        }
+        return *this;
+      }
+      sibling_iterator operator++(int) {
+        sibling_iterator copy = *this;
+        ++(*this);
+        return copy;
+      }
+      sibling_iterator operator--(int) {
+        sibling_iterator copy = *this;
+        --(*this);
+        return copy;
+      }
+      sibling_iterator& operator+=(unsigned num) {
+        while (num > 0) {
+          ++(*this);
+          --num;
+        }
+        return (*this);
+      }
+      sibling_iterator& operator-=(unsigned num) {
+        while (num > 0) {
+          --(*this);
+          --num;
+        }
+        return (*this);
+      }
 
-      Node_* range_first() const;
-      Node_* range_last() const;
+      Node_* range_first() const { return parent_->first_child; }
+      Node_* range_last() const { return parent_->last_child; }
       Node_* parent_;
 
      private:
-      void set_parent();
+      void set_parent() {
+        parent_ = nullptr;
+        if (this->node == nullptr) return;
+        if (this->node->parent != nullptr) parent_ = this->node->parent;
+      }
     };
     class leaf_iterator : public iterator_base {
      public:
-      leaf_iterator() {}
-      leaf_iterator(Node_*, Node_* top = 0) {}
-      leaf_iterator(const iterator_base&) {}
-      leaf_iterator(const sibling_iterator&) {}
+      leaf_iterator() : iterator_base(nullptr), top_node_(nullptr) {}
+      leaf_iterator(Node_* tn, Node_* top = 0)
+          : iterator_base(tn), top_node_(top) {}
+      leaf_iterator(const iterator_base& other)
+          : iterator_base(other.node), top_node_(nullptr) {}
+      leaf_iterator(const sibling_iterator& other)
+          : iterator_base(other.node), top_node_(nullptr) {}
 
-      bool operator==(const leaf_iterator&) const;
-      bool operator!=(const leaf_iterator&) const;
-      leaf_iterator& operator++();
-      leaf_iterator& operator--();
-      leaf_iterator operator++(int);
-      leaf_iterator operator--(int);
-      leaf_iterator& operator+=(unsigned);
-      leaf_iterator& operator-=(unsigned);
+      bool operator==(const leaf_iterator& other) const {
+        if (other.node == this->node) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      bool operator!=(const leaf_iterator& other) const {
+        if (other.node != this->node) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      leaf_iterator& operator++() {
+        assert(this->node != nullptr);
+        if (this->node->first_child != nullptr) {
+          while (this->node->first_child) this->node = this->node->first_child;
+        } else {
+          while (this->node->next_sibling == nullptr) {
+            if (this->node->parent == nullptr) return *this;
+            this->node = this->node->parent;
+            if (top_node_ != nullptr && this->node == top_node_) return *this;
+          }
+          this->node = this->node->next_sibling;
+          while (this->node->first_child) this->node = this->node->first_child;
+        }
+        return *this;
+      }
+      leaf_iterator& operator--() {
+        assert(this->node != nullptr);
+        while (this->node->prev_sibling == nullptr) {
+          if (this->node->parent == nullptr) return *this;
+          this->node = this->node->parent;
+          if (top_node_ != nullptr && this->node == top_node_) return *this;
+        }
+        this->node = this->node->prev_sibling;
+        while (this->node->last_child) this->node = this->node->last_child;
+        return *this;
+      }
+      leaf_iterator operator++(int) {
+        leaf_iterator copy = *this;
+        ++(*this);
+        return copy;
+      }
+      leaf_iterator operator--(int) {
+        leaf_iterator copy = *this;
+        --(*this);
+        return copy;
+      }
+      leaf_iterator& operator+=(unsigned num) {
+        while (num > 0) {
+          ++(*this);
+          --num;
+        }
+        return (*this);
+      }
+      leaf_iterator& operator-=(unsigned num) {
+        while (num > 0) {
+          --(*this);
+          --num;
+        }
+        return (*this);
+      }
 
      private:
       Node_* top_node_;
@@ -1054,82 +1480,504 @@ namespace tree {
     }
 
     template <typename _Iter>
-    _Iter move_ontop(_Iter target, _Iter source);
+    _Iter move_ontop(_Iter target, _Iter source) {
+      Node_* dest = target.node;
+      Node_* src = source.node;
+      assert(dest);
+      assert(src);
+      if (dest == src) return source;
 
-    Tree move_out(iterator);
+      Node_* b_prev = dest->prev_sibling;
+      Node_* b_next = dest->next_sibling;
+      Node_* b_parent = dest->parent;
+
+      erase(target);
+
+      if (src->prev_sibling != nullptr) {
+        src->prev_sibling->next_sibling = src->next_sibling;
+      } else {
+        src->parent->first_child = src->next_sibling;
+      }
+      if (src->next_sibling != nullptr) {
+        src->next_sibling->prev_sibling = src->prev_sibling;
+      } else {
+        src->parent->last_child = src->prev_sibling;
+      }
+      if (b_prev != nullptr) {
+        b_prev->next_sibling = src;
+      } else {
+        b_parent->first_child = src;
+      }
+      if (b_next != nullptr) {
+        b_next->prev_sibling = src;
+      } else {
+        b_parent->last_child = src;
+      }
+      src->prev_sibling = b_prev;
+      src->next_sibling = b_next;
+      src->parent = b_parent;
+      return src;
+    }
+
+    Tree move_out(iterator src) {
+      Tree ret;
+      ret.head->next_sibling = src.node;
+      ret.feet->prev_sibling = src.node;
+      src.node->parent = nullptr;
+
+      if (src.node->prev_sibling != nullptr) {
+        src.node->prev_sibling->next_sibling = src.node->next_sibling;
+      }
+      if (src.node->next_sibling != nullptr) {
+        src.node->next_sibling->prev_sibling = src.node->prev_sibling;
+      }
+      src.node->prev_sibling = ret.head;
+      src.node->next_sibling = ret.feet;
+      return ret;
+    }
 
     template <typename _Iter>
-    _Iter move_in(_Iter, Tree&);
+    _Iter move_in(_Iter loc, Tree& other) {
+      if (other.head->next_sibling == other.feet) return loc;
+      Node_* other_first = other.head->next_sibling;
+      Node_* other_last = other.feet->pref_sibling;
+      sibling_iterator prev(loc);
+      --prev;
+      prev.node->next_sibling = other_first;
+      loc.node->prev_sibling = other_last;
+      Node_* walk = other_first;
+
+      while (true) {
+        walk->parent = loc.node->parent;
+        if (walk == other_last) break;
+        walk = walk->next_sibling;
+      }
+      other.head->next_sibling = other.feet;
+      other.feet->prev_sibling = other.head;
+      return other_first;
+    }
 
     template <typename _Iter>
-    _Iter move_in_below(_Iter, Tree&);
+    _Iter move_in_as_nth_child(_Iter loc, std::size_t n, Tree& other) {
+      if (other.head->next_sibling == other.feet) return loc;
 
-    template <typename _Iter>
-    _Iter move_in_as_nth_child(_Iter, std::size_t, Tree&);
+      Node_* other_first_head = other.head->next_sibling;
+      Node_* other_last_head = other.feet->prev_sibling;
 
-    void merge(sibling_iterator, sibling_iterator, sibling_iterator,
-               sibling_iterator, bool duplicate_leaves = false);
-    void sort(sibling_iterator from, sibling_iterator to, bool deep = false);
+      if (n == 0) {
+        if (loc.node->first_child == 0) {
+          loc.node->first_child = other_first_head;
+          loc.node->last_child = other_last_head;
+          other_last_head->next_sibling = 0;
+          other_first_head->prev_sibling = 0;
+        } else {
+          loc.node->first_child->prev_sibling = other_last_head;
+          other_last_head->next_sibling = loc.node->first_child;
+          loc.node->first_child = other_first_head;
+          other_first_head->prev_sibling = 0;
+        }
+      } else {
+        --n;
+        Node_* walk = loc.node->first_child;
+        while (true) {
+          if (walk == 0)
+            throw std::range_error(
+                "Tree: move_in_as_nth_child position out of range");
+          if (n == 0) break;
+          --n;
+          walk = walk->next_sibling;
+        }
+        if (walk->next_sibling == 0)
+          loc.node->last_child = other_last_head;
+        else
+          walk->next_sibling->prev_sibling = other_last_head;
+        other_last_head->next_sibling = walk->next_sibling;
+        walk->next_sibling = other_first_head;
+        other_first_head->prev_sibling = walk;
+      }
+
+      Node_* walk = other_first_head;
+      while (true) {
+        walk->parent = loc.node;
+        if (walk == other_last_head) break;
+        walk = walk->next_sibling;
+      }
+
+      other.head->next_sibling = other.feet;
+      other.feet->prev_sibling = other.head;
+
+      return other_first_head;
+    }
+
+    void merge(sibling_iterator to1, sibling_iterator to2,
+               sibling_iterator from1, sibling_iterator from2,
+               bool duplicate_leaves = false) {
+      sibling_iterator fnd;
+      while (from1 != from2) {
+        if ((fnd = std::find(to1, to2, (*from1))) != to2) {
+          if (from1.begin() == from1.end()) {
+            if (duplicate_leaves) append_child(parent(to1), (*from1));
+          } else {
+            merge(fnd.begin(), fnd.end(), from1.begin(), from1.end(),
+                  duplicate_leaves);
+          }
+        } else {
+          insert_subtree(to2, from1);
+        }
+        ++from1;
+      }
+    }
+    void sort(sibling_iterator from, sibling_iterator to, bool deep = false) {
+      std::less<_Tp> comp;
+      sort(from, to, comp, deep);
+    }
     template <class _Comp>
     void sort(sibling_iterator from, sibling_iterator to, _Comp comp,
-              bool deep = false);
+              bool deep = false) {
+      if (from == to) return;
+      std::multiset<Node_*, compare_nodes<_Comp>> nodes(comp);
+      sibling_iterator it = from, it2 = to;
+      while (it != to) {
+        nodes.insert(it.node);
+        ++it;
+      }
+      --it2;
+
+      Node_* prev = from.node->prev_sibling;
+      Node_* next = it2.node->next_sibling;
+      typename std::multiset<Node_*, compare_nodes<_Comp>>::iterator
+          nit = nodes.begin(),
+          eit = nodes.end();
+      if (prev == 0) {
+        if ((*nit)->parent != 0) (*nit)->parent->first_child = (*nit);
+      } else
+        prev->next_sibling = (*nit);
+
+      --eit;
+      while (nit != eit) {
+        (*nit)->prev_sibling = prev;
+        if (prev) prev->next_sibling = (*nit);
+        prev = (*nit);
+        ++nit;
+      }
+      if (prev) prev->next_sibling = (*eit);
+
+      (*eit)->next_sibling = next;
+      (*eit)->prev_sibling = prev;
+      if (next == 0) {
+        if ((*eit)->parent != 0) (*eit)->parent->last_child = (*eit);
+      } else
+        next->prev_sibling = (*eit);
+
+      if (deep) {
+        sibling_iterator bcs(*nodes.begin());
+        sibling_iterator ecs(*eit);
+        ++ecs;
+        while (bcs != ecs) {
+          sort(begin(bcs), end(bcs), comp, deep);
+          ++bcs;
+        }
+      }
+    }
 
     template <typename _Iter>
-      bool equal(const _Iter& one, const _Iter& two, const _Iter& three) const{
-        std::equal_to<_Tp> comp;
-        return equal(one, two, three, comp);
-      }
+    bool equal(const _Iter& one, const _Iter& two, const _Iter& three) const {
+      std::equal_to<_Tp> comp;
+      return equal(one, two, three, comp);
+    }
     template <typename _Iter, class _Bp>
     bool equal(const _Iter& one, const _Iter& two, const _Iter& three,
-        _Bp comp) const{
+               _Bp comp) const {
       pre_order_iterator one_(one), three_(three);
-      while(one_ != two && is_valid(three_)){
-        if(!comp(*one_, *three_)) return false;
-        if(one_.number_of_children() != three_.number_of_children()) return false;
+      while (one_ != two && is_valid(three_)) {
+        if (!comp(*one_, *three_)) return false;
+        if (one_.number_of_children() != three_.number_of_children())
+          return false;
         ++one_;
         ++three_;
       }
       return true;
     }
     template <typename _Iter>
-    bool equal_subtree(const _Iter& one, const _Iter& two) const;
+    bool equal_subtree(const _Iter& one, const _Iter& two) const {
+      std::equal_to<_Tp> comp;
+      return equal_subtree(one, two, comp);
+    }
     template <typename _Iter, class _Bp>
-    bool equal_subtree(const _Iter& one, const _Iter& two, _Bp) const;
+    bool equal_subtree(const _Iter& one, const _Iter& two, _Bp comp) const {
+      pre_order_iterator one_(one), two_(two);
+      if (!comp(*one_, *two_)) return false;
+      if (number_of_children(one) != number_of_children(two)) return false;
+      return equal(begin(one), end(one, begin(two), comp));
+    }
 
-    Tree subtree(sibling_iterator from, sibling_iterator to) const;
-    void subtree(Tree&, sibling_iterator from, sibling_iterator to) const;
+    Tree<_Tp> subtree(sibling_iterator from, sibling_iterator to) const {
+      assert(from != to);
+      Tree<_Tp> tmp;
+      tmp.set_head(value_type());
+      tmp.replace(tmp.begin(), tmp.end(), from, to);
+      return tmp;
+    }
+    void subtree(Tree& tmp, sibling_iterator from, sibling_iterator to) const {
+      assert(from != to);
+      tmp.set_head(value_type());
+      tmp.replace(tmp.begin(), tmp.end(), from, to);
+    }
 
-    void swap(sibling_iterator it);
+    void swap(sibling_iterator it) {
+      Node_* nxt = it.node->next_sibling;
+      if (nxt) {
+        if (it.node->prev_sibling) {
+          it.node->prev_sibling->next_sibling = nxt;
+        } else {
+          it.node->parent->first_child = nxt;
+        }
+        nxt->prev_sibling = it.node->prev_sibling;
+        Node_* nxtnxt = nxt->next_sibling;
+        if (nxtnxt) {
+          nxtnxt->prev_sibling = it.node;
+        } else {
+          it.node->parent->last_child = it.node;
+        }
+        nxt->next_sibling = it.node;
+        it.node->prev_sibling = nxt;
+        it.node->next_sibling = nxtnxt;
+      }
+    }
 
-    void swap(iterator, iterator);
+    void swap(iterator one, iterator two) {
+      if (one.node->next_sibling == two.now) {
+        swap(one);
+      } else if (two.node->next_sibling == one.node) {
+        swap(two);
+      } else {
+        Node_* nxt1 = one.node->next_sibling;
+        Node_* nxt2 = two.node->next_sibling;
+        Node_* prev1 = one.node->prev_sibling;
+        Node_* prev2 = two.node->prev_sibling;
+        Node_* par1 = one.node->parent;
+        Node_* par2 = two.node->parent;
+        one.node->parent = par2;
+        one.node->next_sibling = nxt2;
+        if (nxt2) {
+          nxt2->prev_sibling = one.node;
+        } else {
+          par2->last_child = one.node;
+        }
+        one.node->prev_sibling = prev2;
+        if (prev2) {
+          prev2->next_sibling = one.node;
+        } else {
+          par2->first_child = one.node;
+        }
+        two.node->parent = par1;
+        two.node->next_sibling = nxt1;
+        if (nxt1) {
+          nxt1->prev_sibling = two.node;
+        } else {
+          par2->last_child = two.node;
+        }
+        two.node->prev_sibling = prev1;
+        if (prev1) {
+          prev1->next_sibling = two.node;
+        } else {
+          par1->first_child = two.node;
+        }
+      }
+    }
 
-    std::size_t size() const;
-    std::size_t size(const iterator_base&) const;
+    std::size_t size() const {
+      std::size_t i = 0;
+      pre_order_iterator it = begin(), eit = end();
+      while (it != eit) {
+        ++i;
+        ++it;
+      }
+      return i;
+    }
+    std::size_t size(const iterator_base& top) const {
+      std::size_t i = 0;
+      pre_order_iterator it = top, eit = top;
+      eit.skip_children();
+      ++eit;
+      while (it != eit) {
+        ++i;
+        ++it;
+      }
+      return i;
+    }
 
-    bool empty() const;
+    bool empty() const {
+      pre_order_iterator it = begin(), eit = end();
+      return (it == eit);
+    }
 
-    static int depth(const iterator_base&);
-    static int depth(const iterator_base&, const iterator_base&);
+    static int depth(const iterator_base& it) {
+      Node_* pos = it.node;
+      assert(pos != nullptr);
+      int ret = 0;
+      while (pos->parent != nullptr) {
+        pos = pos->parent;
+        ++ret;
+      }
+      return ret;
+    }
+    static int depth(const iterator_base& it, const iterator_base& root) {
+      Node_* pos = it.node;
+      assert(pos != nullptr);
+      int ret = 0;
+      while (pos->parent != nullptr && pos != root.node) {
+        pos = pos->parent;
+        ++ret;
+      }
+      return ret;
+    }
 
-    int max_depth() const;
-    int max_depth(const iterator_base&) const;
+    int max_depth() const {
+      int maxd = -1;
+      for (Node_* it = head->next_sibling; it != feet; it = it->next_sibling) {
+        maxd = std::max(maxd, max_depth(it));
+      }
+      return maxd;
+    }
+    int max_depth(const iterator_base& pos) const {
+      Node_* tmp = pos.node;
+      if (tmp == nullptr || tmp == head || tmp == feet) {
+        return -1;
+      }
+      int cur_depth = 0, max_depth = 0;
+      while (true) {
+        while (tmp->first_child == 0) {
+          if (tmp == pos.node) {
+            return max_depth;
+          } else if (tmp->next_sibling == nullptr) {
+            do {
+              tmp = tmp->parent;
+              if (tmp == nullptr) {
+                return max_depth;
+              }
+              --cur_depth;
 
-    static unsigned number_of_children(const iterator_base&);
+            } while (tmp->next_sibling == nullptr);
+          }
+          tmp = tmp->first_child;
+          ++cur_depth;
+          max_depth = std::max(cur_depth, max_depth);
+        }
+      }
+    }
 
-    unsigned int number_of_siblings(const iterator_base&) const;
+    static unsigned number_of_children(const iterator_base& it) {
+      Node_* pos = it.node->first_child;
+      if (pos == nullptr) {
+        return 0;
+      }
+      unsigned ret = 1;
+      while ((pos = pos->next_sibling)) ++ret;
+      return ret;
+    }
+
+    unsigned int number_of_siblings(const iterator_base& it) const {
+      Node_* pos = it.node;
+      unsigned ret = 0;
+      while (pos->next_sibling && pos->next_sibling != head &&
+             pos->next_sibling != feet) {
+        ++ret;
+        pos = pos->next_sibling;
+      }
+      pos = it.node;
+      while (pos->prev_sibling && pos->prev_sibling != head &&
+             pos->prev_sibling != feet) {
+        ++ret;
+        pos = pos->prev_sibling;
+      }
+      return ret;
+    }
 
     bool is_in_subtree(const iterator_base& pos, const iterator_base& begin,
-                       const iterator_base& end) const;
+                       const iterator_base& end) const {
+      pre_order_iterator tmp = begin;
+      while (tmp != end) {
+        if (tmp == pos) {
+          return true;
+        }
+        ++tmp;
+      }
+      return false;
+    }
 
-    bool is_valid(const iterator_base&) const;
+    bool is_valid(const iterator_base& it) const {
+      if (it.node == nullptr || it.node == feet || it.node == head) {
+        return false;
+      } else {
+        return true;
+      }
+    }
 
-    static bool is_head(const iterator_base&);
+    static bool is_head(const iterator_base& it) {
+      if (it.node->parent == nullptr) {
+        return true;
+      } else {
+        return false;
+      }
+    }
 
-    iterator lowest_common_ancestor(const iterator_base&,
-                                    const iterator_base&) const;
-    unsigned int index(sibling_iterator it) const;
-    static sibling_iterator child(const iterator_base& pos, unsigned int);
-    sibling_iterator sibling(const iterator_base& pos, unsigned int) const;
+    iterator lowest_common_ancestor(const iterator_base& one,
+                                    const iterator_base& two) const {
+      std::set<iterator, iterator_base_less> parents;
+      iterator walk = one;
+      do {
+        walk = parent(walk);
+        parents.insert(walk);
+      } while (is_valid(parent(walk)));
+      walk = two;
+      do {
+        walk = parent(walk);
+        if (parents.find(walk) != parents.end()) break;
+      } while (is_valid(parent(walk)));
+      return walk;
+    }
+    unsigned int index(sibling_iterator it) const {
+      unsigned ind = 0;
+      if (it.node->parent == nullptr) {
+        while (it.node->prev_sibling != head) {
+          it.node = it.node->prev_sibling;
+          ++ind;
+        }
+      } else {
+        while (it.node->prev_sibling != nullptr) {
+          it.node = it.node->prev_sibling;
+          ++ind;
+        }
+      }
+      return ind;
+    }
+    static sibling_iterator child(const iterator_base& pos, unsigned int num) {
+      Node_* tmp = pos.node->first_child;
+      while (num--) {
+        assert(tmp != nullptr);
+        tmp = tmp->next_sibling;
+      }
+      return tmp;
+    }
+    sibling_iterator sibling(const iterator_base& pos, unsigned int num) const {
+      Node_* tmp;
+      if (pos.node->parent == nullptr) {
+        tmp = head->next_sibling;
+        while (num) {
+          tmp = tmp->next_sibling;
+          --num;
+        }
+      } else {
+        tmp = pos.node->parent->first_child;
+        while (num) {
+          assert(tmp != nullptr);
+          tmp = tmp->next_sibling;
+          --num;
+        }
+      }
+      return tmp;
+    }
 
     Node_ *head, *feet;
 
