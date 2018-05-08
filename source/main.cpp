@@ -16,12 +16,44 @@ int main(int argc, char const* argv[]) {
   estl::tree::Tree<int> t(17);
   t.append(5);
   t.append(6);
+  t.append(10);
+  t.back().append(0);
+  t.back().back().append(3);
+  t.back().back().append(4);
+  t.back().append(1);
+  t.back().back().append(5);
+  t.back().back().append(6);
+  t.back().append(2);
+  t.back().back().append(7);
+  t.back().back().append(8);
+  t.append(26);
+  t.back().append(7);
+  t.front().prepend(32);
+  t.append(18);
+  t.prepend(99);
+  auto it = t.begin();
+  t.insert(t.child_begin() + 2, 42);
+  std::cout << t << "\n";
+  std::cout << estl::tree::pretty(t) << "\n";
+  std::cout << "depth_first:\n";
+  for(auto it = t.begin(); it != t.end(); ++it){
+    std::cout << *it << ",";
+  }
+  std::cout << "\n";
+  std::cout << "sibling:\n";
+  for(auto it = t.child_begin(); it != t.child_end(); ++it){
+    std::cout << *it << ",";
+  }
+  std::cout << "\n";
+  std::cout << "leaf:\n";
+  for(auto it = t.leaf_begin(); it != t.leaf_end(); ++it){
+    std::cout << *it << ",";
+  }
+  std::cout << "\n";
   // t.back().append(100);
-  estl::tree::Tree<int> ref = t.subtree(++t.begin());
-  ref.append(13);
-  ref.append(21);
-  t.append(7);
-  t.prepend(2);
+  // estl::tree::Tree<int> ref = t.subtree(++t.begin());
+  // t.append(7);
+  // t.prepend(2);
   // std::cout << t << "\n";
   // estl::tree::Tree<int>::iterator it = t.begin();
   // // std::cout << t.end().node_ << "\n";
@@ -33,7 +65,7 @@ int main(int argc, char const* argv[]) {
   // ++it;
   // std::cout << it.node_ << std::flush << "::" << *it << "\n";
   // std::cout << estl::tree::pretty(t) << "\n";
-  std::cout << estl::tree::pretty(ref) << "\n";
+  // std::cout << estl::tree::pretty(ref) << "\n";
   // for(auto& it : t){
   //   std::cout << it << "<<\n";
   // }

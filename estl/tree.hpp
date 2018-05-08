@@ -2,6 +2,7 @@
 #define ESTL_TREE_HPP_
 
 #include <iostream>
+#include <iterator>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -10,41 +11,24 @@
 namespace estl {
 namespace tree {
   template <typename _Tp, typename _Al = std::allocator<_Tp>>
-  class Node_ {
-   public:
-    Node_()
-        : node(_Tp()),
-          parent_(nullptr),
-          first_(nullptr),
-          last_(nullptr),
-          prev_(nullptr),
-          next_(nullptr) {}
-    Node_(const _Tp& value)
-        : node(value),
-          parent_(nullptr),
-          first_(nullptr),
-          last_(nullptr),
-          prev_(nullptr),
-          next_(nullptr) {}
-    Node_(_Tp&& value)
-        : node(value),
-          parent_(nullptr),
-          first_(nullptr),
-          last_(nullptr),
-          prev_(nullptr),
-          next_(nullptr) {}
-    _Tp node;
-    Node_ *parent_, *first_, *last_, *prev_, *next_;
-
-   private:
-  };
-  template <typename _Tp, typename _Al = std::allocator<_Tp>>
   class Tree {
    public:
-    class depth_iterator {
+    class iterator_base {
+     public:
+      typedef _Al allocator_type;
+      typedef typename _Al::value_type value_type;
+      typedef typename _Al::reference reference;
+      typedef typename _Al::const_reference const_reference;
+      typedef typename _Al::difference_type difference_type;
+      typedef typename _Al::size_type size_type;
+      typedef typename _Al::pointer pointer;
+      typedef typename _Al::const_pointer const_pointer;
+      typedef std::random_access_iterator_tag iterator_category;
+    };
+    class depth_iterator : public iterator_base {
      public:
       depth_iterator() : node_(nullptr) {}
-      depth_iterator(Node_<_Tp, _Al>* node) : node_(node) {}
+      depth_iterator(Tree<_Tp, _Al>* node) : node_(node) {}
 
       _Tp& operator*() const { return node_->node; }
       _Tp* operator->() const { return &(node_->node); }
@@ -71,7 +55,9 @@ namespace tree {
         if (node_->first_ != nullptr) {
           node_ = node_->first_;
         } else {
-          while (node_->next_ == nullptr) {
+          while (node_->parent_ != nullptr &&
+                 node_->parent_->parent_ != nullptr &&
+                 node_->next_ == node_->parent_->foot_) {
             node_ = node_->parent_;
             if (node_ == nullptr) return *this;
           }
@@ -93,6 +79,30 @@ namespace tree {
         }
         return *this;
       }
+      depth_iterator& operator++(int) {
+        depth_iterator copy = *this;
+        ++(*this);
+        return copy;
+      }
+      depth_iterator& operator--(int) {
+        depth_iterator copy = *this;
+        --(*this);
+        return copy;
+      }
+      depth_iterator& operator+(unsigned n) {
+        while (n > 0) {
+          ++(*this);
+          --n;
+        }
+        return *this;
+      }
+      depth_iterator& operator-(unsigned n) {
+        while (n > 0) {
+          ++(*this);
+          --n;
+        }
+        return *this;
+      }
       depth_iterator& operator+=(unsigned n) {
         while (n > 0) {
           ++(*this);
@@ -107,7 +117,169 @@ namespace tree {
         }
         return *this;
       }
-      Node_<_Tp, _Al>* node_;
+      Tree<_Tp, _Al>* node_;
+    };
+    class sibling_iterator : public iterator_base {
+     public:
+      sibling_iterator() : node_(nullptr) {}
+      sibling_iterator(Tree<_Tp, _Al>* node) : node_(node) {}
+
+      _Tp& operator*() const { return node_->node; }
+      _Tp* operator->() const { return &(node_->node); }
+
+      bool operator==(const sibling_iterator& rhs) const {
+        if (rhs.node_ == node_) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      bool operator!=(const sibling_iterator& rhs) const {
+        if (rhs.node_ != node_) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      sibling_iterator& operator++() {
+        if (node_ == nullptr) {
+          throw std::logic_error(
+              "Tree(depth_iterator) iterator node is uninitialized");
+        }
+        node_ = node_->next_;
+        return *this;
+      }
+      sibling_iterator& operator--() {
+        if (node_ == nullptr) {
+          throw std::logic_error(
+              "Tree(depth_iterator) iterator node is uninitialized");
+        }
+        node_ = node_->prev_;
+        return *this;
+      }
+      sibling_iterator& operator+(unsigned n) {
+        while (n > 0) {
+          ++(*this);
+          --n;
+        }
+        return *this;
+      }
+      sibling_iterator& operator-(unsigned n) {
+        while (n > 0) {
+          --(*this);
+          --n;
+        }
+        return *this;
+      }
+      sibling_iterator& operator+=(unsigned n) {
+        while (n > 0) {
+          ++(*this);
+          --n;
+        }
+        return *this;
+      }
+      sibling_iterator& operator-=(unsigned n) {
+        while (n > 0) {
+          --(*this);
+          --n;
+        }
+        return *this;
+      }
+      Tree<_Tp, _Al>* node_;
+    };
+    class leaf_iterator : public iterator_base {
+     public:
+      leaf_iterator() : node_(nullptr) {}
+      leaf_iterator(Tree<_Tp, _Al>* node) : node_(node) {}
+
+      _Tp& operator*() const { return node_->node; }
+      _Tp* operator->() const { return &(node_->node); }
+
+      bool operator==(const leaf_iterator& rhs) const {
+        if (rhs.node_ == node_) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      bool operator!=(const leaf_iterator& rhs) const {
+        if (rhs.node_ != node_) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      leaf_iterator& operator++() {
+        if (node_ == nullptr) {
+          throw std::logic_error(
+              "Tree(depth_iterator) iterator node is uninitialized");
+        }
+        if (node_->first_ != nullptr) {
+          while (node_->first_ != nullptr) {
+            node_ = node_->first_;
+          }
+        } else {
+          while (node_->parent_ != nullptr &&
+                 node_->parent_->parent_ != nullptr &&
+                 node_->next_ == node_->parent_->foot_) {
+            node_ = node_->parent_;
+          }
+          node_ = node_->next_;
+          while (node_->first_ != nullptr) {
+            node_ = node_->first_;
+          }
+          return *this;
+        }
+
+        if (node_->first_ != nullptr) {
+          node_ = node_->first_;
+        } else {
+          while (node_->parent_ != nullptr &&
+                 node_->parent_->parent_ != nullptr &&
+                 node_->next_ == node_->parent_->foot_) {
+            node_ = node_->parent_;
+          }
+          node_ = node_->next_;
+        }
+        return *this;
+      }
+      leaf_iterator& operator--() {
+        if (node_ == nullptr) {
+          throw std::logic_error(
+              "Tree(depth_iterator) iterator node is uninitialized");
+        }
+        node_ = node_->prev_;
+        return *this;
+      }
+      leaf_iterator& operator+(unsigned n) {
+        while (n > 0) {
+          ++(*this);
+          --n;
+        }
+        return *this;
+      }
+      leaf_iterator& operator-(unsigned n) {
+        while (n > 0) {
+          --(*this);
+          --n;
+        }
+        return *this;
+      }
+      leaf_iterator& operator+=(unsigned n) {
+        while (n > 0) {
+          ++(*this);
+          --n;
+        }
+        return *this;
+      }
+      leaf_iterator& operator-=(unsigned n) {
+        while (n > 0) {
+          --(*this);
+          --n;
+        }
+        return *this;
+      }
+      Tree<_Tp, _Al>* node_;
     };
 
     typedef _Al allocator_type;
@@ -122,32 +294,51 @@ namespace tree {
     typedef const depth_iterator const_iterator;
     typedef std::reverse_iterator<iterator> reverse_iterator;
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+    typedef sibling_iterator sibling_iterator;
+    typedef const sibling_iterator const_sibling_iterator;
+    typedef std::reverse_iterator<sibling_iterator> reverse_sibling_iterator;
+    typedef std::reverse_iterator<const_sibling_iterator>
+        const_reverse_sibling_iterator;
+    typedef leaf_iterator leaf_iterator;
+    typedef const leaf_iterator const_leaf_iterator;
+    typedef std::reverse_iterator<leaf_iterator> reverse_leaf_iterator;
+    typedef std::reverse_iterator<const_leaf_iterator>
+        const_reverse_leaf_iterator;
 
-    Tree() { initialize(); }
-    Tree(const _Tp& val) {
-      initialize();
-      head->node = val;
-    }
-    Tree(_Tp&& val) {
-      initialize();
-      head->node = val;
-    }
-    Tree(const Node_<_Tp, _Al>& val){
-      initialize();
-      head->node = val.node;
-      head->first_ = val.first_;
-      head->last_= val.last_;
-    }
+    Tree()
+        : node(_Tp()),
+          parent_(nullptr),
+          prev_(nullptr),
+          next_(nullptr),
+          first_(nullptr),
+          last_(nullptr),
+          foot_(nullptr) {}
+    Tree(const _Tp& val)
+        : node(val),
+          parent_(nullptr),
+          prev_(nullptr),
+          next_(nullptr),
+          first_(nullptr),
+          last_(nullptr),
+          foot_(nullptr) {}
+    Tree(_Tp&& val)
+        : node(val),
+          parent_(nullptr),
+          prev_(nullptr),
+          next_(nullptr),
+          first_(nullptr),
+          last_(nullptr),
+          foot_(nullptr) {}
     // Tree(const Tree<_Tp, _Al>& copy)
     //     : node(copy.node), children_(copy.children_) {}
     ~Tree() {}
 
     Tree<_Tp, _Al>& operator=(const _Tp& val) {
-      head->node = val;
+      this->node = val;
       return *this;
     }
     Tree<_Tp, _Al>& operator=(const Tree<_Tp, _Al>& copy) {
-      head->node = copy.node;
+      this->node = copy.node;
       // children_ = copy.children_;
       return *this;
     }
@@ -159,34 +350,106 @@ namespace tree {
     // const_reference operator[](size_type pos) const { return children_[pos];
     // }
 
-    reference front() { return *head->first_; }
-    const_reference front() const { return *head->first_; }
+    reference front() { return *this->first_; }
+    const_reference front() const { return *this->first_; }
 
-    reference back() { return *head->last_; }
-    const_reference back() const { return *head->last_; }
+    reference back() { return *this->last_; }
+    const_reference back() const { return *this->last_; }
 
-    iterator begin() noexcept { return iterator(head); }
-    const_iterator begin() const noexcept { return const_iterator(head); }
-    const_iterator cbegin() const noexcept { return const_iterator(head); }
+    iterator begin() noexcept { return iterator(this); }
+    const_iterator begin() const noexcept { return const_iterator(this); }
+    const_iterator cbegin() const noexcept { return const_iterator(this); }
 
-    iterator end() noexcept { return iterator(foot); }
-    const_iterator end() const noexcept { return const_iterator(foot); }
-    const_iterator cend() const noexcept { return const_iterator(foot); }
+    iterator end() noexcept { return iterator(foot_); }
+    const_iterator end() const noexcept { return const_iterator(foot_); }
+    const_iterator cend() const noexcept { return const_iterator(foot_); }
 
-    reverse_iterator rbegin() noexcept { return reverse_iterator(head); }
+    reverse_iterator rbegin() noexcept { return reverse_iterator(this); }
     const_reverse_iterator rbegin() const noexcept {
-      return const_reverse_iterator(head);
+      return const_reverse_iterator(this);
     }
     const_reverse_iterator crbegin() const noexcept {
-      return const_reverse_iterator(head);
+      return const_reverse_iterator(this);
     }
 
-    reverse_iterator rend() noexcept { return reverse_iterator(foot); }
+    reverse_iterator rend() noexcept { return reverse_iterator(foot_); }
     const_reverse_iterator rend() const noexcept {
-      return const_reverse_iterator(foot);
+      return const_reverse_iterator(foot_);
     }
     const_reverse_iterator crend() const noexcept {
-      return const_reverse_iterator(foot);
+      return const_reverse_iterator(foot_);
+    }
+
+    sibling_iterator child_begin() noexcept { return sibling_iterator(first_); }
+    const_sibling_iterator child_begin() const noexcept {
+      return const_sibling_iterator(first_);
+    }
+    const_sibling_iterator cchild_begin() const noexcept {
+      return const_sibling_iterator(first_);
+    }
+
+    sibling_iterator child_end() noexcept { return sibling_iterator(foot_); }
+    const_sibling_iterator child_end() const noexcept {
+      return const_sibling_iterator(foot_);
+    }
+    const_sibling_iterator cchild_end() const noexcept {
+      return const_sibling_iterator(foot_);
+    }
+
+    reverse_sibling_iterator rchild_begin() noexcept {
+      return reverse_sibling_iterator(first_);
+    }
+    const_reverse_sibling_iterator rchild_begin() const noexcept {
+      return const_reverse_sibling_iterator(first_);
+    }
+    const_reverse_sibling_iterator crchild_begin() const noexcept {
+      return const_reverse_sibling_iterator(first_);
+    }
+
+    reverse_sibling_iterator rchild_end() noexcept {
+      return reverse_sibling_iterator(foot_);
+    }
+    const_reverse_sibling_iterator rchild_end() const noexcept {
+      return const_reverse_sibling_iterator(foot_);
+    }
+    const_reverse_sibling_iterator crchild_end() const noexcept {
+      return const_reverse_sibling_iterator(foot_);
+    }
+
+    leaf_iterator leaf_begin() noexcept { return leaf_iterator(first_); }
+    const_leaf_iterator leaf_begin() const noexcept {
+      return const_leaf_iterator(first_);
+    }
+    const_leaf_iterator cleaf_begin() const noexcept {
+      return const_leaf_iterator(first_);
+    }
+
+    leaf_iterator leaf_end() noexcept { return leaf_iterator(foot_); }
+    const_leaf_iterator leaf_end() const noexcept {
+      return const_leaf_iterator(foot_);
+    }
+    const_leaf_iterator cleaf_end() const noexcept {
+      return const_leaf_iterator(foot_);
+    }
+
+    reverse_leaf_iterator rleaf_begin() noexcept {
+      return reverse_leaf_iterator(first_);
+    }
+    const_reverse_leaf_iterator rleaf_begin() const noexcept {
+      return const_reverse_leaf_iterator(first_);
+    }
+    const_reverse_leaf_iterator crleaf_begin() const noexcept {
+      return const_reverse_leaf_iterator(first_);
+    }
+
+    reverse_leaf_iterator rleaf_end() noexcept {
+      return reverse_leaf_iterator(foot_);
+    }
+    const_reverse_leaf_iterator rleaf_end() const noexcept {
+      return const_reverse_leaf_iterator(foot_);
+    }
+    const_reverse_leaf_iterator crleaf_end() const noexcept {
+      return const_reverse_leaf_iterator(foot_);
     }
 
     bool empty() const noexcept { return (begin() == end()); }
@@ -199,19 +462,19 @@ namespace tree {
     }
 
     void clear() noexcept {
-      while (head->next_ != foot) {
-        erase(iterator(head->next_));
+      while (this->next_ != foot_) {
+        erase(iterator(this->next_));
       }
     }
 
     iterator insert(const_iterator pos, const _Tp& value) {
       if (pos.node_ == nullptr) {
-        pos.node_ = foot;
+        pos.node_ = foot_;
       }
       if (pos.node_ == this) {
         throw std::logic_error("Tree(insert) pos must be initialized");
       }
-      Node_<_Tp, _Al>* nd = alloc_.allocate(1, 0);
+      Tree<_Tp, _Al>* nd = alloc_.allocate(1, 0);
       alloc_.construct(nd);
       nd->node = value;
       nd->parent_ = pos->parent_;
@@ -228,20 +491,16 @@ namespace tree {
       return iterator(nd);
     }
 
-    iterator insert(const_iterator pos, _Tp&& value) {
-      if (pos.node_ == nullptr) {
-        pos.node_ = foot;
-      }
-      if (pos.node_ == this) {
-        throw std::logic_error("Tree(insert) pos must be initialized");
-      }
-      Node_<_Tp, _Al>* nd = alloc_.allocate(1, 0);
-      alloc_.construct(nd);
-      nd->node = value;
-      nd->parent_ = pos->parent_;
-      nd->next_ = pos;
-      nd->prev_ = pos->prev_;
-      pos->prev_ = nd;
+    template <typename _Iter>
+    typename std::enable_if<std::is_base_of<iterator_base, _Iter>::value,
+                            _Iter>::type
+    insert(_Iter pos, _Tp&& value) {
+      Tree<_Tp, _Al>* nd = alloc_.allocate(1, 0);
+      alloc_.construct(nd, value);
+      nd->parent_ = pos.node_->parent_;
+      nd->next_ = pos.node_;
+      nd->prev_ = pos.node_->prev_;
+      pos.node_->prev_ = nd;
       if (nd->prev_ == nullptr) {
         if (nd->parent_ != nullptr) {
           nd->parent_->first_ = nd;
@@ -249,7 +508,7 @@ namespace tree {
       } else {
         nd->prev_->next_ = nd;
       }
-      return iterator(nd);
+      return _Iter(nd);
     }
 
     iterator erase(const_iterator pos) {
@@ -285,120 +544,111 @@ namespace tree {
       pos->last_ = nullptr;
     }
 
-    // void push_back(const _Tp& value) {
-    //   Tree<_Tp, _Al>* prev = nullptr;
-    //   if (children_.size() != 0) {
-    //     prev = &children_.back();
-    //   }
-    //   children_.push_back(Tree<_Tp, _Al>(value, this, prev, nullptr));
-    //   if (prev != nullptr) {
-    //     prev->next_ = &children_.back();
-    //   }
-    // }
-    // void push_back(_Tp&& value) {
-    //   Tree<_Tp, _Al>* prev = nullptr;
-    //   if (children_.size() != 0) {
-    //     prev = &children_.back();
-    //   }
-    //   children_.push_back(Tree<_Tp, _Al>(value, this, prev, nullptr));
-    //   if (prev != nullptr) {
-    //     prev->next_ = &children_.back();
-    //   }
-    // }
-    //
-    // void pop_back() {
-    //   children_.pop_back();
-    //   if (children_.size() != 0) {
-    //     children_.back().next_ = nullptr;
-    //   }
-    // }
+    void push_back(const _Tp& value) { append(value); }
+    void push_back(_Tp&& value) { append(value); }
+
+    void pop_back() {
+      if (last_ != nullptr) {
+        Tree<_Tp, _Al>* nd = last_->prev_;
+        nd->next_ = foot_;
+        alloc_.destroy(last_);
+        alloc_.deallocate(last_, 1);
+        last_ = nd;
+      }
+    }
 
     void append(const _Tp& value) {
-      Node_<_Tp, _Al>* nd = alloc_.allocate(1, 0);
+      Tree<_Tp, _Al>* nd = alloc_.allocate(1, nullptr);
       alloc_.construct(nd);
       nd->node = value;
-      nd->parent_ = head;
-      if (head->last_ != nullptr) {
-        nd->prev_ = head->last_;
+      nd->parent_ = this;
+      if (foot_ == nullptr) {
+        initialize();
+      }
+      nd->next_ = foot_;
+      foot_->prev_ = nd;
+      if (this->last_ != nullptr) {
+        nd->prev_ = this->last_;
         nd->prev_->next_ = nd;
       } else {
-        head->first_ = nd;
+        this->first_ = nd;
       }
-      head->last_ = nd;
+      this->last_ = nd;
     }
-    // void append(_Tp&& value) {
-    //   Tree<_Tp, _Al>* prev = nullptr;
-    //   if (children_.size() != 0) {
-    //     prev = &*(--children_.end());
-    //   }
-    //   children_.push_back(Tree<_Tp, _Al>(value, this, prev, nullptr));
-    //   if (prev != nullptr) {
-    //     prev = &*(children_.end() - 2);
-    //     prev->next_ = &*(--children_.end());
-    //   }
-    // }
-    void prepend(const _Tp& value) {
-      Node_<_Tp, _Al>* nd = alloc_.allocate(1, 0);
+    void append(_Tp&& value) {
+      Tree<_Tp, _Al>* nd = alloc_.allocate(1, nullptr);
       alloc_.construct(nd);
       nd->node = value;
-      nd->parent_ = head;
-      if (head->first_ != nullptr) {
-        nd->next_ = head->first_;
-        head->first_->prev_ = nd;
-      } else {
-        head->last_ = nd;
+      nd->parent_ = this;
+      if (foot_ == nullptr) {
+        initialize();
       }
-      head->first_ = nd;
+      nd->next_ = foot_;
+      foot_->prev_ = nd;
+      if (this->last_ != nullptr) {
+        nd->prev_ = this->last_;
+        nd->prev_->next_ = nd;
+      } else {
+        this->first_ = nd;
+      }
+      this->last_ = nd;
     }
-    // void prepend(_Tp&& value) {
-    //   Tree<_Tp, _Al>* next = nullptr;
-    //   if (children_.size() != 0) {
-    //     next = &children_.front();
-    //   }
-    //   children_.insert(children_.begin(),
-    //                    Tree<_Tp, _Al>(value, this, nullptr, next));
-    //   if (next != nullptr) {
-    //     next->prev_ = &children_.front();
-    //   }
-    // }
-    
-    Tree<_Tp, _Al> subtree(const_iterator pos){
-      Tree<_Tp, _Al> tmp;
-      tmp.head = pos.node_;
-      tmp.head->node = pos.node_->node;
-      // tmp.head->first_ = pos.node_->first_;
-      // tmp.head->last_= pos.node_->last_;
-      // tmp.head->next_ = tmp.foot;
-      std::cout << tmp.head->next_ << "\n";
-      std::cout << tmp.foot << "\n";
-      tmp.head->next_ = tmp.foot;
-      tmp.foot->prev_ = tmp.head;
-      return tmp;
+    void prepend(const _Tp& value) {
+      Tree<_Tp, _Al>* nd = alloc_.allocate(1, nullptr);
+      alloc_.construct(nd);
+      nd->node = value;
+      nd->parent_ = this;
+      if (foot_ == nullptr) {
+        initialize();
+      }
+      if (this->first_ != nullptr) {
+        nd->next_ = this->first_;
+        this->first_->prev_ = nd;
+      } else {
+        this->last_ = nd;
+        nd->next_ = foot_;
+        foot_->prev_ = nd;
+      }
+      this->first_ = nd;
     }
-    
-    Node_<_Tp, _Al>*head, *foot;
-    private:
+    void prepend(_Tp&& value) {
+      Tree<_Tp, _Al>* nd = alloc_.allocate(1, nullptr);
+      alloc_.construct(nd);
+      nd->node = value;
+      nd->parent_ = this;
+      if (foot_ == nullptr) {
+        initialize();
+      }
+      if (this->first_ != nullptr) {
+        nd->next_ = this->first_;
+        this->first_->prev_ = nd;
+      } else {
+        this->last_ = nd;
+        nd->next_ = foot_;
+        foot_->prev_ = nd;
+      }
+      this->first_ = nd;
+    }
+
+    _Tp node;
+    Tree<_Tp, _Al>*parent_, *prev_, *next_, *first_, *last_, *foot_;
+
+   private:
     void initialize() {
-      head = alloc_.allocate(1, nullptr);
-      foot = alloc_.allocate(1, nullptr);
-      alloc_.construct(head, Node_<_Tp, _Al>());
-      alloc_.construct(foot, Node_<_Tp, _Al>());
-
-      head->next_ = foot;
-
-      foot->prev_ = head;
+      foot_ = alloc_.allocate(1, nullptr);
+      alloc_.construct(foot_, Tree<_Tp, _Al>());
+      foot_->parent_ = this;
     }
 
-
-    std::allocator<Node_<_Tp, _Al>> alloc_;
+    std::allocator<Tree<_Tp, _Al>> alloc_;
   };
 
   template <typename _Tp>
   std::string pretty(Tree<_Tp> tree, std::size_t indent = 2) {
-    return pretty(tree.head, indent);
+    return pretty(&tree, indent);
   }
   template <typename _Tp>
-  std::string pretty(Node_<_Tp>* tree, std::size_t indent = 2) {
+  std::string pretty(Tree<_Tp>* tree, std::size_t indent = 2) {
     std::stringstream ss;
     ss << tree->node;
     std::string ret = ss.str();
@@ -409,7 +659,7 @@ namespace tree {
     }
     if (tree->first_ != nullptr) {
       ret += "\n";
-      Node_<_Tp>* it = tree->first_;
+      Tree<_Tp>* it = tree->first_;
       while (it != tree->last_) {
         ret += "\u251c" + bar;
         std::string sub = pretty(it, indent);
@@ -435,14 +685,14 @@ namespace tree {
   }
 
   template <typename _Tp>
-  std::ostream& operator<<(std::ostream& out, Tree<_Tp> tree) {
+  std::ostream& operator<<(std::ostream& out, Tree<_Tp>& tree) {
     out << tree.node;
-    if (tree.size() != 0) {
+    if (tree.first_ != nullptr) {
       out << '[';
-      for (typename Tree<_Tp>::iterator it = tree.begin(); it != tree.end();
-           ++it) {
-        out << (*it);
-        if (it != (--tree.end())) {
+      for (typename Tree<_Tp>::sibling_iterator it = tree.child_begin();
+           it != tree.child_end(); ++it) {
+        out << *it.node_;
+        if (it != (--tree.child_end())) {
           out << ',';
         }
       }
