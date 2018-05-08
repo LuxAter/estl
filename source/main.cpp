@@ -50,6 +50,7 @@ int main(int argc, char const* argv[]) {
     std::cout << *it << ",";
   }
   std::cout << "\n";
+  std::cout << t.leaf_at(4) << "\n";
   // t.back().append(100);
   // estl::tree::Tree<int> ref = t.subtree(++t.begin());
   // t.append(7);

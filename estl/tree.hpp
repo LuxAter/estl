@@ -329,11 +329,25 @@ namespace tree {
           first_(nullptr),
           last_(nullptr),
           foot_(nullptr) {}
-    // Tree(const Tree<_Tp, _Al>& copy)
-    //     : node(copy.node), children_(copy.children_) {}
-    ~Tree() {}
+    Tree(const Tree<_Tp, _Al>& copy) : node(copy.node) {
+      // TODO(Arden): Compleate copy constructor. Be sure to not copy the
+      // pointer, but to actually make a copy of the node variable.
+      if (copy.parent_ != nullptr) {
+        parent_ = alloc_.allocate(1, nullptr);
+        alloc_.construct(parent_, Tree<_Tp, _Al>(*copy.parent_));
+      }
+    }
+    ~Tree() {
+      if (first_ != nullptr) {
+        erase_children(this);
+      }
+    }
 
     Tree<_Tp, _Al>& operator=(const _Tp& val) {
+      this->node = val;
+      return *this;
+    }
+    Tree<_Tp, _Al>& operator=(_Tp&& val) {
       this->node = val;
       return *this;
     }
@@ -343,12 +357,23 @@ namespace tree {
       return *this;
     }
 
-    // reference at(size_type pos) { return children_.at(pos); }
-    // const_reference at(size_type pos) const { return children_.at(pos); }
-    //
-    // reference operator[](size_type pos) { return children_[pos]; }
-    // const_reference operator[](size_type pos) const { return children_[pos];
-    // }
+    reference at(size_type pos) { return *(begin() + pos).node_; }
+    const_reference at(size_type pos) const { return *(begin() + pos).node_; }
+
+    reference child_at(size_type pos) { return *(child_begin() + pos).node_; }
+    const_reference child_at(size_type pos) const {
+      return *(child_begin() + pos).node_;
+    }
+
+    reference leaf_at(size_type pos) { return *(leaf_begin() + pos).node_; }
+    const_reference leaf_at(size_type pos) const {
+      return *(leaf_begin() + pos).node_;
+    }
+
+    reference operator[](size_type pos) { return *(begin() + pos).node_; }
+    const_reference operator[](size_type pos) const {
+      return *(begin() + pos).node_;
+    }
 
     reference front() { return *this->first_; }
     const_reference front() const { return *this->first_; }
@@ -531,7 +556,7 @@ namespace tree {
       if (pos.node_ == nullptr) {
         return;
       }
-      Tree<_Tp, _Al>*current = pos->first_, *prev = nullptr;
+      Tree<_Tp, _Al>*current = pos.node_->first_, *prev = nullptr;
       while (current != nullptr) {
         prev = current;
         current = current->next_;
@@ -540,8 +565,8 @@ namespace tree {
         alloc_.destroy(prev);
         alloc_.deallocate(prev, 1);
       }
-      pos->first_ = nullptr;
-      pos->last_ = nullptr;
+      pos.node_->first_ = nullptr;
+      pos.node_->last_ = nullptr;
     }
 
     void push_back(const _Tp& value) { append(value); }
@@ -644,11 +669,11 @@ namespace tree {
   };
 
   template <typename _Tp>
-  std::string pretty(Tree<_Tp> tree, std::size_t indent = 2) {
+  std::string pretty(const Tree<_Tp>& tree, std::size_t indent = 2) {
     return pretty(&tree, indent);
   }
   template <typename _Tp>
-  std::string pretty(Tree<_Tp>* tree, std::size_t indent = 2) {
+  std::string pretty(const Tree<_Tp>* tree, std::size_t indent = 2) {
     std::stringstream ss;
     ss << tree->node;
     std::string ret = ss.str();

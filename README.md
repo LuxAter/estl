@@ -30,6 +30,15 @@ with key values as strings referencing the destination for the argument, and
 the values being a `estl::Variable` holding the data value. More information
 can be found on the documentation for _ArgParse_.
 
+### Format ###
+
+The *Format* file is used for formatting string. The syntax of the format
+string follows the formatting style found in Python's format function. The
+formatted arguments will first attempts a member funciton called `format`, then
+will attempt `printf` formatting, then will resort to `ostream` formatting. All
+of the formatted strings are collected and returned as one string matching the
+defined specifier.
+
 ### Matrix ###
 
 The *Matrix* file is primarily to provide a mathematical matrix object. Using
