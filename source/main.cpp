@@ -23,13 +23,8 @@ int main(int argc, char const* argv[]) {
   t.append(2);
   t.back().append(7);
   t.back().append(8);
-  estl::tree::Tree<int> a(t);
-  std::cout << t << "\n";
-  std::cout << a << "\n";
-  a.back().clear();
-  a.erase(a.begin() + 5);
-  std::cout << t << "\n";
-  std::cout << a << "\n";
+  // std::cout << estl::tree::pretty(t) << "\n";
+  std::cout << estl::tree::dot(t) << "\n";
   // t.back().append(100);
   // estl::tree::Tree<int> ref = t.subtree(++t.begin());
   // t.append(7);

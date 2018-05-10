@@ -337,16 +337,14 @@ namespace tree {
           first_(nullptr),
           last_(nullptr),
           foot_(nullptr) {
-      // TODO(Arden): Compleate copy constructor. Be sure to not copy the
-      // pointer, but to actually make a copy of the node variable.
       if (copy.first_ != nullptr) {
         initialize();
         first_ = alloc_.allocate(1, nullptr);
         alloc_.construct(first_, *(copy.child_begin().node_));
         first_->parent_ = this;
-        Tree<_Tp, _Al> *previous = first_, *current;
+        Tree<_Tp, _Al>*previous = first_, *current;
         for (auto it = copy.child_begin(); it != copy.child_end(); ++it) {
-          if(it == copy.child_begin()) continue;
+          if (it == copy.child_begin()) continue;
           current = alloc_.allocate(1, nullptr);
           alloc_.construct(current, *(it.node_));
           current->parent_ = this;
@@ -358,10 +356,24 @@ namespace tree {
         foot_->prev_ = previous;
         this->last_ = previous;
       }
-      // if (copy.parent_ != nullptr) {
-      //   parent_ = alloc_.allocate(1, nullptr);
-      //   alloc_.construct(parent_, Tree<_Tp, _Al>(*copy.parent_));
-      // }
+    }
+    Tree(Tree<_Tp, _Al>&& move)
+        : node(std::move(move.node)),
+          parent_(move.parent_),
+          prev_(move.prev_),
+          next_(move.next_),
+          first_(move.first_),
+          last_(move.last_),
+          foot_(move.foot_) {
+      move.parent_ = nullptr;
+      move.prev_ = nullptr;
+      move.next_ = nullptr;
+      move.first_ = nullptr;
+      move.last_ = nullptr;
+      move.foot_ = nullptr;
+      for(auto it = child_begin(); it != child_end(); ++it){
+        it.node_->parent_ = this;
+      }
     }
     ~Tree() {
       if (first_ != nullptr) {
@@ -379,8 +391,44 @@ namespace tree {
     }
     Tree<_Tp, _Al>& operator=(const Tree<_Tp, _Al>& copy) {
       this->node = copy.node;
-      // children_ = copy.children_;
+      if (copy.first_ != nullptr) {
+        initialize();
+        first_ = alloc_.allocate(1, nullptr);
+        alloc_.construct(first_, *(copy.child_begin().node_));
+        first_->parent_ = this;
+        Tree<_Tp, _Al>*previous = first_, *current;
+        for (auto it = copy.child_begin(); it != copy.child_end(); ++it) {
+          if (it == copy.child_begin()) continue;
+          current = alloc_.allocate(1, nullptr);
+          alloc_.construct(current, *(it.node_));
+          current->parent_ = this;
+          previous->next_ = current;
+          current->prev_ = previous;
+          previous = current;
+        }
+        previous->next_ = foot_;
+        foot_->prev_ = previous;
+        this->last_ = previous;
+      }
       return *this;
+    }
+    Tree<_Tp, _Al>& operator=(Tree<_Tp, _Al>& move){
+      node = std::move(move.node);
+      parent_ = move.parent_;
+      prev_ = move.prev_;
+      next_ = move.next_;
+      first_ = move.first_;
+      last_ = move.last_;
+      foot_ = move.foot_;
+      move.parent_ = nullptr;
+      move.prev_ = nullptr;
+      move.next_ = nullptr;
+      move.first_ = nullptr;
+      move.last_ = nullptr;
+      move.foot_ = nullptr;
+      for(auto it = child_begin(); it != child_end(); ++it){
+        it.node_->parent_ = this;
+      }
     }
 
     reference at(size_type pos) { return *(begin() + pos).node_; }
@@ -512,9 +560,7 @@ namespace tree {
       return count;
     }
 
-    void clear() noexcept {
-      erase_children(const_iterator(this));
-    }
+    void clear() noexcept { erase_children(const_iterator(this)); }
 
     iterator insert(const_iterator pos, const _Tp& value) {
       if (pos.node_ == nullptr) {
@@ -564,12 +610,12 @@ namespace tree {
       erase_children(pos);
       if (pos.node_->prev_ == nullptr) {
         pos.node_->parent_->first_ = pos.node_->next_;
-      } else if (pos.node_->next_ != nullptr){
+      } else if (pos.node_->next_ != nullptr) {
         pos.node_->next_->prev_ = pos.node_->prev_;
       }
       if (pos.node_->next_ == nullptr) {
         pos.node_->parent_->last_ = pos.node_->prev_;
-      } else if (pos.node_->prev_ != nullptr){
+      } else if (pos.node_->prev_ != nullptr) {
         pos.node_->prev_->next_ = pos.node_->next_;
       }
       alloc_.destroy(pos.node_);
@@ -732,6 +778,27 @@ namespace tree {
     }
     return ret;
   }
+  template<typename _Tp>
+    std::string dot(const Tree<_Tp>& tree){
+      return dot(&tree);
+    }
+  template<typename _Tp>
+    std::string dot(const Tree<_Tp>* tree, std::string parent=std::string()){
+      std::stringstream ss;
+      ss << tree->node;
+      std::string node = "\"" + ss.str() + "\"";
+      std::string ret;
+      if(parent != std::string()){
+        ret += "  " + parent + " -- " + node + ";\n";
+      }
+      for(auto it = tree->child_begin(); it != tree->child_end(); ++it){
+        ret += dot(it.node_, node);
+      }
+      if(parent == std::string()){
+        ret = "graph tree {\n" + ret + "}";
+      }
+      return ret;
+    }
 
   template <typename _Tp>
   std::ostream& operator<<(std::ostream& out, Tree<_Tp>& tree) {
