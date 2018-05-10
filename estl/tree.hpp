@@ -329,13 +329,39 @@ namespace tree {
           first_(nullptr),
           last_(nullptr),
           foot_(nullptr) {}
-    Tree(const Tree<_Tp, _Al>& copy) : node(copy.node) {
+    Tree(const Tree<_Tp, _Al>& copy)
+        : node(copy.node),
+          parent_(nullptr),
+          prev_(nullptr),
+          next_(nullptr),
+          first_(nullptr),
+          last_(nullptr),
+          foot_(nullptr) {
       // TODO(Arden): Compleate copy constructor. Be sure to not copy the
       // pointer, but to actually make a copy of the node variable.
-      if (copy.parent_ != nullptr) {
-        parent_ = alloc_.allocate(1, nullptr);
-        alloc_.construct(parent_, Tree<_Tp, _Al>(*copy.parent_));
+      if (copy.first_ != nullptr) {
+        initialize();
+        first_ = alloc_.allocate(1, nullptr);
+        alloc_.construct(first_, *(copy.child_begin().node_));
+        first_->parent_ = this;
+        Tree<_Tp, _Al> *previous = first_, *current;
+        for (auto it = copy.child_begin(); it != copy.child_end(); ++it) {
+          if(it == copy.child_begin()) continue;
+          current = alloc_.allocate(1, nullptr);
+          alloc_.construct(current, *(it.node_));
+          current->parent_ = this;
+          previous->next_ = current;
+          current->prev_ = previous;
+          previous = current;
+        }
+        previous->next_ = foot_;
+        foot_->prev_ = previous;
+        this->last_ = previous;
       }
+      // if (copy.parent_ != nullptr) {
+      //   parent_ = alloc_.allocate(1, nullptr);
+      //   alloc_.construct(parent_, Tree<_Tp, _Al>(*copy.parent_));
+      // }
     }
     ~Tree() {
       if (first_ != nullptr) {
@@ -487,9 +513,7 @@ namespace tree {
     }
 
     void clear() noexcept {
-      while (this->next_ != foot_) {
-        erase(iterator(this->next_));
-      }
+      erase_children(const_iterator(this));
     }
 
     iterator insert(const_iterator pos, const _Tp& value) {
@@ -538,15 +562,15 @@ namespace tree {
 
     iterator erase(const_iterator pos) {
       erase_children(pos);
-      if (pos->prev_ == nullptr) {
-        pos->parent_->first_ = pos->next_;
-      } else {
-        pos->next_->prev_ = pos->prev_;
+      if (pos.node_->prev_ == nullptr) {
+        pos.node_->parent_->first_ = pos.node_->next_;
+      } else if (pos.node_->next_ != nullptr){
+        pos.node_->next_->prev_ = pos.node_->prev_;
       }
-      if (pos->next_ == nullptr) {
-        pos->parent_->last_ = pos->prev_;
-      } else {
-        pos->next_->prev_ = pos->prev_;
+      if (pos.node_->next_ == nullptr) {
+        pos.node_->parent_->last_ = pos.node_->prev_;
+      } else if (pos.node_->prev_ != nullptr){
+        pos.node_->prev_->next_ = pos.node_->next_;
       }
       alloc_.destroy(pos.node_);
       alloc_.deallocate(pos.node_, 1);
