@@ -10,3 +10,4 @@ estl.out
 unit-test
 .gdb_history
 coverage/*
+core
