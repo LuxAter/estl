@@ -91,6 +91,8 @@ help:
 	printf "List of all acceptable make targets\n\n"
 	$(call help,all,Builds external, source, and test files and projects)
 	$(call help,clean,Clean files created from external, source, and test)
+	$(call help,install,Installs include directories and libraries)
+	$(call help,uninstall,Removes installed include directores and libraries)
 	$(call help,help,Display this help page)
 	$(call help,external,Builds external files and projects)
 	$(call help,clean-external,Cleans files created from external)
@@ -98,6 +100,9 @@ help:
 	$(call help,clean-source,Cleans files created from source)
 	$(call help,test,Builds test files and projects)
 	$(call help,clean-test,Cleans files created from test)
+	$(call help,docs,Compiles documentation)
+	$(call help,clean-docs,Cleans files created from docs)
+	$(call help,runtest,Compiles and runs unit tests)
 
 .PHONY : root-access
 root-access:
