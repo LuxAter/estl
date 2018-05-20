@@ -8,6 +8,35 @@
 #include <iostream>
 #include <memory>
 
+namespace estl {
+namespace logger {
+
+#define Default() Logger::Get()->GetLogger()
+#define Fatal(msg, ...)                                                    \
+  Logger::Get()->GetLogger()->_LogFatal(msg, __FILE__, __func__, __LINE__, \
+                                        ##__VA_ARGS__)
+#define Error(msg, ...)                                                    \
+  Logger::Get()->GetLogger()->_LogError(msg, __FILE__, __func__, __LINE__, \
+                                        ##__VA_ARGS__)
+#define Warning(msg, ...)                                                    \
+  Logger::Get()->GetLogger()->_LogWarning(msg, __FILE__, __func__, __LINE__, \
+                                          ##__VA_ARGS__)
+#define Success(msg, ...)                                                    \
+  Logger::Get()->GetLogger()->_LogSuccess(msg, __FILE__, __func__, __LINE__, \
+                                          ##__VA_ARGS__)
+#define Debug(msg, ...)                                                    \
+  Logger::Get()->GetLogger()->_LogDebug(msg, __FILE__, __func__, __LINE__, \
+                                        ##__VA_ARGS__)
+#define Trace(msg, ...)                                                    \
+  Logger::Get()->GetLogger()->_LogTrace(msg, __FILE__, __func__, __LINE__, \
+                                        ##__VA_ARGS__)
+#define Info(msg, ...)                                                    \
+  Logger::Get()->GetLogger()->_LogInfo(msg, __FILE__, __func__, __LINE__, \
+                                       ##__VA_ARGS__)
+#define Version(msg, ...)                                                    \
+  Logger::Get()->GetLogger()->_LogVersion(msg, __FILE__, __func__, __LINE__, \
+                                          ##__VA_ARGS__)
+
 #define Log(type, msg, ...) \
   _Log(type, msg, __FILE__, __func__, __LINE__, ##__VA_ARGS__)
 #define LogFatal(msg, ...) \
@@ -133,8 +162,6 @@
   CounterLogger::Get()->_LogVersion(msg, __FILE__, __func__, __LINE__, \
                                     ##__VA_ARGS__)
 
-namespace estl {
-namespace logger {
   enum LogType {
     FATAL = 0,
     ERROR = 1,
@@ -146,10 +173,10 @@ namespace logger {
     VERSION = 7
   };
 
-  class Logger {
+  class LoggerBase {
    public:
-    Logger() {}
-    virtual ~Logger() {}
+    LoggerBase() {}
+    virtual ~LoggerBase() {}
 
     void _Log(LogType type, std::string_view message, std::string_view file,
               std::string_view func, unsigned int line, va_list args) {
@@ -236,6 +263,41 @@ namespace logger {
       va_end(args);
     }
 
+    void FormatAll(std::string fmt){
+      for (std::size_t i = 0; i < 8; i++){
+        log_fmt_[i] = fmt;
+      }
+    }
+
+    void Format(LogType type, std::string fmt){
+      log_fmt_[type] = fmt;
+    }
+
+    void FormatFatal(std::string fmt){
+      log_fmt_[FATAL] = fmt;
+    }
+    void FormatError(std::string fmt){
+      log_fmt_[ERROR] = fmt;
+    }
+    void FormatWarning(std::string fmt){
+      log_fmt_[WARNING] = fmt;
+    }
+    void FormatSuccess(std::string fmt){
+      log_fmt_[SUCCESS] = fmt;
+    }
+    void FormatDebug(std::string fmt){
+      log_fmt_[DEBUG] = fmt;
+    }
+    void FormatTrace(std::string fmt){
+      log_fmt_[TRACE] = fmt;
+    }
+    void FormatInfo(std::string fmt){
+      log_fmt_[INFO] = fmt;
+    }
+    void FormatVersion(std::string fmt){
+      log_fmt_[VERSION] = fmt;
+    }
+
    protected:
     std::array<std::string, 3> time_fmt_ = {
         {"%Y-%m-%d", "%H:%M:%S", "%Y-%m-%d %H:%M:%S"}};
@@ -285,9 +347,9 @@ namespace logger {
     }
   };
 
-  class ConsoleLogger : public Logger {
+  class ConsoleLogger : public LoggerBase {
    public:
-    ConsoleLogger() : Logger() { SetColor(true); }
+    ConsoleLogger() : LoggerBase() { SetColor(true); }
     virtual ~ConsoleLogger() {}
 
     inline static ConsoleLogger* Get() {
@@ -336,10 +398,10 @@ namespace logger {
     bool color_ = true;
   };
 
-  class FileLogger : public Logger {
+  class FileLogger : public LoggerBase {
    public:
-    FileLogger() : Logger() {}
-    FileLogger(std::string_view file) : Logger() { file_.open(file.data()); }
+    FileLogger() : LoggerBase() {}
+    FileLogger(std::string file) : LoggerBase(), file_path_(file) {}
     virtual ~FileLogger() {
       if (file_.is_open()) {
         file_.close();
@@ -351,11 +413,9 @@ namespace logger {
       return &instance;
     }
 
-    void Open(std::string_view file) {
-      if (file_.is_open()) {
-        file_.close();
-      }
-      file_.open(file.data());
+    void Open(std::string file) {
+      Close();
+      file_path_ = file;
     }
     void Close() {
       if (file_.is_open()) {
@@ -373,13 +433,23 @@ namespace logger {
    private:
     virtual void HandleLog(LogType type, std::string log_msg) {
       if (file_.is_open()) {
-        file_ << log_msg;
+        file_ << log_msg << std::endl;
         if (type <= flush_level_) {
           file_.flush();
         }
+      } else {
+        file_.open(file_path_.data());
+        if (file_.is_open()) {
+          file_ << log_msg << std::endl;
+          if (type <= flush_level_) {
+            file_.flush();
+          }
+        }
       }
     }
+
     std::ofstream file_;
+    std::string file_path_;
     LogType flush_level_ = WARNING;
   };
 
@@ -411,6 +481,21 @@ namespace logger {
     inline static DailyLogger* Get() {
       static DailyLogger instance;
       return &instance;
+    }
+
+    void SetPath(std::string path) {
+      this->Close();
+      char fmt[255];
+      std::time_t raw_time;
+      std::time(&raw_time);
+      std::tm* current_tm = std::localtime(&raw_time);
+      std::strftime(fmt, 255, time_fmt_[0].c_str(), current_tm);
+      std::string date_str(fmt);
+      if (path.back() == '/') {
+        this->Open(path + date_str + ".log");
+      } else {
+        this->Open(path + '/' + date_str + ".log");
+      }
     }
   };
 
@@ -463,6 +548,34 @@ namespace logger {
       return &instance;
     }
 
+    void SetPath(std::string path) {
+      char fmt[255];
+      std::time_t raw_time;
+      std::time(&raw_time);
+      std::tm* current_tm = std::localtime(&raw_time);
+      std::strftime(fmt, 255, time_fmt_[0].c_str(), current_tm);
+      std::string date_str(fmt);
+      std::size_t count = 0;
+      if (path.back() == '/') {
+        count = FileCounter(path + date_str);
+      } else {
+        count = FileCounter(path);
+      }
+      if (count != 0) {
+        if (path.back() == '/') {
+          this->Open(path + date_str + "_" + std::to_string(count) + ".log");
+        } else {
+          this->Open(path + "_" + std::to_string(count) + ".log");
+        }
+      } else {
+        if (path.back() == '/') {
+          this->Open(path + date_str + ".log");
+        } else {
+          this->Open(path + ".log");
+        }
+      }
+    }
+
    private:
     unsigned int FileCounter(std::string path) {
       unsigned int counter = 0;
@@ -477,6 +590,33 @@ namespace logger {
       }
       return counter;
     }
+  };
+
+  class Logger {
+   public:
+    enum LoggerType { CONSOLE = 0, DAILY = 1, COUNTER = 2 };
+    Logger() {}
+    virtual ~Logger() {}
+
+    inline static Logger* Get() {
+      static Logger instance;
+      return &instance;
+    }
+    inline LoggerBase* GetLogger() {
+      switch (type_) {
+        case CONSOLE:
+          return ConsoleLogger::Get();
+        case DAILY:
+          return DailyLogger::Get();
+        case COUNTER:
+          return CounterLogger::Get();
+      }
+    }
+
+    void SetDefault(LoggerType type) { type_ = type; }
+
+   private:
+    LoggerType type_ = CONSOLE;
   };
 
 }  // namespace logger
