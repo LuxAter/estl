@@ -3,8 +3,8 @@
 [![Version](https://img.shields.io/github/tag/LuxAtrumStudio/estl.svg?style=for-the-badge)](https://github.com/LuxAtrumStudio/estl)
 [![Documentation](https://img.shields.io/badge/Documentation-gh--pages-blue.svg?style=for-the-badge)](https://luxatrumstudio.github.io/estl/)
 
-[![Build_Status](https://img.shields.io/travis/LuxAtrumStudio/estl/feature/iostream.svg?style=for-the-badge)](https://travis-ci.org/LuxAtrumStudio/estl)
-[![Code_Coverage](https://img.shields.io/codecov/c/github/LuxAtrumStudio/estl/feature/iostream.svg?style=for-the-badge)](https://codecov.io/gh/LuxAtrumStudio/estl)
+[![Build_Status](https://img.shields.io/travis/LuxAtrumStudio/estl/development.svg?style=for-the-badge)](https://travis-ci.org/LuxAtrumStudio/estl)
+[![Code_Coverage](https://img.shields.io/codecov/c/github/LuxAtrumStudio/estl/development.svg?style=for-the-badge)](https://codecov.io/gh/LuxAtrumStudio/estl)
 [![Code Quality](https://img.shields.io/codacy/grade/9dd431f11f53414ab360f1f34e1eef49.svg?style=for-the-badge)](https://www.codacy.com/app/LuxAtrumStudio/estl/dashboard)
 
 [![GitHub commit activity the past week, 4 weeks, year](https://img.shields.io/github/commit-activity/y/LuxAtrumStudio/estl.svg?style=for-the-badge)](<>)
@@ -34,10 +34,28 @@ can be found on the documentation for _ArgParse_.
 
 The *Format* file is used for formatting string. The syntax of the format
 string follows the formatting style found in Python's format function. The
-formatted arguments will first attempts a member funciton called `format`, then
+formatted arguments will first attempts a member function called `format`, then
 will attempt `printf` formatting, then will resort to `ostream` formatting. All
 of the formatted strings are collected and returned as one string matching the
 defined specifier.
+
+### Logger ###
+
+The *Logger* file is used for an advanced, but easy to use logging system. All
+of the loggers are singletons, allowing consistent logging across the program.
+A collection of macros allow for the logging system to determine the source
+file, function, and line number that the log message was called from. All log
+messages can be formatted as desired, allowing for extreme control of the
+output. There are a selection of different loggers to chose from:
+
+* ConsoleLogger
+* FileLogger
+* DailyLogger
+* CounterLogger
+* StreamLogger
+
+    Each of these loggers handle logging messages differently, and more detail is
+    given in the docs.
 
 ### Matrix ###
 
@@ -53,6 +71,19 @@ object. This new implementation makes use of variadic templates, so that any
 class or struct can be passed as an argument, using its respective `operator<<`
 to print it to the stream. There are some default bindings for the default
 streams.
+
+### Tree ###
+
+The *tree* class is an implementation of an arbitrary tree structure. It
+provides easy ways to add or remove children. There are three different 
+iterators that can be used for iterating over the nodes of the tree including:
+
+* depth_iterator
+* sibling_iterator
+* leaf_iterator
+
+The file also provides methods for viewing the elements in the tree as either a
+multi-line string or a single-line string.
 
 ### Variable ###
 
