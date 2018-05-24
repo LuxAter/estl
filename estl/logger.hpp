@@ -162,6 +162,34 @@ namespace logger {
   CounterLogger::Get()->_LogVersion(msg, __FILE__, __func__, __LINE__, \
                                     ##__VA_ARGS__)
 
+#define StreamLog(type, msg, ...)                                    \
+  StreamLogger::Get()->_Log(type, msg, __FILE__, __func__, __LINE__, \
+                             ##__VA_ARGS__)
+#define StreamLogFatal(msg, ...)                                    \
+  StreamLogger::Get()->_LogFatal(msg, __FILE__, __func__, __LINE__, \
+                                  ##__VA_ARGS__)
+#define StreamLogError(msg, ...)                                    \
+  StreamLogger::Get()->_LogError(msg, __FILE__, __func__, __LINE__, \
+                                  ##__VA_ARGS__)
+#define StreamLogWarning(msg, ...)                                    \
+  StreamLogger::Get()->_LogWarning(msg, __FILE__, __func__, __LINE__, \
+                                    ##__VA_ARGS__)
+#define StreamLogSuccess(msg, ...)                                    \
+  StreamLogger::Get()->_LogSuccess(msg, __FILE__, __func__, __LINE__, \
+                                    ##__VA_ARGS__)
+#define StreamLogDebug(msg, ...)                                    \
+  StreamLogger::Get()->_LogDebug(msg, __FILE__, __func__, __LINE__, \
+                                  ##__VA_ARGS__)
+#define StreamLogTrace(msg, ...)                                    \
+  StreamLogger::Get()->_LogTrace(msg, __FILE__, __func__, __LINE__, \
+                                  ##__VA_ARGS__)
+#define StreamLogInfo(msg, ...)                                    \
+  StreamLogger::Get()->_LogInfo(msg, __FILE__, __func__, __LINE__, \
+                                 ##__VA_ARGS__)
+#define StreamLogVersion(msg, ...)                                    \
+  StreamLogger::Get()->_LogVersion(msg, __FILE__, __func__, __LINE__, \
+                                    ##__VA_ARGS__)
+
   enum LogType {
     FATAL = 0,
     ERROR = 1,
@@ -263,40 +291,22 @@ namespace logger {
       va_end(args);
     }
 
-    void FormatAll(std::string fmt){
-      for (std::size_t i = 0; i < 8; i++){
+    void FormatAll(std::string fmt) {
+      for (std::size_t i = 0; i < 8; i++) {
         log_fmt_[i] = fmt;
       }
     }
 
-    void Format(LogType type, std::string fmt){
-      log_fmt_[type] = fmt;
-    }
+    void Format(LogType type, std::string fmt) { log_fmt_[type] = fmt; }
 
-    void FormatFatal(std::string fmt){
-      log_fmt_[FATAL] = fmt;
-    }
-    void FormatError(std::string fmt){
-      log_fmt_[ERROR] = fmt;
-    }
-    void FormatWarning(std::string fmt){
-      log_fmt_[WARNING] = fmt;
-    }
-    void FormatSuccess(std::string fmt){
-      log_fmt_[SUCCESS] = fmt;
-    }
-    void FormatDebug(std::string fmt){
-      log_fmt_[DEBUG] = fmt;
-    }
-    void FormatTrace(std::string fmt){
-      log_fmt_[TRACE] = fmt;
-    }
-    void FormatInfo(std::string fmt){
-      log_fmt_[INFO] = fmt;
-    }
-    void FormatVersion(std::string fmt){
-      log_fmt_[VERSION] = fmt;
-    }
+    void FormatFatal(std::string fmt) { log_fmt_[FATAL] = fmt; }
+    void FormatError(std::string fmt) { log_fmt_[ERROR] = fmt; }
+    void FormatWarning(std::string fmt) { log_fmt_[WARNING] = fmt; }
+    void FormatSuccess(std::string fmt) { log_fmt_[SUCCESS] = fmt; }
+    void FormatDebug(std::string fmt) { log_fmt_[DEBUG] = fmt; }
+    void FormatTrace(std::string fmt) { log_fmt_[TRACE] = fmt; }
+    void FormatInfo(std::string fmt) { log_fmt_[INFO] = fmt; }
+    void FormatVersion(std::string fmt) { log_fmt_[VERSION] = fmt; }
 
    protected:
     std::array<std::string, 3> time_fmt_ = {
@@ -592,9 +602,45 @@ namespace logger {
     }
   };
 
+  class StreamLogger : public LoggerBase {
+   public:
+    StreamLogger() : LoggerBase(), stream_(nullptr) {}
+    StreamLogger(std::ostream* out) : LoggerBase(), stream_(out) {}
+    virtual ~StreamLogger() {}
+
+    inline static StreamLogger* Get() {
+      static StreamLogger instance;
+      return &instance;
+    }
+
+    void SetStream(std::ostream* out){
+      stream_ = out;
+    }
+
+    void SetFlushLevel(LogType type) { flush_level_ = type; }
+    void Flush() {
+      if (stream_ != nullptr) {
+        *stream_ << std::flush;
+      }
+    }
+
+   private:
+    virtual void HandleLog(LogType type, std::string log_msg) {
+      if (stream_ != nullptr) {
+        *stream_ << log_msg << std::endl;
+        if (type <= flush_level_) {
+          *stream_ << std::flush;
+        }
+      }
+    }
+
+    LogType flush_level_;
+    std::ostream* stream_;
+  };
+
   class Logger {
    public:
-    enum LoggerType { CONSOLE = 0, DAILY = 1, COUNTER = 2 };
+    enum LoggerType { CONSOLE = 0, DAILY = 1, COUNTER = 2, STREAM = 3 };
     Logger() {}
     virtual ~Logger() {}
 
@@ -610,6 +656,8 @@ namespace logger {
           return DailyLogger::Get();
         case COUNTER:
           return CounterLogger::Get();
+        case STREAM:
+          return StreamLogger::Get();
       }
     }
 
