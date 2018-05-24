@@ -924,7 +924,7 @@ namespace format {
      * @return Formatted string representing specified argument.
      */
     template <std::size_t I = 0, typename... Args>
-    inline typename std::enable_if<I == sizeof...(Args), std::string>::type
+    inline typename std::enable_if<I >= sizeof...(Args), std::string>::type
     aiformat(std::size_t index, int data[8], std::tuple<Args...> args) {
       throw std::out_of_range("argument index (which is " +
                               std::to_string(index) +
