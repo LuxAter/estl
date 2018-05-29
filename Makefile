@@ -156,4 +156,5 @@ clean-docs:
 
 .PHONY: runtest
 runtest: test
+	find . -name "*.gcda" -delete
 	./unit-test --gtest_color=yes

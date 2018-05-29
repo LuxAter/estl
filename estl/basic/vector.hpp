@@ -13,7 +13,7 @@ namespace base {
    public:
     Vec2() : x(T()), y(T()) {}
     Vec2(const T& a) : x(a), y(a) {}
-    Vec2(const T& a, const T& b, const T& c) : x(a), y(b) {}
+    Vec2(const T& a, const T& b) : x(a), y(b) {}
     explicit Vec2(const std::array<T, 2>& vec) : x(vec[0]), y(vec[1]) {}
     explicit Vec2(const Vec2<T>& vec) : x(vec.x), y(vec.y) {}
     ~Vec2() {}
@@ -231,11 +231,11 @@ namespace base {
   }
   template <typename T>
   inline bool operator<=(const Vec2<T>& lhs, const Vec2<T>& rhs) {
-    return !(rhs > lhs);
+    return !(lhs > rhs);
   }
   template <typename T>
   inline bool operator>=(const Vec2<T>& lhs, const Vec2<T>& rhs) {
-    return !(rhs < lhs);
+    return !(lhs < rhs);
   }
   template <typename T>
   inline bool operator==(const Vec3<T>& lhs, const Vec3<T>& rhs) {
@@ -269,11 +269,11 @@ namespace base {
   }
   template <typename T>
   inline bool operator<=(const Vec3<T>& lhs, const Vec3<T>& rhs) {
-    return !(rhs > lhs);
+    return !(lhs > rhs);
   }
   template <typename T>
   inline bool operator>=(const Vec3<T>& lhs, const Vec3<T>& rhs) {
-    return !(rhs < lhs);
+    return !(lhs < rhs);
   }
   template <typename T>
   inline bool operator==(const Vec4<T>& lhs, const Vec4<T>& rhs) {
@@ -312,11 +312,11 @@ namespace base {
   }
   template <typename T>
   inline bool operator<=(const Vec4<T>& lhs, const Vec4<T>& rhs) {
-    return !(rhs > lhs);
+    return !(lhs > rhs);
   }
   template <typename T>
   inline bool operator>=(const Vec4<T>& lhs, const Vec4<T>& rhs) {
-    return !(rhs < lhs);
+    return !(lhs < rhs);
   }
 
   template <typename T>
