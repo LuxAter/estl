@@ -37,13 +37,7 @@ namespace base {
       return *this;
     }
 
-    inline std::array<T, N>& operator[](unsigned val) {
-      std::array<T, N> arr;
-      for (std::size_t i = val; i < N; ++i) {
-        arr[i] = data_[i];
-      }
-      return arr;
-    }
+    inline T& operator[](unsigned val) { return data_[val]; }
     inline T& operator()(unsigned row, unsigned col) {
       return data_[col + (row * N)];
     }
@@ -121,6 +115,7 @@ namespace base {
     for (std::size_t i = 0; i < N * N; ++i) {
       mat.data_[i] = lhs.data_[i] + rhs.data_[i];
     }
+    return mat;
   }
   template <typename T, std::size_t N>
   inline Mat<T, N> operator-(const Mat<T, N>& lhs, const Mat<T, N>& rhs) {
@@ -128,6 +123,7 @@ namespace base {
     for (std::size_t i = 0; i < N * N; ++i) {
       mat.data_[i] = lhs.data_[i] - rhs.data_[i];
     }
+    return mat;
   }
   template <typename T, std::size_t N>
   inline Mat<T, N> operator*(const Mat<T, N>& lhs, const Mat<T, N>& rhs) {
@@ -135,6 +131,7 @@ namespace base {
     for (std::size_t i = 0; i < N * N; ++i) {
       mat.data_[i] = lhs.data_[i] * rhs.data_[i];
     }
+    return mat;
   }
   template <typename T, std::size_t N>
   inline Mat<T, N> operator/(const Mat<T, N>& lhs, const Mat<T, N>& rhs) {
@@ -142,6 +139,7 @@ namespace base {
     for (std::size_t i = 0; i < N * N; ++i) {
       mat.data_[i] = lhs.data_[i] / rhs.data_[i];
     }
+    return mat;
   }
   template <typename T, std::size_t N>
   inline Mat<T, N> operator+(const Mat<T, N>& lhs, const T& rhs) {
@@ -149,6 +147,7 @@ namespace base {
     for (std::size_t i = 0; i < N * N; ++i) {
       mat.data_[i] = lhs.data_[i] + rhs;
     }
+    return mat;
   }
   template <typename T, std::size_t N>
   inline Mat<T, N> operator-(const Mat<T, N>& lhs, const T& rhs) {
@@ -156,6 +155,7 @@ namespace base {
     for (std::size_t i = 0; i < N * N; ++i) {
       mat.data_[i] = lhs.data_[i] - rhs;
     }
+    return mat;
   }
   template <typename T, std::size_t N>
   inline Mat<T, N> operator*(const Mat<T, N>& lhs, const T& rhs) {
@@ -163,6 +163,7 @@ namespace base {
     for (std::size_t i = 0; i < N * N; ++i) {
       mat.data_[i] = lhs.data_[i] * rhs;
     }
+    return mat;
   }
   template <typename T, std::size_t N>
   inline Mat<T, N> operator/(const Mat<T, N>& lhs, const T& rhs) {
@@ -170,6 +171,7 @@ namespace base {
     for (std::size_t i = 0; i < N * N; ++i) {
       mat.data_[i] = lhs.data_[i] / rhs;
     }
+    return mat;
   }
 
   template <typename T>
@@ -211,9 +213,9 @@ namespace base {
   template <typename T>
   inline Vec2<T> Dot(const Mat<T, 4>& mat, const Vec2<T>& vec) {
     return Vec2<T>(mat.data_[0] * vec.x + mat.data_[1] * vec.y + mat.data_[2] +
-                       mat.data[3],
+                       mat.data_[3],
                    mat.data_[4] * vec.x + mat.data_[5] * vec.y + mat.data_[6] +
-                       mat.data[7]);
+                       mat.data_[7]);
   }
   template <typename T>
   inline Vec3<T> Dot(const Mat<T, 4>& mat, const Vec3<T>& vec) {
@@ -233,7 +235,7 @@ namespace base {
                    mat.data_[8] * vec.x + mat.data_[9] * vec.y +
                        mat.data_[10] * vec.z + mat.data_[11] * vec.w,
                    mat.data_[12] * vec.x + mat.data_[13] * vec.y +
-                       mat.data[14] * vec.z + mat.data[15] * vec.w);
+                       mat.data_[14] * vec.z + mat.data_[15] * vec.w);
   }
   template <typename T, std::size_t N>
   inline Mat<T, N> Dot(const Mat<T, N>& lhs, const Mat<T, N>& rhs) {
