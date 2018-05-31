@@ -28,6 +28,7 @@ namespace tree {
     class depth_iterator : public iterator_base {
      public:
       depth_iterator() : node_(nullptr) {}
+      depth_iterator(const depth_iterator& copy) : node_(copy.node_) {}
       depth_iterator(Tree<_Tp, _Al>* node) : node_(node) {}
 
       _Tp& operator*() const { return node_->node; }
@@ -122,6 +123,8 @@ namespace tree {
     class const_depth_iterator : public iterator_base {
      public:
       const_depth_iterator() : node_(nullptr) {}
+      const_depth_iterator(const const_depth_iterator& copy)
+          : node_(copy.node_) {}
       const_depth_iterator(Tree<_Tp, _Al>* node) : node_(node) {}
       const_depth_iterator(const Tree<_Tp, _Al>* node) : node_(node) {}
 
@@ -217,6 +220,7 @@ namespace tree {
     class sibling_iterator : public iterator_base {
      public:
       sibling_iterator() : node_(nullptr) {}
+      sibling_iterator(const sibling_iterator& copy) : node_(copy.node_) {}
       sibling_iterator(Tree<_Tp, _Al>* node) : node_(node) {}
 
       _Tp& operator*() const { return node_->node; }
@@ -285,6 +289,8 @@ namespace tree {
     class const_sibling_iterator : public iterator_base {
      public:
       const_sibling_iterator() : node_(nullptr) {}
+      const_sibling_iterator(const const_sibling_iterator& copy)
+          : node_(copy.node_) {}
       const_sibling_iterator(Tree<_Tp, _Al>* node) : node_(node) {}
       const_sibling_iterator(const Tree<_Tp, _Al>* node) : node_(node) {}
 
@@ -354,6 +360,7 @@ namespace tree {
     class leaf_iterator : public iterator_base {
      public:
       leaf_iterator() : node_(nullptr) {}
+      leaf_iterator(const leaf_iterator& copy) : node_(copy.node_) {}
       leaf_iterator(Tree<_Tp, _Al>* node) : node_(node) {
         if (node_->first_ != nullptr) {
           while (node_->first_ != nullptr) {
@@ -454,6 +461,8 @@ namespace tree {
     class const_leaf_iterator : public iterator_base {
      public:
       const_leaf_iterator() : node_(nullptr) {}
+      const_leaf_iterator(const const_leaf_iterator& copy)
+          : node_(copy.node_) {}
       const_leaf_iterator(Tree<_Tp, _Al>* node) : node_(node) {
         if (node_->first_ != nullptr) {
           while (node_->first_ != nullptr) {
@@ -974,7 +983,63 @@ namespace tree {
     template <typename _Iter>
     typename std::enable_if<std::is_base_of<iterator_base, _Iter>::value,
                             _Iter>::type
+    insert(_Iter pos, const Tree<_Tp, _Al>& tree) {
+      if (pos == nullptr) {
+        initialize();
+        pos = _Iter(foot_);
+      }
+      Tree<_Tp, _Al>* nd = alloc_.allocate(1, nullptr);
+      alloc_.construct(nd, tree);
+      nd->parent_ = pos.node_->parent_;
+      nd->next_ = pos.node_;
+      nd->prev_ = pos.node_->prev_;
+      pos.node_->prev = nd;
+      if (nd->prev_ == nullptr) {
+        if (nd->parent_ != nullptr) {
+          nd->parent_->first_ = nd;
+        }
+      } else {
+        nd->prev_->next_ = nd;
+      }
+      if (pos == foot_) {
+        foot_->prev_ = nd;
+        nd->parent_->last_ = nd;
+      }
+      return _Iter(nd);
+    }
+    template <typename _Iter>
+    typename std::enable_if<std::is_base_of<iterator_base, _Iter>::value,
+                            _Iter>::type
+    insert(_Iter pos, Tree<_Tp, _Al>&& tree) {
+      if (pos == nullptr) {
+        initialize();
+        pos = _Iter(foot_);
+      }
+      Tree<_Tp, _Al>* nd = alloc_.allocate(1, nullptr);
+      alloc_.construct(nd, tree);
+      nd->parent_ = pos.node_->parent_;
+      nd->next_ = pos.node_;
+      nd->prev_ = pos.node_->prev_;
+      pos.node_->prev = nd;
+      if (nd->prev_ == nullptr) {
+        if (nd->parent_ != nullptr) {
+          nd->parent_->first_ = nd;
+        }
+      } else {
+        nd->prev_->next_ = nd;
+      }
+      if (pos == foot_) {
+        foot_->prev_ = nd;
+        nd->parent_->last_ = nd;
+      }
+      return _Iter(nd);
+    }
+
+    template <typename _Iter>
+    typename std::enable_if<std::is_base_of<iterator_base, _Iter>::value,
+                            _Iter>::type
     erase(_Iter pos) {
+      _Iter ret = pos;
       erase_children(pos);
       if (pos.node_->prev_ == nullptr) {
         pos.node_->parent_->first_ = pos.node_->next_;
@@ -988,6 +1053,7 @@ namespace tree {
       }
       alloc_.destroy(pos.node_);
       alloc_.deallocate(pos.node_, 1);
+      return ret;
     }
 
     void erase_children(const iterator& pos) {
@@ -1028,6 +1094,7 @@ namespace tree {
 
     void push_back(const _Tp& value) { append(value); }
     void push_back(_Tp&& value) { append(value); }
+    void push_back(const Tree<_Tp, _Al>& tree) { append(tree); }
 
     void pop_back() {
       if (last_ != nullptr) {
