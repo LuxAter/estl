@@ -14,8 +14,7 @@ export DOC_DIR= docs
 
 export BASE_PATH=$(shell pwd)
 
-export COMPILER=g++
-# export COMPILER=clang++
+export COMPILER=clang++
 export CXXFLAGS= -MMD -std=c++17 -w -c -fPIC
 
 export INSTALL_PATH=/usr/local
@@ -75,7 +74,7 @@ install: source root-access install-source
 	if [ $(TYPE) == "lib" ] && ! [ -d "$(INSTALL_PATH)/include/$(NAME)" ]; then \
 	  $(call print,Installing include directory,$(INSTALL_COLOR));\
 	  sudo mkdir $(INSTALL_PATH)/include/ -p;\
-	  sudo cp $(INCLUDE_DIR)/ $(INSTALL_PATH)/include/estl/ -r;\
+	  sudo cp $(INCLUDE_DIR)/ $(INSTALL_PATH)/include/ -r;\
 	fi
 
 .PHONY : uninstall
@@ -162,4 +161,5 @@ clean-docs:
 
 .PHONY: runtest
 runtest: test
+	find . -name "*.gcda" -delete
 	./unit-test --gtest_color=yes
