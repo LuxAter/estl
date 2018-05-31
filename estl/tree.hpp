@@ -928,6 +928,39 @@ namespace tree {
     template <typename _Iter>
     typename std::enable_if<std::is_base_of<iterator_base, _Iter>::value,
                             _Iter>::type
+    replace(_Iter pos, _Tp&& value) {
+      _Iter res = insert(pos, value);
+      erase(pos);
+      return res;
+    }
+    template <typename _Iter>
+    typename std::enable_if<std::is_base_of<iterator_base, _Iter>::value,
+                            _Iter>::type
+    replace(_Iter pos, const _Tp& value) {
+      _Iter res = insert(pos, value);
+      erase(pos);
+      return res;
+    }
+    template <typename _Iter>
+    typename std::enable_if<std::is_base_of<iterator_base, _Iter>::value,
+                            _Iter>::type
+    replace(_Iter pos, const Tree<_Tp, _Al>& value) {
+      _Iter res = insert(pos, value);
+      erase(pos);
+      return res;
+    }
+    template <typename _Iter>
+    typename std::enable_if<std::is_base_of<iterator_base, _Iter>::value,
+                            _Iter>::type
+    replace(_Iter pos, Tree<_Tp, _Al>&& value) {
+      _Iter res = insert(pos, value);
+      erase(pos);
+      return res;
+    }
+
+    template <typename _Iter>
+    typename std::enable_if<std::is_base_of<iterator_base, _Iter>::value,
+                            _Iter>::type
     insert(_Iter pos, _Tp&& value) {
       if (pos == nullptr) {
         initialize();
@@ -993,7 +1026,7 @@ namespace tree {
       nd->parent_ = pos.node_->parent_;
       nd->next_ = pos.node_;
       nd->prev_ = pos.node_->prev_;
-      pos.node_->prev = nd;
+      pos.node_->prev_ = nd;
       if (nd->prev_ == nullptr) {
         if (nd->parent_ != nullptr) {
           nd->parent_->first_ = nd;
