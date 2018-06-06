@@ -26,6 +26,10 @@ int main(int argc, char const* argv[]) {
   for(auto it = a.leaf_begin(); it != a.leaf_end(); ++it){
     std::cout << *it << "\n";
   }
+  std::cout << "====\n";
+  for(auto it = a.at(1).fixed_begin(); it != a.at(1).fixed_end(); ++it){
+    std::cout << *it << '\n';
+  }
   // std::cout << a.size() << "\n";
   // std::cout << a.child_size() << "\n";
   // std::cout << a.leaf_size() << "\n";

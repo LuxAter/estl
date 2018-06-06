@@ -217,6 +217,208 @@ namespace tree {
       }
       const Tree<_Tp, _Al>* node_;
     };
+    class fixed_depth_iterator : public iterator_base {
+     public:
+      fixed_depth_iterator() : node_(nullptr), top_(nullptr) {}
+      fixed_depth_iterator(const fixed_depth_iterator& copy)
+          : node_(copy.node_), top_(copy.top_) {}
+      fixed_depth_iterator(Tree<_Tp, _Al>* node) : node_(node), top_(node) {}
+      fixed_depth_iterator(Tree<_Tp, _Al>* node, Tree<_Tp, _Al>* top)
+          : node_(node), top_(top) {}
+
+      _Tp& operator*() const { return node_->node; }
+      _Tp* operator->() const { return &(node_->node); }
+
+      bool operator==(const fixed_depth_iterator& rhs) const {
+        if (rhs.node_ == node_) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      bool operator!=(const fixed_depth_iterator& rhs) const {
+        if (rhs.node_ != node_) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      fixed_depth_iterator& operator++() {
+        if (node_ == nullptr) {
+          throw std::logic_error(
+              "Tree(fixed_depth_iterator) iterator node is uninitialized");
+        }
+        if (node_->first_ != nullptr) {
+          node_ = node_->first_;
+        } else {
+          while (
+              node_->parent_ != nullptr && node_->parent_->parent_ != nullptr &&
+              node_->next_ == node_->parent_->foot_ && node_->parent_ != top_) {
+            node_ = node_->parent_;
+            if (node_ == nullptr) return *this;
+          }
+          node_ = node_->next_;
+        }
+        return *this;
+      }
+      fixed_depth_iterator& operator--() {
+        if (node_ == nullptr) {
+          throw std::logic_error("Tree iterator node in uninitialized");
+        }
+        if (node_->prev_ != nullptr) {
+          node_ = node_->prev_;
+          while (node_->last_ != nullptr) {
+            node_ = node_->last_;
+          }
+        } else if (node_ != top_) {
+          node_ = node_->parent_;
+        } else {
+          node_ = nullptr;
+        }
+        return *this;
+      }
+      fixed_depth_iterator& operator++(int) {
+        fixed_depth_iterator copy = *this;
+        ++(*this);
+        return copy;
+      }
+      fixed_depth_iterator& operator--(int) {
+        fixed_depth_iterator copy = *this;
+        --(*this);
+        return copy;
+      }
+      fixed_depth_iterator& operator+(unsigned n) {
+        while (n > 0) {
+          ++(*this);
+          --n;
+        }
+        return *this;
+      }
+      fixed_depth_iterator& operator-(unsigned n) {
+        while (n > 0) {
+          ++(*this);
+          --n;
+        }
+        return *this;
+      }
+      fixed_depth_iterator& operator+=(unsigned n) {
+        while (n > 0) {
+          ++(*this);
+          --n;
+        }
+        return *this;
+      }
+      fixed_depth_iterator& operator-=(unsigned n) {
+        while (n > 0) {
+          --(*this);
+          --n;
+        }
+        return *this;
+      }
+
+      Tree<_Tp, _Al>*node_, *top_;
+    };
+    class const_fixed_depth_iterator : public iterator_base {
+     public:
+      const_fixed_depth_iterator() : node_(nullptr), top_(nullptr) {}
+      const_fixed_depth_iterator(const fixed_depth_iterator& copy)
+          : node_(copy.node_), top_(copy.top_) {}
+      const_fixed_depth_iterator(Tree<_Tp, _Al>* node) : node_(node), top_(node) {}
+      const_fixed_depth_iterator(Tree<_Tp, _Al>* node, Tree<_Tp, _Al>* top)
+          : node_(node), top_(top) {}
+
+      _Tp& operator*() const { return node_->node; }
+      _Tp* operator->() const { return &(node_->node); }
+
+      bool operator==(const const_fixed_depth_iterator& rhs) const {
+        if (rhs.node_ == node_) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      bool operator!=(const const_fixed_depth_iterator& rhs) const {
+        if (rhs.node_ != node_) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      const_fixed_depth_iterator& operator++() {
+        if (node_ == nullptr) {
+          throw std::logic_error(
+              "Tree(const_fixed_depth_iterator) iterator node is uninitialized");
+        }
+        if (node_->first_ != nullptr) {
+          node_ = node_->first_;
+        } else {
+          while (
+              node_->parent_ != nullptr && node_->parent_->parent_ != nullptr &&
+              node_->next_ == node_->parent_->foot_ && node_->parent_ != top_) {
+            node_ = node_->parent_;
+            if (node_ == nullptr) return *this;
+          }
+          node_ = node_->next_;
+        }
+        return *this;
+      }
+      const_fixed_depth_iterator& operator--() {
+        if (node_ == nullptr) {
+          throw std::logic_error("Tree iterator node in uninitialized");
+        }
+        if (node_->prev_ != nullptr) {
+          node_ = node_->prev_;
+          while (node_->last_ != nullptr) {
+            node_ = node_->last_;
+          }
+        } else if (node_ != top_) {
+          node_ = node_->parent_;
+        } else {
+          node_ = nullptr;
+        }
+        return *this;
+      }
+      const_fixed_depth_iterator& operator++(int) {
+        const_fixed_depth_iterator copy = *this;
+        ++(*this);
+        return copy;
+      }
+      const_fixed_depth_iterator& operator--(int) {
+        const_fixed_depth_iterator copy = *this;
+        --(*this);
+        return copy;
+      }
+      const_fixed_depth_iterator& operator+(unsigned n) {
+        while (n > 0) {
+          ++(*this);
+          --n;
+        }
+        return *this;
+      }
+      const_fixed_depth_iterator& operator-(unsigned n) {
+        while (n > 0) {
+          ++(*this);
+          --n;
+        }
+        return *this;
+      }
+      const_fixed_depth_iterator& operator+=(unsigned n) {
+        while (n > 0) {
+          ++(*this);
+          --n;
+        }
+        return *this;
+      }
+      const_fixed_depth_iterator& operator-=(unsigned n) {
+        while (n > 0) {
+          --(*this);
+          --n;
+        }
+        return *this;
+      }
+
+      const Tree<_Tp, _Al>*node_, *top_;
+    };
     class sibling_iterator : public iterator_base {
      public:
       sibling_iterator() : node_(nullptr) {}
@@ -357,7 +559,6 @@ namespace tree {
       }
       const Tree<_Tp, _Al>* node_;
     };
-
     class leaf_iterator : public iterator_base {
      public:
       leaf_iterator() : node_(nullptr) {}
@@ -459,7 +660,6 @@ namespace tree {
       }
       Tree<_Tp, _Al>* node_;
     };
-
     class const_leaf_iterator : public iterator_base {
      public:
       const_leaf_iterator() : node_(nullptr) {}
@@ -587,6 +787,11 @@ namespace tree {
     typedef std::reverse_iterator<depth_iterator> reverse_depth_iterator;
     typedef std::reverse_iterator<const_depth_iterator>
         const_reverse_depth_iterator;
+    typedef fixed_depth_iterator fixed_depth_iterator;
+    typedef const_fixed_depth_iterator const_fixed_depth_iterator;
+    typedef std::reverse_iterator<fixed_depth_iterator> reverse_fixed_depth_iterator;
+    typedef std::reverse_iterator<const_fixed_depth_iterator>
+        const_reverse_fixed_depth_iterator;
     typedef sibling_iterator sibling_iterator;
     typedef const_sibling_iterator const_sibling_iterator;
     typedef std::reverse_iterator<sibling_iterator> reverse_sibling_iterator;
@@ -777,7 +982,8 @@ namespace tree {
     const_reference child_at(size_type pos) const {
       return *(child_begin() + pos).node_;
     }
-
+    reference fixed_at(size_type pos) {return *(fixed_begin() + pos).node_;}
+    const_reference fixed_at(size_type pos) const { return *(fixed_begin() + pos).node_; }
     reference leaf_at(size_type pos) { return *(leaf_begin() + pos).node_; }
     const_reference leaf_at(size_type pos) const {
       return *(leaf_begin() + pos).node_;
@@ -816,6 +1022,42 @@ namespace tree {
     }
     const_reverse_iterator crend() const noexcept {
       return const_reverse_iterator(foot_);
+    }
+
+    fixed_depth_iterator fixed_begin() noexcept { return fixed_depth_iterator(this); }
+    fixed_depth_iterator fixed_begin() const noexcept {
+      return const_fixed_depth_iterator(this);
+    }
+    const_sibling_iterator cfixed_begin() const noexcept {
+      return const_sibling_iterator(this);
+    }
+
+    fixed_depth_iterator fixed_end() noexcept { return fixed_depth_iterator(foot_); }
+    const_fixed_depth_iterator fixed_end() const noexcept {
+      return const_fixed_depth_iterator(foot_);
+    }
+    const_fixed_depth_iterator cfixed_end() const noexcept {
+      return const_fixed_depth_iterator(foot_);
+    }
+
+    reverse_fixed_depth_iterator rfixed_begin() noexcept {
+      return reverse_fixed_depth_iterator(this);
+    }
+    const_reverse_fixed_depth_iterator rfixed_begin() const noexcept {
+      return const_reverse_fixed_depth_iterator(this);
+    }
+    const_reverse_fixed_depth_iterator crfixed_begin() const noexcept {
+      return const_reverse_fixed_depth_iterator(this);
+    }
+
+    reverse_fixed_depth_iterator rfixed_end() noexcept {
+      return reverse_fixed_depth_iterator(foot_);
+    }
+    const_reverse_fixed_depth_iterator rfixed_end() const noexcept {
+      return const_reverse_fixed_depth_iterator(foot_);
+    }
+    const_reverse_fixed_depth_iterator crfixed_end() const noexcept {
+      return const_reverse_fixed_depth_iterator(foot_);
     }
 
     sibling_iterator child_begin() noexcept { return sibling_iterator(first_); }
