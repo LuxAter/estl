@@ -15,7 +15,7 @@ export DOC_DIR= docs
 export BASE_PATH=$(shell pwd)
 
 export COMPILER=clang++
-export CXXFLAGS= -MMD -std=c++17 -w -c -fPIC
+export CXXFLAGS= -MMD -std=c++17 -c -fPIC -Wall -Wextra -Wpedantic
 
 export INSTALL_PATH=/usr/local
 
