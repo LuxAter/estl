@@ -164,31 +164,31 @@ namespace logger {
 
 #define StreamLog(type, msg, ...)                                    \
   StreamLogger::Get()->_Log(type, msg, __FILE__, __func__, __LINE__, \
-                             ##__VA_ARGS__)
+                            ##__VA_ARGS__)
 #define StreamLogFatal(msg, ...)                                    \
   StreamLogger::Get()->_LogFatal(msg, __FILE__, __func__, __LINE__, \
-                                  ##__VA_ARGS__)
+                                 ##__VA_ARGS__)
 #define StreamLogError(msg, ...)                                    \
   StreamLogger::Get()->_LogError(msg, __FILE__, __func__, __LINE__, \
-                                  ##__VA_ARGS__)
+                                 ##__VA_ARGS__)
 #define StreamLogWarning(msg, ...)                                    \
   StreamLogger::Get()->_LogWarning(msg, __FILE__, __func__, __LINE__, \
-                                    ##__VA_ARGS__)
+                                   ##__VA_ARGS__)
 #define StreamLogSuccess(msg, ...)                                    \
   StreamLogger::Get()->_LogSuccess(msg, __FILE__, __func__, __LINE__, \
-                                    ##__VA_ARGS__)
+                                   ##__VA_ARGS__)
 #define StreamLogDebug(msg, ...)                                    \
   StreamLogger::Get()->_LogDebug(msg, __FILE__, __func__, __LINE__, \
-                                  ##__VA_ARGS__)
+                                 ##__VA_ARGS__)
 #define StreamLogTrace(msg, ...)                                    \
   StreamLogger::Get()->_LogTrace(msg, __FILE__, __func__, __LINE__, \
-                                  ##__VA_ARGS__)
+                                 ##__VA_ARGS__)
 #define StreamLogInfo(msg, ...)                                    \
   StreamLogger::Get()->_LogInfo(msg, __FILE__, __func__, __LINE__, \
-                                 ##__VA_ARGS__)
+                                ##__VA_ARGS__)
 #define StreamLogVersion(msg, ...)                                    \
   StreamLogger::Get()->_LogVersion(msg, __FILE__, __func__, __LINE__, \
-                                    ##__VA_ARGS__)
+                                   ##__VA_ARGS__)
 
   enum LogType {
     FATAL = 0,
@@ -323,9 +323,9 @@ namespace logger {
          "[__TYPE__] <__DATE_TIME__> (__FILE__:__FUNC__:__LINE__) __BODY__"}};
 
    private:
-    virtual void HandleLog(LogType type, std::string log_msg) {}
+    virtual void HandleLog(LogType, std::string) {}
     std::string& ReplaceSubString(std::string& src, std::string pat,
-                                  std::string_view rep, std::size_t count = 0) {
+                                  std::string_view rep) {
       std::size_t index = 0;
       while (true) {
         index = src.find(pat);
@@ -402,7 +402,7 @@ namespace logger {
     }
 
    private:
-    virtual void HandleLog(LogType type, std::string log_msg) {
+    virtual void HandleLog(LogType, std::string log_msg) {
       printf("%s\n", log_msg.c_str());
     }
     bool color_ = true;
@@ -613,9 +613,7 @@ namespace logger {
       return &instance;
     }
 
-    void SetStream(std::ostream* out){
-      stream_ = out;
-    }
+    void SetStream(std::ostream* out) { stream_ = out; }
 
     void SetFlushLevel(LogType type) { flush_level_ = type; }
     void Flush() {

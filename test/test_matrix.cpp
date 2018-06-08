@@ -64,10 +64,10 @@ TEST_F(MatrixTest, Iterator) {
 TEST_F(MatrixTest, Capacity) {
   EXPECT_EQ(a.empty(), false);
   EXPECT_EQ(d.empty(), true);
-  EXPECT_EQ(b.size(), 9);
-  EXPECT_EQ(b.rows(), 3);
-  EXPECT_EQ(b.columns(), 3);
-  EXPECT_EQ(b.max_size(), 9);
+  EXPECT_EQ(b.size(), 9ul);
+  EXPECT_EQ(b.rows(), 3ul);
+  EXPECT_EQ(b.columns(), 3ul);
+  EXPECT_EQ(b.max_size(), 9ul);
 }
 
 TEST_F(MatrixTest, Operations) {

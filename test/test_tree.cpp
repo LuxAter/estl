@@ -60,9 +60,9 @@ TEST_F(TreeTest, Size) {
   tree.append({6, 7, {8, 9, 10}});
   EXPECT_EQ(tree.str(), "0[1[2,3[4,5]],6[7,8[9,10]]]");
   EXPECT_EQ(tree.empty(), false);
-  EXPECT_EQ(tree.size(), 11);
-  EXPECT_EQ(tree.child_size(), 2);
-  EXPECT_EQ(tree.leaf_size(), 6);
+  EXPECT_EQ(tree.size(), 11ul);
+  EXPECT_EQ(tree.child_size(), 2ul);
+  EXPECT_EQ(tree.leaf_size(), 6ul);
   tree.clear();
   EXPECT_EQ(tree.str(), "0");
 }

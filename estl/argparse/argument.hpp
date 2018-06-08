@@ -62,17 +62,17 @@ namespace argparse {
         : required_(copy.required_),
           n_args_count_(copy.n_args_count_),
           help_(copy.help_),
-          metavar_(copy.metavar_),
           dest_(copy.dest_),
           group_(copy.group_),
+          metavar_(copy.metavar_),
           names_(copy.names_),
           action_(copy.action_),
           n_args_(copy.n_args_),
-          value_(copy.value_),
           default_(copy.default_),
-          type_(copy.type_),
+          choices_(copy.choices_),
           const_(copy.const_),
-          choices_(copy.choices_) {}
+          value_(copy.value_),
+          type_(copy.type_){}
 
     void SetName(std::set<std::string> names) { names_ = names; }
     ArgOpt SetVariable(Variable val, ArgOpt opt) {
@@ -475,7 +475,7 @@ namespace argparse {
         return;
       }
       if (n_args_ == N || n_args_ == OPTIONAL || n_args_ == ONE) {
-        int num_args = 0;
+        std::size_t num_args = 0;
         for (num_args = 0; num_args < n_args_count_ && args.size() > 0 &&
                            args.front()[0] != '-';
              num_args++) {

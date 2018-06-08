@@ -197,7 +197,7 @@ namespace format {
     template <typename T>
     inline typename std::enable_if<!std::is_convertible<T, long long>::value,
                                    bool>::type
-    negetive_int(T argument) {
+    negetive_int(T) {
       return false;
     }
     /**
@@ -345,7 +345,7 @@ namespace format {
               typename TChar = typename TString::value_type>
     inline typename std::enable_if<
         !std::is_convertible<T, unsigned long long>::value, TString>::type
-    to_binary(std::size_t n, const TChar* fmt, T argument) {
+    to_binary(std::size_t, const TChar*, T) {
       return TString();
     }
 
@@ -397,7 +397,7 @@ namespace format {
       } else {
         fmt = to_xstring<std::string>(n, fmt.c_str(), args);
       }
-      if (data[4] != -1 && data[4] > fmt.size()) {
+      if (data[4] != -1 && static_cast<std::size_t>(data[4]) > fmt.size()) {
         if (data[1] == -1) {
           data[1] = int(' ');
         }
@@ -789,7 +789,7 @@ namespace format {
     template <typename T, typename U>
     inline typename std::enable_if<!std::is_convertible<T, U>::value,
                                    std::string>::type
-    acformat(int data[8], T argument) {
+    acformat(int data[8], T) {
       throw std::invalid_argument(
           "argument index (which is " + std::to_string(data[0]) + ") of type " +
           type_name<T>() + " is not convertable to type of " + type_name<U>());
@@ -925,7 +925,7 @@ namespace format {
      */
     template <std::size_t I = 0, typename... Args>
     inline typename std::enable_if<I >= sizeof...(Args), std::string>::type
-    aiformat(std::size_t index, int data[8], std::tuple<Args...> args) {
+    aiformat(std::size_t index, int[8], std::tuple<Args...> ) {
       throw std::out_of_range("argument index (which is " +
                               std::to_string(index) +
                               ") >= argument count (which is " +

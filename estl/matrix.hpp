@@ -1376,7 +1376,7 @@ namespace matrix {
    */
   template <typename _Tp, std::size_t _Nr, std::size_t _Nc>
   _Tp trace(const estl::matrix::Matrix<_Tp, _Nr, _Nc>& lhs) {
-    _Tp sum;
+    _Tp sum = 0.0;
     for (typename estl::matrix::Matrix<_Tp, _Nr, _Nc>::size_type it = 0;
          it != lhs.rows() && it != lhs.columns(); it++) {
       sum += lhs.at(it, it);
