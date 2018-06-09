@@ -88,7 +88,7 @@ namespace stream {
    */
   template <typename T, typename... Args>
   void print(std::ostream& out, std::string __format, T first, Args... args) {
-    int i;
+    std::size_t i;
     for (i = 0; i < __format.size(); i++) {
       if (__format[i] != '%') {
         out << __format[i];
@@ -402,7 +402,7 @@ namespace stream {
       }
       __ch = in.get();
       bool __is_in = false;
-      for (int i = 0; i < __delim.size() && __is_in == false; i++) {
+      for (std::size_t i = 0; i < __delim.size() && __is_in == false; i++) {
         if (__ch == __delim[i]) {
           __is_in = true;
         }
@@ -467,7 +467,7 @@ namespace stream {
    */
   template <typename T, typename... Args>
   void scan(std::istream& in, std::string __format, T& first, Args&... args) {
-    int i;
+    std::size_t i;
     for (i = 0; i < __format.size(); i++) {
       if (__format[i] != '%') {
         char ch;

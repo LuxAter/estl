@@ -14,8 +14,9 @@ export DOC_DIR= docs
 
 export BASE_PATH=$(shell pwd)
 
+export IGNORE=-Wno-gnu-zero-variadic-macro-arguments -Wno-ignored-optimization-argument
 export COMPILER=clang++
-export CXXFLAGS= -MMD -std=c++17 -c -fPIC -Wall -Wextra -Wpedantic
+export CXXFLAGS= -MMD -std=c++17 -c -fPIC -Wall -Wextra -Wpedantic $(IGNORE)
 
 export INSTALL_PATH=/usr/local
 

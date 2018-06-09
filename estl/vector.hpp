@@ -1334,7 +1334,7 @@ namespace vector {
    */
   template <typename _Tp, std::size_t _N>
   _Tp length(estl::vector::Vector<_Tp, _N> vec) {
-    _Tp total;
+    _Tp total = 0.0;
     for (typename estl::vector::Vector<_Tp, _N>::iterator it = vec.begin();
          it != vec.end(); ++it) {
       total += pow(*it, 2.0);

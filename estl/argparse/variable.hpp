@@ -102,6 +102,8 @@ namespace argparse {
           string_vec_ = copy.string_vec_;
           break;
         }
+        default:
+          break;
       }
     }
     ~Variable() {}
@@ -163,6 +165,8 @@ namespace argparse {
           PushBack(val.GetString());
           break;
         }
+        default:
+          break;
       }
     }
 
@@ -198,10 +202,10 @@ namespace argparse {
         double_vec_ = std::vector<double>{val};
       }
     }
-    void PushBack(const char* val){
-      if(type_ == STRING_VECTOR){
+    void PushBack(const char* val) {
+      if (type_ == STRING_VECTOR) {
         string_vec_.push_back(std::string(val));
-      }else{
+      } else {
         type_ = STRING_VECTOR;
         string_vec_ = std::vector<std::string>{std::string(val)};
       }
@@ -258,6 +262,8 @@ namespace argparse {
           string_vec_ = copy.string_vec_;
           break;
         }
+        default:
+          break;
       }
       return *this;
     }
@@ -353,24 +359,31 @@ namespace argparse {
     explicit inline operator int() const { return GetInt(); }
     explicit inline operator double() const { return GetDouble(); }
     explicit inline operator std::string() const { return GetString(); }
-    explicit inline operator std::vector<bool>() const { return GetBoolVector(); }
-    explicit inline operator std::vector<char>() const { return GetCharVector(); }
+    explicit inline operator std::vector<bool>() const {
+      return GetBoolVector();
+    }
+    explicit inline operator std::vector<char>() const {
+      return GetCharVector();
+    }
     explicit inline operator std::vector<int>() const { return GetIntVector(); }
-    explicit inline operator std::vector<double>() const { return GetDoubleVector(); }
+    explicit inline operator std::vector<double>() const {
+      return GetDoubleVector();
+    }
     explicit inline operator std::vector<std::string>() const {
       return GetStringVector();
     }
 
-    template<class T>
-      std::ostream& GetVectorString(std::ostream& out, std::vector<T> lhs) const{
-        for(typename std::vector<T>::const_iterator it = lhs.begin(); it != lhs.end(); ++it){
-          out << *it;
-          if (it != --lhs.end()){
-            out << ", ";
-          }
+    template <class T>
+    std::ostream& GetVectorString(std::ostream& out, std::vector<T> lhs) const {
+      for (typename std::vector<T>::const_iterator it = lhs.begin();
+           it != lhs.end(); ++it) {
+        out << *it;
+        if (it != --lhs.end()) {
+          out << ", ";
         }
-        return out;
       }
+      return out;
+    }
 
    private:
     Types type_ = NONE;

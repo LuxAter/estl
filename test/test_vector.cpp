@@ -52,7 +52,7 @@ TEST_F(VectorTest, Iterator) {
 TEST_F(VectorTest, Capacity) {
   EXPECT_EQ(a.empty(), false);
   EXPECT_EQ(c.empty(), true);
-  EXPECT_EQ(b.size(), 3);
+  EXPECT_EQ(b.size(), 3ul);
 }
 
 TEST_F(VectorTest, Operations) {
