@@ -11,8 +11,8 @@ TEST(LoggerTest, ConsoleLogger) {
   ConsoleLogError("This is a %d test", 2);
   std::string output = testing::internal::GetCapturedStdout();
   EXPECT_EQ(output,
-            "[FATAL  ] (test_logger.cpp:TestBody:10) This is an fatal "
-            "test\n[ERROR  ] (test_logger.cpp:TestBody:11) This is a 2 test\n");
+            "[FATAL  ] (test/test_logger.cpp:TestBody:10) This is an fatal "
+            "test\n[ERROR  ] (test/test_logger.cpp:TestBody:11) This is a 2 test\n");
 }
 
 TEST(LoggerTest, FileLogger) {
@@ -32,7 +32,7 @@ TEST(LoggerTest, FileLogger) {
   }
   EXPECT_EQ(
       output,
-      "[WARNING] (test_logger.cpp:TestBody:22) This is a 3.141500 test\n");
+      "[WARNING] (test/test_logger.cpp:TestBody:22) This is a 3.141500 test\n");
 }
 
 TEST(LoggerTest, DailyLogger) {
@@ -56,7 +56,7 @@ TEST(LoggerTest, DailyLogger) {
     remove((date_str + ".log").c_str());
   }
   EXPECT_EQ(output,
-            "[SUCCESS] (test_logger.cpp:TestBody:41) This is a Success!\n");
+            "[SUCCESS] (test/test_logger.cpp:TestBody:41) This is a Success!\n");
 }
 
 TEST(LoggerTest, CounterLogger) {
@@ -77,8 +77,8 @@ TEST(LoggerTest, CounterLogger) {
     remove("test.log");
   }
   EXPECT_EQ(output,
-            "[DEBUG  ] (test_logger.cpp:TestBody:66) This is a debug "
-            "message\n[TRACE  ] (test_logger.cpp:TestBody:67) This is a trace "
+            "[DEBUG  ] (test/test_logger.cpp:TestBody:66) This is a debug "
+            "message\n[TRACE  ] (test/test_logger.cpp:TestBody:67) This is a trace "
             "message\n");
 }
 
@@ -91,7 +91,7 @@ TEST(LoggerTest, StreamLogger) {
   StreamLogVersion("This is version information");
   std::string output = ss.str();
   EXPECT_EQ(output,
-            "[INFO   ] (test_logger.cpp:TestBody:90) This is an info "
-            "message\n[VESION ] (test_logger.cpp:TestBody:91) This is version "
+            "[INFO   ] (test/test_logger.cpp:TestBody:90) This is an info "
+            "message\n[VESION ] (test/test_logger.cpp:TestBody:91) This is version "
             "information\n");
 }

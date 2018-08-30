@@ -1,166 +1,231 @@
 SHELL = /bin/bash
-
-export NAME= estl.out
-export LINK=
-export INCLUDE=
-export TYPE= lib
-
-export SOURCE_DIR= source
-export TEST_DIR= test
-export EXTERNAL_DIR = external
-export BUILD_DIR= build
-export INCLUDE_DIR= estl
-export DOC_DIR= docs
-
-export BASE_PATH=$(shell pwd)
-
-export IGNORE=-Wno-gnu-zero-variadic-macro-arguments -Wno-ignored-optimization-argument
-export COMPILER=clang++
-export CXXFLAGS= -MMD -std=c++17 -c -fPIC -Wall -Wextra -Wpedantic $(IGNORE)
-
-export INSTALL_PATH=/usr/local
-
-
-# ifdef CI
-export GCOV_LINK = --coverage
-export GCOV_FLAG = -fprofile-arcs -ftest-coverage -fno-inline -fno-inline-small-functions -fno-default-inline
-# else
-# export GCOV_LINK =
-# export GCOV_FLAG =
-# endif
-
-export COMMON_INCLUDE=-I$(BASE_PATH)/$(INCLUDE_DIR) $(INCLUDE)
-
-export SECTION_COLOR=\033[1;97m
-export TARGET_COLOR=\033[0;34m
-export LINK_COLOR=\033[0;35m
-export CLEAN_COLOR=\033[0;33m
-export COMPILE_COLOR=\033[0;32m
-export INSTALL_COLOR=\033[0;36m
-export ERROR_COLOR=\033[1;31m
-export NO_COLOR=\033[m
-
 ifndef .VERBOSE
   .SILENT:
 endif
 
-define print_section
-str="$(1)";\
-    line_length=$${#str};\
-    printf "%b%s\n" "$(SECTION_COLOR)" "$$str";\
-    while [ $$line_length -gt 0 ]; do\
-      printf "=";\
-      let line_length=line_length-1;\
-    done;\
-    printf "%b\n" "$(NO_COLOR)"
-endef
+NAME=estl
 
-define print
-printf "%b%s%b\n" "$(2)" "$(1)" "$(NO_COLOR)"
-endef
+CC=clang
+CXX=clang++
+CFLAGS=-Wall
+CXXFLAGS=-Wall -std=c++17 -fPIC -Wall -Wextra -Wpedantic -Wno-gnu-zero-variadic-macro-arguments -Wno-ignored-optimization-argument
+LINK=
+INCLUDE=
 
+SOURCE_DIR=source
+INCLUDE_DIR=estl
+BUILD_DIR=build
+DOC_DIR=docs
+TEST_DIR=test
+EXAMPLE_DIR=example
+EXTERNAL_DIR=external
+INSTALL_PATH?=/usr/local
+ROOT=$(shell pwd)
+
+SCAN_COLOR=\033[1;35m
+BUILD_COLOR=\033[32m
+CLEAN_COLOR=\033[1;33m
+LINK_COLOR=\033[1;32m
+INSTALL_COLOR=\033[01;36m
+CMD_COLOR=\033[1;34m
+HELP_COLOR=\033[1;34m
+
+# FUNCTIONS{{{
+define scan_target
+printf "%b%s%b\n" "$(SCAN_COLOR)" "Scaning dependencies for target $(1)" "\033[0m"
+endef
+define complete_target
+printf "%s\n" "Built target $(1)"
+endef
+define clean_target
+printf "%b%s%b\n" "$(CLEAN_COLOR)" "Cleaning target $(1)" "\033[0m"
+endef
+define install_target
+printf "%b%s%b\n" "$(INSTALL_COLOR)" "Installing target $(1)" "\033[0m"
+endef
+define uninstall_target
+printf "%b%s%b\n" "$(INSTALL_COLOR)" "Unnstalling target $(1)" "\033[0m"
+endef
+define print_build_c
+str=$$(realpath --relative-to="$(ROOT)" "$(1)");\
+    printf "%b%s%b\n" "$(BUILD_COLOR)" "Building C object $$str" "\033[0m"
+endef
+define print_build_cpp
+str=$$(realpath --relative-to="$(ROOT)" "$(1)");\
+    printf "%b%s%b\n" "$(BUILD_COLOR)" "Building Cpp object $$str" "\033[0m"
+endef
+define print_link_lib
+str=$$(realpath --relative-to="$(ROOT)" "$(1)");\
+    printf "%b%s%b\n" "$(LINK_COLOR)" "Linking static library $$str" "\033[0m"
+endef
+define print_link_exe
+str=$$(realpath --relative-to="$(ROOT)" "$(1)");\
+    printf "%b%s%b\n" "$(LINK_COLOR)" "Linking executable $$str" "\033[0m"
+endef
+define print_run_cmd
+printf "%b%s%b\n" "$(CMD_COLOR)" "Running '$(1)'" "\033[0m"
+endef
 define help
-printf "%b%*s%b: %s\n" "$(TARGET_COLOR)" 14 "$(1)" "$(NO_COLOR)" "$(2)"
+printf "%b%*s%b: %s\n" "$(HELP_COLOR)" 20 "$(1)" "\033[0m" "$(2)"
 endef
+# }}}
 
-.PHONY : all
-all: external source test
-# all: source
+GTEST_DIR=$(ROOT)/$(EXTERNAL_DIR)/googletest/googletest
 
-.PHONY : clean
-clean: clean-source clean-test
+LIB=$(ROOT)/$(BUILD_DIR)/lib$(NAME).a
+EXE=$(ROOT)/$(NAME).out
+TEST_EXE=$(ROOT)/unit-test
 
-.PHONY : install
-install: source root-access install-source
-	if [ $(TYPE) == "lib" ] && ! [ -d "$(INSTALL_PATH)/include/$(NAME)" ]; then \
-	  $(call print,Installing include directory,$(INSTALL_COLOR));\
-	  sudo mkdir $(INSTALL_PATH)/include/ -p;\
-	  sudo cp $(INCLUDE_DIR)/ $(INSTALL_PATH)/include/ -r;\
-	fi
+LIB_FILES = $(filter-out $(SOURCE_DIR)/main.cpp, $(filter-out $(SOURCE_DIR)/main.c, $(shell find "$(SOURCE_DIR)" -name "*.c")))
+LIB_OBJS = $(LIB_FILES:%=$(ROOT)/$(BUILD_DIR)/%.o)
+EXE_FILES = $(shell find "$(SOURCE_DIR)" -name "main.c") $(shell find "$(SOURCE_DIR)" -name "main.cpp")
+EXE_OBJS = $(EXE_FILES:%=$(ROOT)/$(BUILD_DIR)/%.o)
+TEST_FILES = $(shell find "$(TEST_DIR)" -name "*.c") $(shell find "$(TEST_DIR)" -name "*.cpp")
+TEST_OBJS = $(TEST_FILES:%=$(ROOT)/$(BUILD_DIR)/%.o)
 
-.PHONY : uninstall
-uninstall: root-access uninstall-source
-	if [ $(TYPE) == "lib" ] && [ -d "$(INSTALL_PATH)/include/$(NAME)" ]; then \
-	  $(call print,Uninstalling include directory,$(INSTALL_COLOR));\
-	  sudo rm $(INSTALL_PATH)/include/$(NAME) -rf;\
-	fi
+all: source test
 
-.PHONY : help
-help:
-	$(call print_section,Makefile Help)
-	printf "List of all acceptable make targets\n\n"
-	$(call help,all,Builds external, source, and test files and projects)
-	$(call help,clean,Clean files created from external, source, and test)
-	$(call help,install,Installs include directories and libraries)
-	$(call help,uninstall,Removes installed include directores and libraries)
-	$(call help,help,Display this help page)
-	$(call help,external,Builds external files and projects)
-	$(call help,clean-external,Cleans files created from external)
-	$(call help,source,Builds source files and projects)
-	$(call help,clean-source,Cleans files created from source)
-	$(call help,test,Builds test files and projects)
-	$(call help,clean-test,Cleans files created from test)
-	$(call help,docs,Compiles documentation)
-	$(call help,clean-docs,Cleans files created from docs)
-	$(call help,runtest,Compiles and runs unit tests)
+clean: clean-source clean-docs clean-test
 
-.PHONY : root-access
-root-access:
-	if [[ $$UID != 0 ]]; then \
-	  $(call print,Target requiers root access,$(ERROR_COLOR)); \
-	  exit 1; \
-	fi
+install: install-source
 
-.PHONY : external
-external:
-	$(call print_section,External Dependencies)
-	if [ -d "$(EXTERNAL_DIR)" ]; then cd "$(EXTERNAL_DIR)" && $(MAKE); fi
-.PHONY : clean-external
-clean-external:
-	$(call print_section,External Dependencies)
-	if [ -d "$(EXTERNAL_DIR)" ]; then cd "$(EXTERNAL_DIR)" && $(MAKE) clean; fi
+uninstall: uninstall-source
 
-.PHONY : source
-source:
-	$(call print_section,Source Files)
-	if [ -d "$(SOURCE_DIR)" ]; then cd "$(SOURCE_DIR)" && $(MAKE); fi
-.PHONY : clean-source
-clean-source:
-	$(call print_section,Source Files)
-	if [ -d "$(SOURCE_DIR)" ]; then cd "$(SOURCE_DIR)" && $(MAKE) clean; fi
-.PHONY : install-source
-install-source:
-	$(call print_section,Source Files)
-	if [ -d "$(SOURCE_DIR)" ]; then cd "$(SOURCE_DIR)" && $(MAKE) install; fi
-.PHONY: uninstall-source
-uninstall-source:
-	$(call print_section,Source Files)
-	if [ -d "$(SOURCE_DIR)" ]; then cd "$(SOURCE_DIR)" && $(MAKE) uninstall; fi
+test: build-test
 
-.PHONY : test
-test:
-	$(call print_section,Unit Tests)
-	if [ -d "$(TEST_DIR)" ]; then cd "$(TEST_DIR)" && $(MAKE); fi
-.PHONY : clean-test
-clean-test:
-	$(call print_section,Unit Tests)
-	if [ -d "$(TEST_DIR)" ]; then cd "$(TEST_DIR)" && $(MAKE) clean; fi
-
-.PHONY: docs
-docs:
-	$(call print_section,Documentation)
-	$(call print,Running doxygen...,$(COMPILE_COLOR))
+# DOCS{{{
+doc:
+	$(call print_run_cmd,doxygen)
 	doxygen
 
-.PHONY: clean-docs
 clean-docs:
-	$(call print_section,Documentation)
-	if [ -d "$(DOC_DIR)/html" ]; then rm "$(DOC_DIR)/html" -r; fi
-	if [ -d "$(DOC_DIR)/latex" ]; then rm "$(DOC_DIR)/latex" -r; fi
-	if [ -d "$(DOC_DIR)/xml" ]; then rm "$(DOC_DIR)/xml" -r; fi
-	$(call print,Cleaned Documentation,$(CLEAN_COLOR))
+	$(call clean_target,docs)
+	if [ -d "$(DOC_DIR)/html" ]; then rm "$(DOC_DIR)/html" -r ;fi
+	if [ -d "$(DOC_DIR)/latex" ]; then rm "$(DOC_DIR)/latex" -r ;fi
+	if [ -d "$(DOC_DIR)/xml" ]; then rm "$(DOC_DIR)/xml" -r ;fi
+# }}}
+# SOURCE{{{
+source: build-exe
 
-.PHONY: runtest
-runtest: test
-	find . -name "*.gcda" -delete
-	./unit-test --gtest_color=yes
+clean-source: clean-lib clean-exe
+	if [ -e "$(ROOT)/$(BUILD_DIR)/$(SOURCE_DIR)" ]; then rm $(ROOT)/$(BUILD_DIR)/$(SOURCE_DIR) -r; fi
+
+install-source: install-lib
+
+uninstall-source: uninstall-lib
+# }}}
+# LIB {{{
+build-lib: pre-lib $(LIB)
+	$(call complete_target,$(shell basename $(LIB)))
+
+clean-lib:
+	$(call clean_target,$(shell basename $(LIB)))
+	if [ -e "$(LIB)" ]; then rm $(LIB); fi
+
+install-lib: build-lib
+	$(call install_target,$(shell basename $(LIB)))
+	mkdir -p $(INSTALL_PATH)/lib/
+	mkdir -p $(INSTALL_PATH)/include/$(NAME)/
+	if [ -e "$(LIB)" ]; then cp $(LIB) $(INSTALL_PATH)/lib; fi
+	if [ ! -z "$(INCLUDE_DIR)" ]; then cp -R $(INCLUDE_DIR)/ $(INSTALL_PATH)/include/$(NAME)/; fi
+	if [ ! -z "$(shell find $(SOURCE_DIR) -name "*.h")" ]; then cd $(SOURCE_DIR) && cp --parents $(shell cd $(SOURCE_DIR) && find . -name "*.h") $(INSTALL_PATH)/include/$(NAME); fi
+	if [ ! -z "$(shell find $(SOURCE_DIR) -name "*.hpp")" ]; then cd $(SOURCE_DIR) && cp --parents $(shell cd $(SOURCE_DIR) && find . -name "*.hpp") $(INSTALL_PATH)/include/$(NAME); fi
+
+uninstall-lib:
+	$(call uninstall_target,$(shell basename $(LIB)))
+	if [ ! -e "$(INSTALL_PATH)/lib/$(shell basename $(LIB))" ]; then rm "$(INSTALL_PATH)/lib/$(shell basename $(LIB))"; fi
+	if [ ! -e "$(INSTALL_PATH)/include/$(NAME)" ]; then rm "$(INSTALL_PATH)/include/$(NAME)" -r; fi
+
+$(LIB): $(LIB_OBJS)
+	if [ ! -z "$(LIB_OBJS)" ]; then $(call print_link_lib,$(shell basename $(LIB))); fi
+	if [ ! -z "$(LIB_OBJS)" ]; then ar rcs $@ $(LIB_OBJS); fi
+
+pre-lib:
+	$(call scan_target,$(shell basename $(LIB)))
+# }}}
+# EXE {{{
+build-exe: build-lib pre-exe $(EXE)
+	$(call complete_target,$(shell basename $(EXE)))
+
+clean-exe:
+	$(call clean_target,$(shell basename $(EXE)))
+	if [ -e "$(EXE)" ]; then rm $(EXE); fi
+
+install-exe:
+	$(call install_target,$(shell basename $(EXE)))
+	mkdir -p $(INSTALL_PATH)/bin/
+	cp $(EXE) $(INSTALL_PATH)/bin
+
+uninstall-exe:
+	$(call uninstall_target,$(shell basename $(EXE)))
+	if [ -e "$(INSTALL_PATH)/bin/$(shell basename $(EXE))" ]; then rm $(INSTALL_PATH)/bin/$(shell basename $(EXE)); fi
+
+$(EXE): $(EXE_OBJS)
+	$(call print_link_exe,$(shell basename $(EXE)))
+	if [ -e "$(LIB)" ]; then $(CC) $(CFLAGS) $(INCLUDE) -I$(ROOT)/$(INCLUDE_DIR) $(EXE_OBJS) $(LIB) $(LINK) -o $@; \
+	else $(CXX) $(CXXFLAGS) $(INCLUDE) -I$(ROOT)/$(INCLUDE_DIR) $(EXE_OBJS) $(LINK) -o $@; fi
+
+pre-exe:
+	$(call scan_target,$(shell basename $(EXE)))
+# }}}
+# GTEST {{{
+build-gtest: pre-gtest $(ROOT)/$(BUILD_DIR)/libgtest.a
+	$(call complete_target,gtest)
+
+$(ROOT)/$(BUILD_DIR)/libgtest.a: $(GTEST_DIR)/src/gtest-all.cc $(GTEST_DIR)/src/gtest_main.cc
+	mkdir -p $(ROOT)/$(BUILD_DIR)/gtest
+	$(call print_build_cpp,$(ROOT)/$(BUILD_DIR)/gtest/gtest-all.cpp.o)
+	$(CXX) -isystem $(GTEST_DIR)/include -I$(GTEST_DIR) -pthread -c $(GTEST_DIR)/src/gtest-all.cc -o $(ROOT)/$(BUILD_DIR)/gtest/gtest-all.cpp.o
+	$(call print_build_cpp,$(ROOT)/$(BUILD_DIR)/gtest/gtest-main.cpp.o)
+	$(CXX) -isystem $(GTEST_DIR)/include -I$(GTEST_DIR) -pthread -c $(GTEST_DIR)/src/gtest_main.cc -o $(ROOT)/$(BUILD_DIR)/gtest/gtest-main.cpp.o
+	$(call print_link_lib,libgtest.a)
+	ar -rcs $(ROOT)/$(BUILD_DIR)/libgtest.a  $(ROOT)/$(BUILD_DIR)/gtest/gtest-all.cpp.o $(ROOT)/$(BUILD_DIR)/gtest/gtest-main.cpp.o
+
+pre-gtest:
+	$(call scan_target,gtest)
+
+clean-gtest:
+	$(call clean_target,gtest)
+	if [ -e "$(ROOT)/$(BUILD_DIR)/libgtest.a" ]; then rm $(ROOT)/$(BUILD_DIR)/libgtest.a; fi
+	if [ -e "$(ROOT)/$(BUILD_DIR)/gtest" ]; then rm -r $(ROOT)/$(BUILD_DIR)/gtest; fi
+# }}}
+# TEST {{{
+build-test: build-gtest pre-test $(TEST_EXE)
+	$(call complete_target,test)
+
+clean-test: clean-gtest
+	$(call clean_target,test)
+	if [ -e "$(TEST_EXE)" ]; then rm $(TEST_EXE); fi
+	if [ -e "$(ROOT)/$(BUILD_DIR)/$(TEST_DIR)" ]; then rm -r $(ROOT)/$(BUILD_DIR)/$(TEST_DIR); fi
+
+$(TEST_EXE): $(TEST_OBJS)
+	$(call print_link_exe,$(TEST_EXE))
+	if [ -e "$(LIB)" ]; then $(CXX) $(CXXFLAGS) $(INCLUDE) -I$(ROOT)/$(INCLUDE_DIR) $(LINK) $(LIB) $(ROOT)/$(BUILD_DIR)/libgtest.a -lpthread $^ -o $@;\
+	else $(CXX) $(CXXFLAGS) $(INCLUDE) -I$(ROOT)/$(INCLUDE_DIR) $(LINK) $(ROOT)/$(BUILD_DIR)/libgtest.a -lpthread $^ -o $@; fi
+
+pre-test:
+	$(call scan_target,test)
+
+$(ROOT)/$(BUILD_DIR)/$(TEST_DIR)/%.c.o: $(ROOT)/$(TEST_DIR)/%.c
+	mkdir -p $(@D)
+	$(call print_build_c,$@)
+	str=$$(realpath --relative-to="$(ROOT)" "$^");\
+	$(CC) $(CFLAGS) -MMD -c $(INCLUDE) -I$(ROOT)/$(INCLUDE_DIR) -I$(GTEST_DIR)/include $$str -o $@
+
+$(ROOT)/$(BUILD_DIR)/$(TEST_DIR)/%.cpp.o: $(ROOT)/$(TEST_DIR)/%.cpp
+	mkdir -p $(@D)
+	$(call print_build_cpp,$@)
+	str=$$(realpath --relative-to="$(ROOT)" "$^");\
+	$(CXX) $(CXXFLAGS) -MMD -c $(INCLUDE) -I$(ROOT)/$(INCLUDE_DIR) -I$(GTEST_DIR)/include $$str -o $@
+# }}}
+$(ROOT)/$(BUILD_DIR)/%.c.o: %.c
+	mkdir -p $(@D)
+	$(call print_build_c,$@)
+	str=$$(realpath --relative-to="$(ROOT)" "$^");\
+	$(CC) $(CFLAGS) -MMD -c $(INCLUDE) -I$(ROOT)/$(INCLUDE_DIR) $$stt -o $@
+
+$(ROOT)/$(BUILD_DIR)/%.cpp.o: %.cpp
+	mkdir -p $(@D)
+	$(call print_build_cpp,$@)
+	str=$$(realpath --relative-to="$(ROOT)" "$^");\
+	$(CXX) $(CXXFLAGS) -MMD -c $(INCLUDE) -I$(ROOT)/$(INCLUDE_DIR) $$str -o $@
