@@ -58,17 +58,17 @@ namespace json {
 
       iterator& operator++() {
         if (dict_) {
-          dict_it_++;
+          ++dict_it_;
         } else {
-          list_it_++;
+          ++list_it_;
         }
         return *this;
       }
       iterator& operator--() {
         if (dict_) {
-          dict_it_--;
+          --dict_it_;
         } else {
-          list_it_--;
+          --list_it_;
         }
         return *this;
       }
@@ -307,7 +307,7 @@ namespace json {
       default:
         std::string token_str;
         if ((str.peek() >= 48 && str.peek() <= 57) || str.peek() == 46) {
-          double decimal = false;
+          bool decimal = false;
           if (str.peek() == 46) {
             decimal = true;
           }
@@ -327,6 +327,7 @@ namespace json {
     return {Json::T_NILL, ""};
   }
   Json ParseStream(std::istream& str) {
+    // TODO: Slow down is at creating JSON, not reading, and not in GetNextToken. Must Be Fixed!!
     std::pair<Json::JsonToken, std::string> token;
     if (str.eof()) {
       return Json();
