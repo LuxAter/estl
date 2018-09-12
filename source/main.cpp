@@ -25,7 +25,7 @@ int main(int argc, char const* argv[]) {
   while(input != "quit"){
     std::cout << ">>";
     std::cin >> input;
-    auto rec = estl::fuzz::Fuzz<5>(input, words);
+    auto rec = estl::fuzz::Fuzz<5>(input, words, estl::fuzz::Manhattin);
     for(auto& it : rec){
       std::cout << it << '\n';
     }
