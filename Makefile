@@ -1,7 +1,7 @@
 SHELL = /bin/bash
 
 export NAME= estl.out
-export LINK=
+export LINK= -llua5.3
 export INCLUDE=
 export TYPE= lib
 

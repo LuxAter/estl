@@ -1,35 +1,22 @@
 #include <iostream>
 
-#include "fuzz.hpp"
+#include "lua.hpp"
 
 #include <vector>
 #include <fstream>
 
-std::vector<std::string> LoadWords(){
-  // std::ifstream file("words_alpha.txt");
-  std::ifstream file("words_small.txt");
-  std::vector<std::string> words;
-  if(file.is_open()){
-    std::string line;
-    while(getline(file, line)){
-      words.push_back(line);
-    }
-    file.close();
-  }
-  return words;
-}
-
 int main(int argc, char const* argv[]) {
-  auto words = LoadWords();
-  std::string input = "";
-  while(input != "quit"){
-    std::cout << ">>";
-    std::cin >> input;
-    auto rec = estl::fuzz::Fuzz<5>(input, words, estl::fuzz::Manhattin);
-    for(auto& it : rec){
-      std::cout << it << '\n';
-    }
-    std::cout << '\n';
+  estl::lua::Script lua("test.lua");
+  std::cout << lua.get<float>("height") << '\n';
+  std::cout << lua.get<float>("width") << '\n';
+  std::vector<int> vec = lua.lua_get_vector<int>("test");
+  std::cout << vec.size() << '\n';
+  for(auto& it: vec){
+    std::cout << it << ',';
+  }
+  std::cout << '\n';
+  for(uint32_t i = 1; i < 10; ++i){
+    std::cout << lua.fib(i) << "\n";
   }
   return 0;
 }
