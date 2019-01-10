@@ -11,6 +11,9 @@
 namespace estl {
 namespace logger {
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+
 #define Default() Logger::Get()->GetLogger()
 #define Fatal(msg, ...)                                                    \
   Logger::Get()->GetLogger()->_LogFatal(msg, __FILE__, __func__, __LINE__, \
@@ -189,6 +192,7 @@ namespace logger {
 #define StreamLogVersion(msg, ...)                                    \
   StreamLogger::Get()->_LogVersion(msg, __FILE__, __func__, __LINE__, \
                                    ##__VA_ARGS__)
+#pragma clang diagnostic pop
 
   enum LogType {
     FATAL = 0,
